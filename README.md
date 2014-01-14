@@ -49,7 +49,7 @@ Install
 
 Installation and complilation of the source code is not fully documented, but will be in the future.  
 However the latest source code for ADI can be obtained from the GitHub repository,
-https://github.com/ARM-DOE/ADI by downloading nad unpacking the zip file <https://github.com//ARM-DOE/ADI/archive/ADI_source.tar.gz>  of the source code.
+https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https://github.com//ARM-DOE/ADI/archive/ADI_source.tar.gz>  of the source code.
 
 
 To install a build please  follow the directions at https://engineering.arm.gov/~gaustad/instructions.html
