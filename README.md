@@ -23,6 +23,9 @@ ADI has been tested to run under Red Hat Enterprise Linux 2.5 and 2.6.  Developm
 To install a rhel6 build, the only other dependency not provided as part of the install of the build is:
 * 'epl6 <https://fedoraproject.org/wiki/EPEL>'
 
+Required packages provided in epel6 include:
+- netcdf-4
+- udunits2
 
 The source code is freely availaable, but instructions and Makefiles to support compilation are not.  ARM's development environment uses a in house workflow management system to streamline development activities.  Generic Makefiles are not currently available, but will be provided at a later date. 
 
