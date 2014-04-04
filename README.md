@@ -57,3 +57,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 
 To install a build please  follow the directions at https://engineering.arm.gov/~gaustad/instructions.html
 
+Comment April 2, 2014:  If you installed prior to this date and have not been able to run create_adi_project please do the following:
+$> yum clean expire-cache
+$> yum -y groupinstall adi6
+
