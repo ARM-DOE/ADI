@@ -81,8 +81,8 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
   vap to verify the ADI installation worked properly.*
 
 - untar the file and copy the resulting `adi_home` directory to somewhere you want to work from, say, `~/Documents` or your home directory in /Users, i.e. `~`.  These instructions will assume you copied it into `~`.
-- A core database named dsdb has been provided in /usr/local/share.  Create the directory path ~/adi_home/data/db/sqlite, `mkdir -p ~/adi_home/data/db/sqlite`
-- Copy the core dsdb into it`cp ???waiting_for_input????/dsdb/*core.sqlite   ~/adi_home/data/db/sqlite/dsdb.sqlite`
+- Create the directory path for the core database in ~/adi_home/data/db/sqlite, `mkdir -p ~/adi_home/data/db/sqlite`
+- From within that directory download and unzip a core database [dsdb.sqlite.gz] (https://engineering.arm.gov/~gaustad/dsdb.sqlite.gz). 
 - Enter your home directory and create a new file named .db_connect with the following entries
   - `dsdb_data    sqlite    <your_home_directory>/adi_home/data/db/sqlite/dsdb.sqlite`
   - `dsdb_read    sqlite    <your_home_directory>/adi_home/data/db/sqlite/dsdb.sqlite`
@@ -97,6 +97,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
   - Each time you open a new bash terminal you will need to setup the environment variables
     - `source ~/adi_home/env_vars_bash`
   - to to the ~/adi_home/adi_example1 directory
+  - copy the linux version of the makefile into Makefile, `cp linux_makefile Makefile`
   - run `make clean; make`. If successful the binary ~/adi_home/dev/vap/bin/adi_example1_vap will be created.
   - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R` this should complete successfully with an exit status of zero.
   - The output data created are:
