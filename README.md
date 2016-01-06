@@ -66,8 +66,8 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
     - `baseurl=http://yum.arm.gov/prod6`
     - `gpgcheck=0`
 - run the following commands:
-    `$> yum -y groupinstall adi6`
-    `$> yum install netcdf-devel`
+    - `$> yum -y groupinstall adi6`
+    - `$> yum install netcdf-devel`
 - if developing in IDL, idl82 is required.
 - if developing in Python, Python 2.7 is required. Python 3 is not supported
 
