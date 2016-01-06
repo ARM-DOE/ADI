@@ -60,11 +60,11 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - Ensure your version of red hat 6 is up to date
 - Install epel 6, which contains packages ADI depends on. You can download the rpm (for 64-bit RH6) from  [here](http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm)
 - Open the .rpm file with Red Hat's Package Installer and follow the prompts to install it.
-- Create a file ARM.repo in /etc/yum.repos.d/ARM.repo containing:
-    `[ARMP6]`
-    `name=ARM Production RH6 Repository`
-    `baseurl=http://yum.arm.gov/prod6`
-    `gpgcheck=0`
+- Create a file ARM.repo in /etc/yum.repos.d/ARM.repo with the following entries:
+    - `[ARMP6]` 
+    - `name=ARM Production RH6 Repository`
+    - `baseurl=http://yum.arm.gov/prod6`
+    - `gpgcheck=0`
 - run the following commands:
     `$> yum -y groupinstall adi6`
     `$> yum install netcdf-devel`
@@ -84,8 +84,8 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - A core database named dsdb has been provided in /usr/local/share.  Create the directory path ~/adi_home/data/db/sqlite, `mkdir -p ~/adi_home/data/db/sqlite`
 - Copy the core dsdb into it`cp ???waiting_for_input????/dsdb/*core.sqlite   ~/adi_home/data/db/sqlite/dsdb.sqlite`
 - Enter your home directory and create a new file named .db_connect with the following entries
-  - dsdb_data    sqlite    <your_home_directory>/adi_home/data/db/sqlite/dsdb.sqlite
-  - dsdb_read    sqlite    <your_home_directory>/adi_home/data/db/sqlite/dsdb.sqlite
+  - `dsdb_data    sqlite    <your_home_directory>/adi_home/data/db/sqlite/dsdb.sqlite`
+  - `dsdb_read    sqlite    <your_home_directory>/adi_home/data/db/sqlite/dsdb.sqlite`
 - Enter the untarred `adi_home` directory
 - To set the required environment variables for running from ~/adi_home, cat ~/adi_home/env_vars_bash_linux, and copy all the commands into your bash terminal. Later you may want to add these environment variables to your .bash_profile, as THESE WILL HAVE TO BE SET EACH TIME YOU ENTER A NEW TERMINAL.  You will probably want to update ~/adi_home/env_vars_bash_linux to set the locations explicitly so you can run your process from any location rather than from ~/adi_home.
 - Setup the example vap process:
