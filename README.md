@@ -96,7 +96,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - Run C version of example1
   - Each time you open a new bash terminal you will need to setup the environment variables
     - `source ~/adi_home/env_vars_bash`
-  - to to the ~/adi_home/dev/vap/src/adi_example1 directory
+  - go to the ~/adi_home/dev/vap/src/adi_example1 directory
   - copy the linux version of the makefile into Makefile, `cp linux_makefile Makefile`
   - run `make clean; make`. If successful the binary ~/adi_home/dev/vap/bin/adi_example1_vap will be created.
   - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R` this should complete successfully with an exit status of zero.
