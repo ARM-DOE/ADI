@@ -96,7 +96,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - Run C version of example1
   - Each time you open a new bash terminal you will need to setup the environment variables
     - `source ~/adi_home/env_vars_bash`
-  - to to the ~/adi_home/adi_example1 directory
+  - to to the ~/adi_home/dev/vap/src/adi_example1 directory
   - copy the linux version of the makefile into Makefile, `cp linux_makefile Makefile`
   - run `make clean; make`. If successful the binary ~/adi_home/dev/vap/bin/adi_example1_vap will be created.
   - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R` this should complete successfully with an exit status of zero.
@@ -107,7 +107,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - Run Python version of example1
   - Each time you open a new bash terminal you will need to setup the environment variables
     - `source ~/adi_home/env_vars_bash`
-  - go to the ~/adi_home/adi_example1_py directory 
+  - go to the ~/adi_home/dev/vap/src/adi_example1_py directory 
   - run `python adi_example1_vap.py -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R'
   - The output data created is the same as for the C run:
     ~/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
@@ -120,7 +120,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
   - Each time you open a new terminal you will need to setup idl and the environment variables
     - `source /Applications/exelis/idl84/bin/idl_setup.bash`
     - `source ~/adi_home/env_vars_bash`
-  - go to the ~/adi_home/adi_example1_idl directory 
+  - go to the ~/adi_home/dev/vap/src/adi_example1_idl directory 
   - run $> `idl -e "adi_example1_vap" -args -s sbs -f S2 -b 20110401 -e 20110402 -D 2'
   - or to run in debug mode 
     - $> `idl -args -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`
