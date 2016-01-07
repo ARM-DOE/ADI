@@ -89,7 +89,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - Enter the untarred `adi_home` directory
 - To set the required environment variables for running from ~/adi_home, cat ~/adi_home/env_vars_bash_linux, and copy all the commands into your bash terminal. Later you may want to add these environment variables to your .bash_profile, as THESE WILL HAVE TO BE SET EACH TIME YOU ENTER A NEW TERMINAL.  You will probably want to update ~/adi_home/env_vars_bash_linux to set the locations explicitly so you can run your process from any location rather than from ~/adi_home.
 - Setup the example vap process:
-  - go into `dev/vap/src/adi_example1/process_dod_defs`
+  - go into `~/adi_home/dev/vap/src/adi_example1/process_dod_defs`
   - import the process by running `db_import_process -a dsdb_data -fmt json adi_example1.json`
   - import the output data definitions by running `db_load_dod -a dsdb_data cpc.json` and `db_load_dod -a dsdb_data met.json`
 
