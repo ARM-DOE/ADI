@@ -13,10 +13,74 @@ Important Links
 - ADI Process Configuration Interface https://engineering.arm.gov/pcm/Main.html
 - Instructions for installing a rh6 build https://engineering.arm.gov/~gaustad/instructions.html
 - Examples: http://engineering.arm.gov/ADI_doc/algorithm.html#algorithm-development-tutorial
-- ARM Data Archive for accessing ARM data http://archive.arm.gov
+- ARM Data Archive for accessing ARM data http://archive.arm.gov  
 
-Dependencies
-============
+Note that we provide two options to install ADI framework. The first one is to run ADI process within virtual machine supported by [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org). The second one is to run ADI process using local host.
+
+--- 
+
+#OPTION 1: Run In Virtual Machine  
+=================================
+  
+####Tools  
+Download and install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org)  
+
+####Install  
+
+After clone this repository, go to "xxx/ADI/ADI_Vagrant/" and run  
+`$> sh run_frist.sh`  
+Then run  
+`$> vagrant up`  
+
+It will take several minutes before the virtual environment is completely set up.  
+
+To enter the virtual development environment just run  
+`$> vagrant ssh`  
+  
+To exit from virtual machine, type "exit" under virtual environment  
+`[vagrant@localhost $]> exit`  
+  
+To completely destroy the virtual machine, run  
+`$> vagrant destroy`  
+(Note that it will destroy everything except for the files in [synced folder](https://www.vagrantup.com/docs/synced-folders/))  
+
+####Run ADI_Example  
+The adi_example1 has been downloaded and everything is set up and precompiled. The default [synced folder](https://www.vagrantup.com/docs/synced-folders/) is used for virtual machine to communicate with external data source.   
+In this example, the output directory is `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/` and `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/`.   
+
+To enter the virual environment, run `vagrant ssh`   
+
+- Run C version of example1  
+  - each time make sure there is no previous written netCDF file in the output directory
+  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1 directory
+  - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
+  -  The output are:   
+    /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
+    /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    They can also be acccessed from host machine  
+    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
+    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf 
+    
+    
+- Run Python version of example1
+  - each time make sure there no previous written netCDF file in the output directory
+  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory
+  - run `python adi_example1_vap.py -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
+  - The output created is same as for the C run:  
+    /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
+    /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    They can also be acccessed from host machine  
+    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
+    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    
+    
+
+---
+#OPTION 2: Run In Host Machine
+==============================
+        
+####Dependencies
+================
 
 ADI has been tested to run under Red Hat Enterprise Linux 2.5 and 2.6.  Development in Python is for 2.7+, but does not include Python 3.  Development in IDL requires IDL 8.2+.  
 
@@ -35,7 +99,7 @@ The required dependencies to install and compile source code are:
 
 
 
-Optional Dependences
+####Optional Dependences
 ====================
 
 * 'Multiprotocol file transform library <http://curl.haxx.se/libcurl/>'_7.19.7 is used to access DSDB via a Web Service.
@@ -47,15 +111,15 @@ To develop algorithms in Python 2.7+:
 * 'netCDF4 <http://code.google.com/p/netcdf4-python/>'_ 1.0.2+ 
 * 'NumPy <http://www.scipy.org>'_ 1.6+
 
-Install
-=======
+####Install
+===========
 
 Installation and complilation of the source code is not fully documented, but will be in the future.  
 However the latest source code for ADI can be obtained from the GitHub repository,
 https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https://github.com//ARM-DOE/ADI/archive/ADI_source.tar.gz>  of the source code.
 
 
-## To Install a Build of ADI:
+#### To Install a Build of ADI:
 
 - Ensure your version of red hat 6 is up to date
 - Install epel 6, which contains packages ADI depends on. You can download the rpm (for 64-bit RH6) from  [here](http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm)
@@ -71,7 +135,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - if developing in IDL, idl82 is required.
 - if developing in Python, Python 2.7 is required. Python 3 is not supported
 
-## Set Up an Environment for ADI
+#### Set Up an Environment for ADI
 
 - Download [adi_home](https://engineering.arm.gov/~gaustad/adi_home.tar.gz). This tarfile contains a directory structure to get you started running ADI quickly. Note that you can also configure the directory structure however you like on your own. 
   
@@ -129,7 +193,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
     ~/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
     ~/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf
 
-## To Add More Process Definitions to the DSDB:
+#### To Add More Process Definitions to the DSDB:
 The process definitions for adi_example1 have been included in your adi_home area. To run additional VAPs against your local database, you will need to import their process information.
 
 - Get the process definition from the PCM
