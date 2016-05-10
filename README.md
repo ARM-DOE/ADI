@@ -18,9 +18,9 @@ Important Links
 Note that we provide two options to install ADI framework. The first one is to run ADI process within virtual machine supported by [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org). The second one is to run ADI process using local host.
 
 
-
-#OPTION 1: Run In Virtual Machine  
 ---
+#OPTION 1: Run In Virtual Machine  
+
   
 ####Tools  
 Download and install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org)  
@@ -63,7 +63,7 @@ To enter the virual environment, run `vagrant ssh`
     
     
 - Run Python version of example1
-  - each time make sure there no previous written netCDF file in the output directory
+  - each time make sure there is no previous written netCDF file in the output directory
   - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory
   - run `python adi_example1_vap.py -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   - The output created is same as for the C run:  
@@ -76,8 +76,8 @@ To enter the virual environment, run `vagrant ssh`
     
 
 
-#OPTION 2: Run In Host Machine
 ---
+#OPTION 2: Run In Host Machine
         
 ####Dependencies
 ================
