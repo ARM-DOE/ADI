@@ -30,11 +30,10 @@ Download and install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https
 Open a terminal and change the current working directory to the location where you want the cloned directory to be made.  Then type the following at the command line prompt.   
 `$> git clone https://github.com/ARM-DOE/ADI.git` 
 
-Navigate into the newly created directories <installation_location>/ADI/ADI_Vagrant and delete an unneeded directory   
-`$> cd ADI/ADI_Vagrant`   
-`$> rm -rf .vagrant`   
+Delete an unneeded directory in the newly created directories <installation_location>/ADI/ADI_Vagrant   
+`$> rm -rf <installation_area>/ADI/ADI_Vagrant/.vagrant`   
 then run    
-`$> sh run_first.sh`    
+`$> run_first.sh`    
 followed by   
 `$> vagrant up`    
 Each of these will take several minutes to complete.  
@@ -48,7 +47,7 @@ Allowing you to update and access data files on your host machine, and also use 
 Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
 
 ####Virtual Machine Access and File Setup
-To run ADI processes you will need to secure shell into the virtual development environment    
+To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your local box.    
 `$> vagrant ssh`  
   
 To exit from virtual machine, type "exit" under virtual environment    
