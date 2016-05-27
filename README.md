@@ -27,10 +27,11 @@ Download and install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https
 
 ####Install  
 
-Open a terminal and change the current working directory to the location where you want the cloned directory to be made.  Then type the following at the command line prompt.
+Open a terminal and change the current working directory to the location where you want the cloned directory to be made.  Then type the following at the command line prompt.   
 `$> git clone https://github.com/ARM-DOE/ADI.git` 
 
-Navigate into the newly created directories <installation_location>/ADI/ADI_Vagrant and delete an unneeded directory 
+Navigate into the newly created directories <installation_location>/ADI/ADI_Vagrant and delete an unneeded directory
+
 `$> cd ADI/ADI_Vagrant` 
 `$> rm -rf .vagrant` 
 then run 
