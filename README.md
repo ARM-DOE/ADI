@@ -30,14 +30,13 @@ Download and install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https
 Open a terminal and change the current working directory to the location where you want the cloned directory to be made.  Then type the following at the command line prompt.   
 `$> git clone https://github.com/ARM-DOE/ADI.git` 
 
-Navigate into the newly created directories <installation_location>/ADI/ADI_Vagrant and delete an unneeded directory
-
-`$> cd ADI/ADI_Vagrant` 
-`$> rm -rf .vagrant` 
-then run 
-`$> sh run_first.sh`  
-followed by
-`$> vagrant up`  
+Navigate into the newly created directories <installation_location>/ADI/ADI_Vagrant and delete an unneeded directory   
+`$> cd ADI/ADI_Vagrant`   
+`$> rm -rf .vagrant`   
+then run    
+`$> sh run_first.sh`    
+followed by   
+`$> vagrant up`    
 Each of these will take several minutes to complete.  
 
 This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine 
@@ -49,13 +48,13 @@ Allowing you to update and access data files on your host machine, and also use 
 Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
 
 ####Virtual Machine Access and File Setup
-To run ADI processes you will need to secure shell into the virtual development environment  
+To run ADI processes you will need to secure shell into the virtual development environment    
 `$> vagrant ssh`  
   
-To exit from virtual machine, type "exit" under virtual environment  
+To exit from virtual machine, type "exit" under virtual environment    
 `[vagrant@localhost $]> exit`  
   
-To completely destroy the virtual machine, run  
+To completely destroy the virtual machine, run    
 `$> vagrant destroy`  
 This will destroy the VM but leave the <installation_area>/ADI/ADI_Vagrant directory untouched.  Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up`. 
 
@@ -73,7 +72,7 @@ with binaries in
 
 ####Run ADI_Example  
 The adi_example1 has been downloaded and precompiled.  
-In this example, two output data products are created. From within the VM these are located in `/home/vagrant/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/` and 
+In this example, two output data products are created. From within the VM these are located in    `/home/vagrant/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/` and    
 `/home/vagrant/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/`.  
 
 WARNING:  !!!  It is not possible to overwrite output files in the VM. Therefore between runs you must delete existing files before trying to recreate them!!!!!!
