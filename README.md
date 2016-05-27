@@ -40,9 +40,9 @@ followed by
 Each of these will take several minutes to complete.  
 
 This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine    
-  <installation_area>/ADI/ADI_Vagrant/data    
+   <installation_area>/ADI/ADI_Vagrant/data    
 is synced to the directory location on the virtual machine     
-  /home/vagrant/adi_home/data
+   /home/vagrant/adi_home/data
 Allowing you to update and access data files on your host machine, and also use the resources in the virtual machine to read and write data to the same area. 
 
 Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
@@ -56,19 +56,21 @@ To exit from virtual machine, type "exit" under virtual environment
   
 To completely destroy the virtual machine, run    
 `$> vagrant destroy`  
-This will destroy the VM but leave the <installation_area>/ADI/ADI_Vagrant directory untouched.  Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up`. 
+This will destroy the VM but leave the 
+   <installation_area>/ADI/ADI_Vagrant directory untouched.  
+Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up`. 
 
 One logged in your home directory area will be 
-/home/vagrant
+   /home/vagrant
 The care ADI libraries are located in
-/home/vagrant/adi-macosx-master
+   /home/vagrant/adi-macosx-master
 the python bindings in
-/home/vagrant/py_lib
+   /home/vagrant/py_lib
 
 Your development area where you keep algorithm's source code is located in
-  /home/vagrant/adi_home/dev/vap/src   
+   /home/vagrant/adi_home/dev/vap/src   
 with binaries in   
-  /home/vagrant/adi_home/dev/vap/bin   
+   /home/vagrant/adi_home/dev/vap/bin   
 
 ####Run ADI_Example  
 The adi_example1 has been downloaded and precompiled.  
