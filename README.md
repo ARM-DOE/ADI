@@ -39,10 +39,10 @@ followed by
 `$> vagrant up`    
 Each of these will take several minutes to complete.  
 
-This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine 
-<installation_area>/ADI/ADI_Vagrant/data
-is synced to the directory location on the virtual machine 
-/home/vagrant/adi_home/data
+This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine    
+  <installation_area>/ADI/ADI_Vagrant/data    
+is synced to the directory location on the virtual machine     
+  /home/vagrant/adi_home/data
 Allowing you to update and access data files on your host machine, and also use the resources in the virtual machine to read and write data to the same area. 
 
 Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
@@ -66,18 +66,18 @@ the python bindings in
 /home/vagrant/py_lib
 
 Your development area where you keep algorithm's source code is located in
-/home/vagrant/adi_home/dev/vap/src
-with binaries in
-/home/vagrant/adi_home/dev/vap/bin 
+  /home/vagrant/adi_home/dev/vap/src   
+with binaries in   
+  /home/vagrant/adi_home/dev/vap/bin   
 
 ####Run ADI_Example  
 The adi_example1 has been downloaded and precompiled.  
 In this example, two output data products are created. From within the VM these are located in    `/home/vagrant/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/` and    
 `/home/vagrant/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/`.  
 
-WARNING:  !!!  It is not possible to overwrite output files in the VM. Therefore between runs you must delete existing files before trying to recreate them!!!!!!
-If you fail to do this your process will exit with the following status
-dsproc_status: 'Could Not Write To NetCDF File'
+WARNING:  !!!  It is not possible to overwrite output files in the VM. Therefore between runs you must delete existing files before trying to recreate them!!!!!!   
+If you fail to do this your process will exit with the following status  
+  dsproc_status: 'Could Not Write To NetCDF File'
 
 - Run C version of example1  
   - each time make sure there is no previous written netCDF file in the output directory
@@ -87,8 +87,8 @@ dsproc_status: 'Could Not Write To NetCDF File'
     /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
     /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
     They can also be acccessed from host machine  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf 
+   <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
+   <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf 
     
     
 - Run Python version of example1
@@ -101,8 +101,8 @@ dsproc_status: 'Could Not Write To NetCDF File'
     /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
     /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
     They can also be acccessed from host machine  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
+    <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
     
     
 
