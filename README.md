@@ -60,11 +60,11 @@ This will destroy the VM but leave the
    <installation_area>/ADI/ADI_Vagrant directory untouched.  
 Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up`. 
 
-One logged in your home directory area will be 
+One logged in your home directory area will be   
    /home/vagrant
-The care ADI libraries are located in
-   /home/vagrant/adi-macosx-master
-the python bindings in
+The care ADI libraries are located in    
+   /home/vagrant/adi-macosx-master    
+the python bindings in    
    /home/vagrant/py_lib
 
 Your development area where you keep algorithm's source code is located in
@@ -79,7 +79,7 @@ In this example, two output data products are created. From within the VM these 
 
 WARNING:  !!!  It is not possible to overwrite output files in the VM. Therefore between runs you must delete existing files before trying to recreate them!!!!!!   
 If you fail to do this your process will exit with the following status  
-  dsproc_status: 'Could Not Write To NetCDF File'
+  `dsproc_status: 'Could Not Write To NetCDF File'  `
 
 - Run C version of example1  
   - each time make sure there is no previous written netCDF file in the output directory
