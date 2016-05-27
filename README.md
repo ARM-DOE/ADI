@@ -40,9 +40,9 @@ followed by
 Each of these will take several minutes to complete.  
 
 This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine    
-   <installation_area>/ADI/ADI_Vagrant/data    
+   `<installation_area>/ADI/ADI_Vagrant/data`    
 is synced to the directory location on the virtual machine     
-   /home/vagrant/adi_home/data
+   `/home/vagrant/adi_home/data`
 Allowing you to update and access data files on your host machine, and also use the resources in the virtual machine to read and write data to the same area. 
 
 Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
@@ -60,17 +60,17 @@ This will destroy the VM but leave the
    <installation_area>/ADI/ADI_Vagrant directory untouched.  
 Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up`. 
 
-One logged in your home directory area will be   
-   /home/vagrant
-The care ADI libraries are located in    
-   /home/vagrant/adi-macosx-master    
+One logged in your home directory area will be     
+  `/home/vagrant`
+The core ADI libraries are located in      
+  `/home/vagrant/adi-macosx-master`    
 the python bindings in    
-   /home/vagrant/py_lib
+  `/home/vagrant/py_lib`
 
 Your development area where you keep algorithm's source code is located in
-   /home/vagrant/adi_home/dev/vap/src   
+   `/home/vagrant/adi_home/dev/vap/src`   
 with binaries in   
-   /home/vagrant/adi_home/dev/vap/bin   
+   `/home/vagrant/adi_home/dev/vap/bin`   
 
 ####Run ADI_Example  
 The adi_example1 has been downloaded and precompiled.  
@@ -86,11 +86,11 @@ If you fail to do this your process will exit with the following status
   - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1 directory
   - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   -  The output are:   
-    /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
-    /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
+    `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     They can also be acccessed from host machine  
-   <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
-   <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf 
+   `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
+   `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf` 
     
     
 - Run Python version of example1
@@ -100,11 +100,11 @@ If you fail to do this your process will exit with the following status
   - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory
   - run `python adi_example1_vap.py -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   - The output files created are:  
-    /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
-    /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
+    `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     They can also be acccessed from host machine  
-    <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
-    <installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
+    `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     
     
 
