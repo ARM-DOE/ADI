@@ -83,7 +83,7 @@ If you fail to do this your process will exit with the following status
 
 - Run C version of example1  
   - each time make sure there is no previous written netCDF file in the output directory
-  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1 directory
+  - go to the `/home/vagrant/adi_home/dev/vap/src/adi_example1` directory
   - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   -  The output are:   
     `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
@@ -94,10 +94,10 @@ If you fail to do this your process will exit with the following status
     
     
 - Run Python version of example1
-  - remove any existing output netCDF files located in the output directories
-  `rm  /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`
-  `rm  /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
-  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory
+  - remove any existing output netCDF files located in the output directories   
+     `rm  /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`
+     `rm  /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
+  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory    
   - run `python adi_example1_vap.py -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   - The output files created are:  
     `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
