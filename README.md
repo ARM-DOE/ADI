@@ -19,7 +19,7 @@ Note that we provide two options to install ADI framework. The first one is to r
 
 
 ---
-#OPTION 1: Run In Virtual Machine  
+#Recommended Installation: Run In Virtual Machine  
 
   
 ####Tools  
@@ -27,57 +27,108 @@ Download and install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https
 
 ####Install  
 
-After clone this repository, go to "xxx/ADI/ADI_Vagrant/" and run  
-`$> sh run_frist.sh`  
-Then run  
-`$> vagrant up`  
+Open a terminal and change the current working directory to the location where you want the cloned directory to be made.  Then type the following at the command line prompt.   
+`$> git clone https://github.com/ARM-DOE/ADI.git` 
 
-It will take several minutes before the virtual environment is completely set up.  
+Delete an unneeded directory in the newly created directories <installation_location>/ADI/ADI_Vagrant   
+`$> rm -rf <installation_area>/ADI/ADI_Vagrant/.vagrant`   
+then run    
+`$> run_first.sh`    
+followed by   
+`$> vagrant up`    
+Each of these will take several minutes to complete.  
 
-To enter the virtual development environment just run  
+This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine    
+   `<installation_area>/ADI/ADI_Vagrant/data`    
+is synced to the directory location on the virtual machine     
+   `/home/vagrant/adi_home/data`
+Allowing you to update and access data files on your host machine, and also use the resources in the virtual machine to read and write data to the same area. 
+
+Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
+
+####Virtual Machine Access and File Setup
+To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your local box.    
 `$> vagrant ssh`  
   
-To exit from virtual machine, type "exit" under virtual environment  
+To exit from virtual machine, type "exit" under virtual environment    
 `[vagrant@localhost $]> exit`  
   
-To completely destroy the virtual machine, run  
+To completely destroy the virtual machine, run    
 `$> vagrant destroy`  
-(Note that it will destroy everything except for the files in [synced folder](https://www.vagrantup.com/docs/synced-folders/))  
+This will destroy the VM but leave the 
+   <installation_area>/ADI/ADI_Vagrant directory untouched.  
+Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up`. 
+
+One logged in your home directory area will be     
+  `/home/vagrant`
+The core ADI libraries are located in      
+  `/home/vagrant/adi-macosx-master`    
+the python bindings in    
+  `/home/vagrant/py_lib`
+
+Your development area where you keep algorithm's source code is located in
+   `/home/vagrant/adi_home/dev/vap/src`   
+with binaries in   
+   `/home/vagrant/adi_home/dev/vap/bin`   
 
 ####Run ADI_Example  
-The adi_example1 has been downloaded and everything is set up and precompiled. The default [synced folder](https://www.vagrantup.com/docs/synced-folders/) is used for virtual machine to communicate with external data source.   
-In this example, the output directory is `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/` and `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/`.   
+The adi_example1 has been downloaded and precompiled.  
+In this example, two output data products are created. From within the VM these are located in    `/home/vagrant/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/` and    
+`/home/vagrant/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/`.  
 
-To enter the virual environment, run `vagrant ssh`   
+WARNING:  !!!  It is not possible to overwrite output files in the VM. Therefore between runs you must delete existing files before trying to recreate them!!!!!!   
+If you fail to do this your process will exit with the following status  
+  `dsproc_status: 'Could Not Write To NetCDF File'  `
 
 - Run C version of example1  
   - each time make sure there is no previous written netCDF file in the output directory
-  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1 directory
+  - go to the `/home/vagrant/adi_home/dev/vap/src/adi_example1` directory
   - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   -  The output are:   
-    /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
-    /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
+    `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     They can also be acccessed from host machine  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf 
+   `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
+   `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf` 
     
     
 - Run Python version of example1
-  - each time make sure there is no previous written netCDF file in the output directory
-  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory
+  - remove any existing output netCDF files located in the output directories   
+     `rm  /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`
+     `rm  /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
+  - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory    
   - run `python adi_example1_vap.py -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
-  - The output created is same as for the C run:  
-    /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
-    /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+  - The output files created are:  
+    `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
+    `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     They can also be acccessed from host machine  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf  
-    .../ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf  
+    `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
+    `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     
     
+
+#### To Add More Process Definitions to the DSDB:
+The process definitions for adi_example1 have been included in your adi_home area. To run additional VAPs against your local database, you will need to import their process information.
+
+- Get the process definition from the PCM
+  - Go to the <a href="https://engineering.arm.gov/pcm/Main.html" target="_blank">Processing Configuration Manager</a>
+    and select the processes tab on the left hand side
+  - Type the name of the process you want in the filter at the bottom, or find it by scrolling through the list
+  - Double click the name of the process to bring it up on the right hand side
+  - Click *Text Export/Import* in the lower right corner, and copy the text that appears to a file on your machine
+- Set your enviornment variables as specified in `env_vars_bash` from the last section 
+- run `db_import_process` for the definition you retrieved
+  - `db_import_process -a dsdb_data -fmt json <process definition file name>`
+- Load the DODs nessecary to run this process. The DODs used by a process are listed on that process's page in the PCM.
+  - Load the DOD into the PCM datastream viewer.
+  - Select the JSON format from the green export DOD icon at the top of the page to copy the DOD to your clipboard. 
+    Copy this into a file on your local machine
+  - Load the dods into the local database
+    - `db_load_dod -a dsdb_data <dod file>`
 
 
 ---
-#OPTION 2: Run In Host Machine
+#Alternative Installation: Run on Host rh6 Machine
         
 ####Dependencies
 ================
