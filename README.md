@@ -53,11 +53,11 @@ To run ADI processes you will need to secure shell into the virtual development 
 To exit from virtual machine, type "exit" under virtual environment (In this way, VM is still running backends)   
 `[vagrant@localhost $]> exit`  
 
-To temporarily stop the virtual machine, type "vagrant halt" under host machine
- `$> vagrant halt`
+To temporarily stop the virtual machine, type "vagrant halt" under host machine  
+`$> vagrant halt`
  
- To restart the virtual machine from temporarily stopping, type "vagrant up" under host machine
-  `$> vagrant halt`
+To restart the virtual machine from temporarily stopping, type "vagrant up" under host machine  
+`$> vagrant up`
   
 To completely destroy the virtual machine, and release the resources VM uses, run    
 `$> vagrant destroy`  
