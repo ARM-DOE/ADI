@@ -32,11 +32,14 @@ Open a terminal and change the current working directory to the location where y
 
 Then enter into the adi virtual machine directory  
 `$> cd <installation_area>/ADI/adi_virtual_machine`   
-then run    
-`$> run_first.sh`    
-followed by   
-`$> vagrant up`    
-Each of these will take several minutes to complete.  
+then run   
+`$> bash run_first.sh`
+(Note run_first.sh is only needed for the very first setting up, it will download necessary packges for virtual machines)    
+
+
+####Virtual Machine Access and File Setup
+To set up the virtual machine, run  
+`$> vagrant up`  
 
 This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine    
    `<installation_area>/ADI/ADI_Vagrant/data`    
@@ -44,9 +47,8 @@ is synced to the directory location on the virtual machine
    `/home/vagrant/adi_home/data`
 Allowing you to update and access data files on your host machine, and also use the resources in the virtual machine to read and write data to the same area. 
 
-Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
+Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).  
 
-####Virtual Machine Access and File Setup
 To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your host machine.    
 `$> vagrant ssh`  
   
