@@ -1,4 +1,0 @@
-[ARMP6]
-name=ARM Production RH6 Repository
-baseurl=http://yum.arm.gov/prod6
-gpgcheck=0 
