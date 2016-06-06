@@ -23,15 +23,15 @@ Note that we provide two options to install ADI framework. The first one is to r
 
   
 ####Tools  
-Download and install [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org)  
+Download and install latest [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org)  
 
 ####Install  
 
 Open a terminal and change the current working directory to the location where you want the cloned directory to be made.  Then type the following at the command line prompt.   
 `$> git clone https://github.com/ARM-DOE/ADI.git` 
 
-Delete an unneeded directory in the newly created directories <installation_location>/ADI/ADI_Vagrant   
-`$> rm -rf <installation_area>/ADI/ADI_Vagrant/.vagrant`   
+Then enter into the adi_virtual_machine directory  
+`$> cd <installation_area>/ADI/adi_virtual_machine`   
 then run    
 `$> run_first.sh`    
 followed by   
@@ -47,22 +47,28 @@ Allowing you to update and access data files on your host machine, and also use 
 Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).
 
 ####Virtual Machine Access and File Setup
-To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your local box.    
+To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your host machine.    
 `$> vagrant ssh`  
   
-To exit from virtual machine, type "exit" under virtual environment    
+To exit from virtual machine, type "exit" under virtual environment (In this way, VM is still running backends)   
 `[vagrant@localhost $]> exit`  
+
+To temporarily stop the virtual machine, type "vagrant halt" under host machine
+ `$> vagrant halt`
+ 
+ To restart the virtual machine from temporarily stopping, type "vagrant up" under host machine
+  `$> vagrant halt`
   
-To completely destroy the virtual machine, run    
+To completely destroy the virtual machine, and release the resources VM uses, run    
 `$> vagrant destroy`  
 This will destroy the VM but leave the 
    <installation_area>/ADI/ADI_Vagrant directory untouched.  
-Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up`. 
+Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up` to build the virtual environment from scratch.
 
 One logged in your home directory area will be     
   `/home/vagrant`
 The core ADI libraries are located in      
-  `/home/vagrant/adi-macosx-master`    
+  `/home/vagrant/adi-master`    
 the python bindings in    
   `/home/vagrant/py_lib`
 
