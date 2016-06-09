@@ -36,7 +36,7 @@ Make sure you have the latest vbguest addition installed
 `$> vagrant plugin install vagrant-vbguest`  
 
 ####Secure private key  
-For security consideration, you should generate your personal secure key pairs to log in the virtual machine. So run
+For security consideration, you should generate your personal secure key pairs to log in the virtual machine. So run  
 `ssh-keygen -t rsa`  
 
 The above command will generate key pairs under `~/.ssh/`, and ask you a passphrase.  
