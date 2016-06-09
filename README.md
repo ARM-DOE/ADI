@@ -32,9 +32,15 @@ Open a terminal and change the current working directory to the location where y
 
 Then enter into the adi virtual machine directory  
 `$> cd <installation_area>/ADI/adi_virtual_machine`   
-then run   
-`$> bash run_first.sh`
-(Note run_first.sh is only needed for the very first setting up, it will download necessary packges for virtual machines)    
+Make sure you have the latest vbguest addition installed  
+`$> vagrant plugin install vagrant-vbguest`  
+
+####Secure private key  
+For security consideration, you should generate your personal secure key pairs to log in the virtual machine. So run
+`ssh-keygen -t rsa`  
+
+The above command will generate key pairs under `~/.ssh/`, and ask you a passphrase.  
+PLEASE remember your passphrase since you will be asked for it later in the first ssh into virtual machine!!!  
 
 
 ####Virtual Machine Access and File Setup
@@ -51,6 +57,8 @@ Under $DATA_HOME the directory structure is organized according to ARM's [data d
 
 To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your host machine.    
 `$> vagrant ssh`  
+(The first time your run this command, the virtual machine will ask you the passphrase you set before)
+ 
   
 To exit from virtual machine, type "exit" under virtual environment (In this way, VM is still running backends)   
 `[vagrant@localhost $]> exit`  
