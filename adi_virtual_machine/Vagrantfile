@@ -7,8 +7,8 @@ $script = <<-SCRIPT
   source ~/.bashrc
   wget -N https://engineering.arm.gov/~whao/adi_vm_home.tar.gz
   tar -xzvf adi_vm_home.tar.gz
-  #mv /vagrant/example_1_makefile_corrected  /home/vagrant/adi_home/dev/vap/src/adi_example1/Makefile
-  cp -r ~/adi_home/data /vagrant/data
+  rm adi_vm_home.tar.gz
+  mv ~/adi_home/data /vagrant/data
   mkdir -p /vagrant/data/db/sqlite
   mkdir -p /home/vagrant/adi_home/data/db/sqlite
   cp /apps/ds/conf/sqlite/20151006.185806.dsdb.sqlite ~/adi_home/data/db/sqlite/dsdb.sqlite
@@ -24,14 +24,15 @@ $script = <<-SCRIPT
   make
   cd ~/
   rm -rf adi_home.tar.gz adi_home.tar.gz.1 adi-macosx-master adi-python-1.1.tar master.zip
-  wget -N -r -O adi-macosx.zip https://github.com/ARM-DOE/adi-macosx/archive/master.zip
-  unzip adi-macosx.zip
-  mv adi-macosx-master adi-master 
-  rm adi-macosx.zip
+
   wget -N -r -O adi-python.tar https://engineering.arm.gov/~gaustad/adi-python-1.1.tar
   tar -xvf adi-python.tar
   rm adi-python.tar
-  bash /vagrant/anaconda.sh -b
+
+  wget -N -O anaconda.sh https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda2-2.4.1-Linux-x86_64.sh
+  bash anaconda.sh -b
+  rm anaconda.sh
+
   export PATH=/home/vagrant/anaconda2/bin:$PATH
   cd ~/py_lib
   python setup.py build_ext -L/apps/ds/lib64 
@@ -45,8 +46,11 @@ $script = <<-SCRIPT
 Vagrant.configure(2) do |config|
 
   config.vm.box = "bento/centos-6.7"
-
   config.vm.synced_folder ".", "/vagrant"
+  config.ssh.insert_key = false
+  config.ssh.private_key_path = ["~/.ssh/id_rsa","~/.vagrant.d/insecure_private_key"]
+  config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination:"~/.ssh/authorized_keys"
+  config.ssh.forward_agent = true
 
   config.vm.provision :shell, inline: "sudo cp /vagrant/ARM.repo /etc/yum.repos.d/ARM.repo"
   config.vm.provision :shell, inline: "sudo yum -y update"
