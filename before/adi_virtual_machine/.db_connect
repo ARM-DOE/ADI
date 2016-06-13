@@ -1,7 +1,0 @@
-
-dsdb_data sqlite  /home/vagrant/adi_home/data/db/sqlite/dsdb.sqlite
-
-dsdb_read sqlite /home/vagrant/adi_home/data/db/sqlite/dsdb.sqlite
-
-
-
