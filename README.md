@@ -58,7 +58,15 @@ Under $DATA_HOME the directory structure is organized according to ARM's [data d
 
 To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your host machine.    
 `$> vagrant ssh`  
-(The first time your run this command, the virtual machine will ask you the passphrase you set before)
+(The first time your run this command, the virtual machine will ask you the passphrase you set before)  
+
+One logged in your home directory area will be     
+`/home/vagrant`  
+  
+The core ADI libraries are located in      
+`/home/vagrant/adi_home`    
+the python bindings in    
+`/home/vagrant/py_lib`
  
   
 To exit from virtual machine, type "exit" under virtual environment (In this way, VM is still running backends)   
@@ -67,21 +75,14 @@ To exit from virtual machine, type "exit" under virtual environment (In this way
 To temporarily stop the virtual machine, type "vagrant halt" under host machine  
 `$> vagrant halt`
  
-To restart the virtual machine from temporarily stopping, type "vagrant up" under host machine  
+To restart the virtual machine after last vagrant halt, type "vagrant up" under host machine  
 `$> vagrant up`
   
 To completely destroy the virtual machine, and release the resources VM uses, run    
 `$> vagrant destroy`  
 This will destroy the VM but leave the 
-   <installation_area>/ADI/ADI_Vagrant directory untouched.  
+   <installation_area>/ADI/ directory untouched.  
 Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up` to build the virtual environment from scratch.
-
-One logged in your home directory area will be     
-  `/home/vagrant`
-The core ADI libraries are located in      
-  `/home/vagrant/adi-master`    
-the python bindings in    
-  `/home/vagrant/py_lib`
 
 Your development area where you keep algorithm's source code is located in
    `/home/vagrant/adi_home/dev/vap/src`   

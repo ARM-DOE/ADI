@@ -1,0 +1,1750 @@
+netcdf sgpadiexample2C1.c1.20130302.052900 {
+dimensions:
+	time = UNLIMITED ; // (2470 currently)
+	nheight = 2 ;
+	nlayer = 5 ;
+variables:
+	int base_time ;
+		base_time:string = "2013-03-02 00:00:00 0:00" ;
+		base_time:long_name = "Base time in Epoch" ;
+		base_time:units = "seconds since 1970-1-1 0:00:00 0:00" ;
+	double time_offset(time) ;
+		time_offset:long_name = "Time offset from base_time" ;
+		time_offset:units = "seconds since 2013-03-02 00:00:00 0:00" ;
+	double time(time) ;
+		time:long_name = "Time offset from midnight" ;
+		time:units = "seconds since 2013-03-02 00:00:00 0:00" ;
+	float pres(time) ;
+		pres:long_name = "Pressure" ;
+		pres:units = "hPa" ;
+		pres:valid_min = 0.f ;
+		pres:valid_max = 1100.f ;
+		pres:valid_delta = 10.f ;
+		pres:resolution = 0.1f ;
+		pres:missing_value = -9999.f ;
+	float tdry(time) ;
+		tdry:long_name = "Dry bulb temperature" ;
+		tdry:units = "C" ;
+		tdry:valid_min = -90.f ;
+		tdry:valid_max = 50.f ;
+		tdry:valid_delta = 10.f ;
+		tdry:resolution = 0.1f ;
+		tdry:missing_value = -9999.f ;
+	float wspd(time) ;
+		wspd:standard_name = "wind_speed" ;
+		wspd:long_name = "Wind speed" ;
+		wspd:units = "m s-1" ;
+		wspd:valid_min = 0.f ;
+		wspd:valid_max = 100.f ;
+		wspd:resolution = 0.1f ;
+		wspd:missing_value = -9999.f ;
+	float rh(time) ;
+		rh:long_name = "Relative humidity" ;
+		rh:units = "%" ;
+		rh:valid_min = 0.f ;
+		rh:valid_max = 100.f ;
+		rh:resolution = 1.f ;
+		rh:missing_value = -9999.f ;
+	float pbl_height_heffter ;
+		pbl_height_heffter:standard_name = "atmosphere_boundary_layer_thickness" ;
+		pbl_height_heffter:long_name = "Planetary boundary layer height calculated using the method of Heffter (1980)" ;
+		pbl_height_heffter:units = "m ASL" ;
+		pbl_height_heffter:valid_min = 0.f ;
+		pbl_height_heffter:valid_max = 5000.f ;
+		pbl_height_heffter:missing_value = -9999.f ;
+	int qc_pbl_height_heffter ;
+		qc_pbl_height_heffter:long_name = "Quality check results on field: Planetary boundary layer height calculated using the method of Heffter (1980)" ;
+		qc_pbl_height_heffter:units = "unitless" ;
+		qc_pbl_height_heffter:description = "This field contains bit packed values which should be interpreted as listed. No bits set (zero) represents good data." ;
+		qc_pbl_height_heffter:bit_1_description = "Data value not available in input file, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_1_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_2_description = "Data does not have enough temperature values, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_2_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_3_description = "Sonde does not reach mimimum height of 1000 m, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_3_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_4_description = "The pressure values are not greater than 200 hPa, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_4_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_5_description = "Data failed temperature checks.  There is a change of 30 degress in temperature in 10 seconds of sounding, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_5_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_6_description = "Data failed  min and max value checks.  Value is less than the valid_min (<-80C)  or value is greater than the valid_max (>50C) temperature checks, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_6_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_7_description = "The pressure value closest to the surface is not valid, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_7_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_8_description = "Planetary bounday layer greater than maximum height, data value set to -9999 in output file." ;
+		qc_pbl_height_heffter:bit_8_assessment = "Bad" ;
+		qc_pbl_height_heffter:bit_9_description = "Planetary bounday layer was not calculated since both conditions were met." ;
+		qc_pbl_height_heffter:bit_9_assessment = "Indeterminate" ;
+		qc_pbl_height_heffter:bit_10_description = "Data value not finite in one of the input variables" ;
+		qc_pbl_height_heffter:bit_10_assessment = "Indeterminate" ;
+	int regime_type ;
+		regime_type:long_name = "Planetary boundary layer regime type determined from Liu-Liang method" ;
+		regime_type:units = "unitless" ;
+		regime_type:value_of_-1 = "Convective boundary layer" ;
+		regime_type:value_of_0 = "Neutral boundary layer" ;
+		regime_type:value_of_1 = "Stable boundary layer" ;
+	int qc_regime_type ;
+		qc_regime_type:long_name = "Quality check results on field: Planetary boundary layer regime type determined from Liu-Liang method" ;
+		qc_regime_type:units = "unitless" ;
+		qc_regime_type:description = "This field contains bit packed values which should be interpreted as listed. No bits set (zero) represents good data." ;
+		qc_regime_type:bit_1_description = "Data value not available in input file, data value set to -9999 in output file." ;
+		qc_regime_type:bit_1_assessment = "Bad" ;
+		qc_regime_type:bit_2_description = "Data does not have enough temperature values, data value set to -9999 in output file." ;
+		qc_regime_type:bit_2_assessment = "Bad" ;
+		qc_regime_type:bit_3_description = "Sonde does not reach mimimum height of 1000 m, data value set to -9999 in output file." ;
+		qc_regime_type:bit_3_assessment = "Bad" ;
+		qc_regime_type:bit_4_description = "The pressure values are not greater than 200 hPa, data value set to -9999 in output file." ;
+		qc_regime_type:bit_4_assessment = "Bad" ;
+		qc_regime_type:bit_5_description = "Data failed temperature checks.  There is a change of 30 degress in temperature in 10 seconds of sounding, data value set to -9999 in output file." ;
+		qc_regime_type:bit_5_assessment = "Bad" ;
+		qc_regime_type:bit_6_description = "Data failed  min and max value checks.  Value is less than the valid_min (<-80C)  or value is greater than the valid_max (>50C) temperature checks, data value set to -9999 in output file." ;
+		qc_regime_type:bit_6_assessment = "Bad" ;
+		qc_regime_type:bit_7_description = "Potential temperature value less than 1, data value set to -9999 in output file." ;
+		qc_regime_type:bit_7_assessment = "Bad" ;
+		qc_regime_type:bit_8_description = "Planetary bounday layer greater than maximum height, data value set to -9999 in output file." ;
+		qc_regime_type:bit_8_assessment = "Bad" ;
+	float pbl_height_liuliang ;
+		pbl_height_liuliang:standard_name = "atmosphere_boundary_layer_thickness" ;
+		pbl_height_liuliang:long_name = "Planetary bounday layer height calculated following Liu and Liang (2010) method" ;
+		pbl_height_liuliang:units = "m ASL" ;
+		pbl_height_liuliang:valid_min = 0.f ;
+		pbl_height_liuliang:valid_max = 5000.f ;
+		pbl_height_liuliang:missing_value = -9999.f ;
+	int qc_pbl_height_liuliang ;
+		qc_pbl_height_liuliang:long_name = "Quality check results on field: Planetary bounday layer height calculated following Liu and Liang (2010) method" ;
+		qc_pbl_height_liuliang:units = "unitless" ;
+		qc_pbl_height_liuliang:description = "This field contains bit packed values which should be interpreted as listed. No bits set (zero) represents good data." ;
+		qc_pbl_height_liuliang:bit_1_description = "Data value not available in input file, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_1_assessment = "Bad" ;
+		qc_pbl_height_liuliang:bit_2_description = "Data does not have enough temperature values, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_2_assessment = "Bad" ;
+		qc_pbl_height_liuliang:bit_3_description = "Sonde does not reach mimimum height of 1000 m, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_3_assessment = "Bad" ;
+		qc_pbl_height_liuliang:bit_4_description = "The pressure values are not greater than 200 hPa, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_4_assessment = "Bad" ;
+		qc_pbl_height_liuliang:bit_5_description = "Data failed temperature checks.  There is a change of 30 degress in temperature in 10 seconds of sounding, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_5_assessment = "Bad" ;
+		qc_pbl_height_liuliang:bit_6_description = "Data failed  min and max value checks.  Value is less than the valid_min (<-80C)  or value is greater than the valid_max (>50C) temperature checks, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_6_assessment = "Bad" ;
+		qc_pbl_height_liuliang:bit_7_description = "Potential temperature value less than 1, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_7_assessment = "Bad" ;
+		qc_pbl_height_liuliang:bit_8_description = "Planetary bounday layer greater than maximum height, data value set to -9999 in output file." ;
+		qc_pbl_height_liuliang:bit_8_assessment = "Bad" ;
+	float pbl_height_bulkrichardson_pt25 ;
+		pbl_height_bulkrichardson_pt25:standard_name = "atmosphere_boundary_layer_thickness" ;
+		pbl_height_bulkrichardson_pt25:long_name = "Planetary boundary layer height calculated from bulk Richardson number using critical threshold of 0.25" ;
+		pbl_height_bulkrichardson_pt25:units = "m ASL" ;
+		pbl_height_bulkrichardson_pt25:valid_min = 0.f ;
+		pbl_height_bulkrichardson_pt25:valid_max = 5000.f ;
+		pbl_height_bulkrichardson_pt25:missing_value = -9999.f ;
+	int qc_pbl_height_bulkrichardson_pt25 ;
+		qc_pbl_height_bulkrichardson_pt25:long_name = "Quality check results on field: Planetary boundary layer height calculated from bulk Richardson number using critical threshold of 0.25" ;
+		qc_pbl_height_bulkrichardson_pt25:units = "unitless" ;
+		qc_pbl_height_bulkrichardson_pt25:description = "This field contains bit packed values which should be interpreted as listed. No bits set (zero) represents good data." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_1_description = "Data value not available in input file, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_1_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt25:bit_2_description = "Data does not have enough temperature values, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_2_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt25:bit_3_description = "Sonde does not reach mimimum height of 1000 m, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_3_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt25:bit_4_description = "The pressure values are not greater than 200 hPa, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_4_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt25:bit_5_description = "Data failed temperature checks.  There is a change of 30 degress in temperature in 10 seconds of sounding, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_5_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt25:bit_6_description = "Data failed  min and max value checks.  Value is less than the valid_min (<-80C)  or value is greater than the valid_max (>50C) temperature checks, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_6_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt25:bit_7_description = "Potential temperature value less than 1, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_7_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt25:bit_8_description = "Planetary bounday layer greater than maximum height, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt25:bit_8_assessment = "Bad" ;
+	float pbl_height_bulkrichardson_pt5 ;
+		pbl_height_bulkrichardson_pt5:standard_name = "atmosphere_boundary_layer_thickness" ;
+		pbl_height_bulkrichardson_pt5:long_name = "Planetary boundary layer height calculated from bulk Richardson number using critical threshold of 0.5" ;
+		pbl_height_bulkrichardson_pt5:units = "m ASL" ;
+		pbl_height_bulkrichardson_pt5:valid_min = 0.f ;
+		pbl_height_bulkrichardson_pt5:valid_max = 5000.f ;
+		pbl_height_bulkrichardson_pt5:missing_value = -9999.f ;
+	int qc_pbl_height_bulkrichardson_pt5 ;
+		qc_pbl_height_bulkrichardson_pt5:long_name = "Quality check results on field: Planetary boundary layer height calculated from bulk Richardson number using critical threshold of 0.5" ;
+		qc_pbl_height_bulkrichardson_pt5:units = "unitless" ;
+		qc_pbl_height_bulkrichardson_pt5:description = "This field contains bit packed values which should be interpreted as listed. No bits set (zero) represents good data." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_1_description = "Data value not available in input file, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_1_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt5:bit_2_description = "Data does not have enough temperature values, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_2_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt5:bit_3_description = "Sonde does not reach mimimum height of 1000 m, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_3_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt5:bit_4_description = "The pressure values are not greater than 200 hPa, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_4_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt5:bit_5_description = "Data failed temperature checks.  There is a change of 30 degress in temperature in 10 seconds of sounding, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_5_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt5:bit_6_description = "Data failed  min and max value checks.  Value is less than the valid_min (<-80C)  or value is greater than the valid_max (>50C) temperature checks, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_6_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt5:bit_7_description = "Potential temperature value less than 1, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_7_assessment = "Bad" ;
+		qc_pbl_height_bulkrichardson_pt5:bit_8_description = "Planetary bounday layer greater than maximum height, data value set to -9999 in output file." ;
+		qc_pbl_height_bulkrichardson_pt5:bit_8_assessment = "Bad" ;
+	float pressure_gridded(nheight) ;
+		pressure_gridded:long_name = "Pressure grid for 5 mb sub-sampling" ;
+		pressure_gridded:units = "hPa" ;
+		pressure_gridded:valid_min = 0.f ;
+		pressure_gridded:valid_max = 1100.f ;
+	float lapserate_theta_ss(nheight) ;
+		lapserate_theta_ss:long_name = "Potential temperature lapse rate sub-sampled at 5 mb" ;
+		lapserate_theta_ss:units = "K/m" ;
+		lapserate_theta_ss:valid_min = -0.5f ;
+		lapserate_theta_ss:valid_max = 0.5f ;
+	float lapserate_theta_smoothed(nheight) ;
+		lapserate_theta_smoothed:long_name = "Potential temperature lapse rate smoothed over 15 mb for Heffter method" ;
+		lapserate_theta_smoothed:units = "K/m" ;
+		lapserate_theta_smoothed:valid_min = -0.5f ;
+		lapserate_theta_smoothed:valid_max = 0.5f ;
+	float pressure_ss(nheight) ;
+		pressure_ss:long_name = "Actual pressure at the top of the 5 mb sub-sampling interval" ;
+		pressure_ss:units = "hPa" ;
+		pressure_ss:valid_min = 0.f ;
+		pressure_ss:valid_max = 1100.f ;
+	float theta_ss(nheight) ;
+		theta_ss:standard_name = "air_potential_temperature" ;
+		theta_ss:long_name = "Potential temperature sub-sampled at 5 mb resolution" ;
+		theta_ss:units = "K" ;
+		theta_ss:valid_min = 100.f ;
+		theta_ss:valid_max = 1000.f ;
+	float height_ss(nheight) ;
+		height_ss:long_name = "Height sub-sampled at 5 mb resolution" ;
+		height_ss:units = "m" ;
+		height_ss:valid_min = 0.f ;
+		height_ss:valid_max = 50000.f ;
+	float wspd_ss(nheight) ;
+		wspd_ss:long_name = "Wind speed sub-sampled at 5 mb resolution" ;
+		wspd_ss:units = "m/s" ;
+		wspd_ss:valid_min = 0.f ;
+		wspd_ss:valid_max = 100.f ;
+	float br_profile(nheight) ;
+		br_profile:long_name = "Vertical profile of bulk Richardson number" ;
+		br_profile:units = "unitless" ;
+		br_profile:valid_min = 0.f ;
+		br_profile:valid_max = 50000.f ;
+	float thetav(nheight) ;
+		thetav:long_name = "Virtual potential temperature" ;
+		thetav:units = "K" ;
+		thetav:valid_min = 100.f ;
+		thetav:valid_max = 1000.f ;
+	float bottom_inversion(nlayer) ;
+		bottom_inversion:long_name = "Bottom of inversion layer" ;
+		bottom_inversion:units = "m" ;
+	float top_inversion(nlayer) ;
+		top_inversion:long_name = "Top of inversion layer" ;
+		top_inversion:units = "m" ;
+	float max_lapse_rate(nlayer) ;
+		max_lapse_rate:long_name = "Maximum lapse rate in inversion layer" ;
+		max_lapse_rate:units = "K/m" ;
+	float max_delta_theta(nlayer) ;
+		max_delta_theta:long_name = "The maximum differnce in theta across inversion layers." ;
+		max_delta_theta:units = "K" ;
+	float ll_level_1 ;
+		ll_level_1:long_name = "Level 1 calculated by the Liu and Liang method" ;
+		ll_level_1:units = "m" ;
+		ll_level_1:comment = "If the regime type is CBL or NRL, this height indicates the bottom of unstable layer. If the regime type is SBL, this is the minimum local potential temperature." ;
+	float ll_level_2 ;
+		ll_level_2:long_name = "Level 2 calculated by the Liu and Liang method" ;
+		ll_level_2:units = "m" ;
+		ll_level_2:comment = "If the regime type is CBL or NRL, the height indicates that the lapse rate exceeds gradient threshold. It the regime type is SBL, the height indicates the nose of low level jet." ;
+	float lat ;
+		lat:long_name = "North latitude" ;
+		lat:units = "degree_N" ;
+		lat:valid_min = -90.f ;
+		lat:valid_max = 90.f ;
+	float lon ;
+		lon:long_name = "East longitude" ;
+		lon:units = "degree_E" ;
+		lon:valid_min = -180.f ;
+		lon:valid_max = 180.f ;
+	float alt ;
+		alt:long_name = "Altitude above mean sea level" ;
+		alt:units = "m" ;
+
+// global attributes:
+		:command_line = "adi_example2_vap -s sgp -f C1 -b 20130302 -e 20130303 -D 2 -R" ;
+		:process_version = "$" ;
+		:dod_version = "adiexample2-c1-0.0" ;
+		:site_id = "sgp" ;
+		:facility_id = "C1: Lamont, Oklahoma" ;
+		:inversion_strength_threshold =  ;
+		:instability_threshold =  ;
+		:overshoot_threshold =  ;
+		:reference_1 = "Heffter, J. L., 1980: Transport layer depth calculations. Second Joint Conference on Applications of Air Pollution Meteorology, New Orleans, LA (1980)." ;
+		:reference_2 = "Liu, S. and X. Z. Liang, 2010: Observed Diurnal Cycle Climatology of Planetary Boundary Layer Height. J. Climate, 23, 5790-5807." ;
+		:input_datastreams = "sgpsondewnpnC1.b1 : 10.11 : 20130302.052900-20130302.233000" ;
+		:input_datastreams_num = 4 ;
+		:input_datastreams_description = "A string consisting of the datastream(s), datastream version(s), and datastream date (range)." ;
+		:qc_standards_version = "1.0" ;
+		:history = "created by user vagrant on machine localhost.localdomain at 2016-05-18 05:45:14, using $" ;
+data:
+
+ base_time = 1362182400 ;
+
+ time_offset = 19740, 19742, 19744, 19746, 19748, 19750, 19752, 19754, 19756, 
+    19758, 19760, 19762, 19764, 19766, 19768, 19770, 19772, 19774, 19776, 
+    19778, 19780, 19782, 19784, 19786, 19788, 19790, 19792, 19794, 19796, 
+    19798, 19800, 19802, 19804, 19806, 19808, 19810, 19812, 19814, 19816, 
+    19818, 19820, 19822, 19824, 19826, 19828, 19830, 19832, 19834, 19836, 
+    19838, 19840, 19842, 19844, 19846, 19848, 19850, 19852, 19854, 19856, 
+    19858, 19860, 19862, 19864, 19866, 19868, 19870, 19872, 19874, 19876, 
+    19878, 19880, 19882, 19884, 19886, 19888, 19890, 19892, 19894, 19896, 
+    19898, 19900, 19902, 19904, 19906, 19908, 19910, 19912, 19914, 19916, 
+    19918, 19920, 19922, 19924, 19926, 19928, 19930, 19932, 19934, 19936, 
+    19938, 19940, 19942, 19944, 19946, 19948, 19950, 19952, 19954, 19956, 
+    19958, 19960, 19962, 19964, 19966, 19968, 19970, 19972, 19974, 19976, 
+    19978, 19980, 19982, 19984, 19986, 19988, 19990, 19992, 19994, 19996, 
+    19998, 20000, 20002, 20004, 20006, 20008, 20010, 20012, 20014, 20016, 
+    20018, 20020, 20022, 20024, 20026, 20028, 20030, 20032, 20034, 20036, 
+    20038, 20040, 20042, 20044, 20046, 20048, 20050, 20052, 20054, 20056, 
+    20058, 20060, 20062, 20064, 20066, 20068, 20070, 20072, 20074, 20076, 
+    20078, 20080, 20082, 20084, 20086, 20088, 20090, 20092, 20094, 20096, 
+    20098, 20100, 20102, 20104, 20106, 20108, 20110, 20112, 20114, 20116, 
+    20118, 20120, 20122, 20124, 20126, 20128, 20130, 20132, 20134, 20136, 
+    20138, 20140, 20142, 20144, 20146, 20148, 20150, 20152, 20154, 20156, 
+    20158, 20160, 20162, 20164, 20166, 20168, 20170, 20172, 20174, 20176, 
+    20178, 20180, 20182, 20184, 20186, 20188, 20190, 20192, 20194, 20196, 
+    20198, 20200, 20202, 20204, 20206, 20208, 20210, 20212, 20214, 20216, 
+    20218, 20220, 20222, 20224, 20226, 20228, 20230, 20232, 20234, 20236, 
+    20238, 20240, 20242, 20244, 20246, 20248, 20250, 20252, 20254, 20256, 
+    20258, 20260, 20262, 20264, 20266, 20268, 20270, 20272, 20274, 20276, 
+    20278, 20280, 20282, 20284, 20286, 20288, 20290, 20292, 20294, 20296, 
+    20298, 20300, 20302, 20304, 20306, 20308, 20310, 20312, 20314, 20316, 
+    20318, 20320, 20322, 20324, 20326, 20328, 20330, 20332, 20334, 20336, 
+    20338, 20340, 20342, 20344, 20346, 20348, 20350, 20352, 20354, 20356, 
+    20358, 20360, 20362, 20364, 20366, 20368, 20370, 20372, 20374, 20376, 
+    20378, 20380, 20382, 20384, 20386, 20388, 20390, 20392, 20394, 20396, 
+    20398, 20400, 20402, 20404, 20406, 20408, 20410, 20412, 20414, 20416, 
+    20418, 20420, 20422, 20424, 20426, 20428, 20430, 20432, 20434, 20436, 
+    20438, 20440, 20442, 20444, 20446, 20448, 20450, 20452, 20454, 20456, 
+    20458, 20460, 20462, 20464, 20466, 20468, 20470, 20472, 20474, 20476, 
+    20478, 20480, 20482, 20484, 20486, 20488, 20490, 20492, 20494, 20496, 
+    20498, 20500, 20502, 20504, 20506, 20508, 20510, 20512, 20514, 20516, 
+    20518, 20520, 20522, 20524, 20526, 20528, 20530, 20532, 20534, 20536, 
+    20538, 20540, 20542, 20544, 20546, 20548, 20550, 20552, 20554, 20556, 
+    20558, 20560, 20562, 20564, 20566, 20568, 20570, 20572, 20574, 20576, 
+    20578, 20580, 20582, 20584, 20586, 20588, 20590, 20592, 20594, 20596, 
+    20598, 20600, 20602, 20604, 20606, 20608, 20610, 20612, 20614, 20616, 
+    20618, 20620, 20622, 20624, 20626, 20628, 20630, 20632, 20634, 20636, 
+    20638, 20640, 20642, 20644, 20646, 20648, 20650, 20652, 20654, 20656, 
+    20658, 20660, 20662, 20664, 20666, 20668, 20670, 20672, 20674, 20676, 
+    20678, 20680, 20682, 20684, 20686, 20688, 20690, 20692, 20694, 20696, 
+    20698, 20700, 20702, 20704, 20706, 20708, 20710, 20712, 20714, 20716, 
+    20718, 20720, 20722, 20724, 20726, 20728, 20730, 20732, 20734, 20736, 
+    20738, 20740, 20742, 20744, 20746, 20748, 20750, 20752, 20754, 20756, 
+    20758, 20760, 20762, 20764, 20766, 20768, 20770, 20772, 20774, 20776, 
+    20778, 20780, 20782, 20784, 20786, 20788, 20790, 20792, 20794, 20796, 
+    20798, 20800, 20802, 20804, 20806, 20808, 20810, 20812, 20814, 20816, 
+    20818, 20820, 20822, 20824, 20826, 20828, 20830, 20832, 20834, 20836, 
+    20838, 20840, 20842, 20844, 20846, 20848, 20850, 20852, 20854, 20856, 
+    20858, 20860, 20862, 20864, 20866, 20868, 20870, 20872, 20874, 20876, 
+    20878, 20880, 20882, 20884, 20886, 20888, 20890, 20892, 20894, 20896, 
+    20898, 20900, 20902, 20904, 20906, 20908, 20910, 20912, 20914, 20916, 
+    20918, 20920, 20922, 20924, 20926, 20928, 20930, 20932, 20934, 20936, 
+    20938, 20940, 20942, 20944, 20946, 20948, 20950, 20952, 20954, 20956, 
+    20958, 20960, 20962, 20964, 20966, 20968, 20970, 20972, 20974, 20976, 
+    20978, 20980, 20982, 20984, 20986, 20988, 20990, 20992, 20994, 20996, 
+    20998, 21000, 21002, 21004, 21006, 21008, 21010, 21012, 21014, 21016, 
+    21018, 21020, 21022, 21024, 21026, 21028, 21030, 21032, 21034, 21036, 
+    21038, 21040, 21042, 21044, 21046, 21048, 21050, 21052, 21054, 21056, 
+    21058, 21060, 21062, 21064, 21066, 21068, 21070, 21072, 21074, 21076, 
+    21078, 21080, 21082, 21084, 21086, 21088, 21090, 21092, 21094, 21096, 
+    21098, 21100, 21102, 21104, 21106, 21108, 21110, 21112, 21114, 21116, 
+    21118, 21120, 21122, 21124, 21126, 21128, 21130, 21132, 21134, 21136, 
+    21138, 21140, 21142, 21144, 21146, 21148, 21150, 21152, 21154, 21156, 
+    21158, 21160, 21162, 21164, 21166, 21168, 21170, 21172, 21174, 21176, 
+    21178, 21180, 21182, 21184, 21186, 21188, 21190, 21192, 21194, 21196, 
+    21198, 21200, 21202, 21204, 21206, 21208, 21210, 21212, 21214, 21216, 
+    21218, 21220, 21222, 21224, 21226, 21228, 21230, 21232, 21234, 21236, 
+    21238, 21240, 21242, 21244, 21246, 21248, 21250, 21252, 21254, 21256, 
+    21258, 21260, 21262, 21264, 21266, 21268, 21270, 21272, 21274, 21276, 
+    21278, 21280, 21282, 21284, 21286, 21288, 21290, 21292, 21294, 21296, 
+    21298, 21300, 21302, 21304, 21306, 21308, 21310, 21312, 21314, 21316, 
+    21318, 21320, 21322, 21324, 21326, 21328, 21330, 21332, 21334, 21336, 
+    21338, 21340, 21342, 21344, 21346, 21348, 21350, 21352, 21354, 21356, 
+    21358, 21360, 21362, 21364, 21366, 21368, 21370, 21372, 21374, 21376, 
+    21378, 21380, 21382, 21384, 21386, 21388, 21390, 21392, 21394, 21396, 
+    21398, 21400, 21402, 21404, 21406, 21408, 21410, 21412, 21414, 21416, 
+    21418, 21420, 21422, 21424, 21426, 21428, 21430, 21432, 21434, 21436, 
+    21438, 21440, 21442, 21444, 21446, 21448, 21450, 21452, 21454, 21456, 
+    21458, 21460, 21462, 21464, 21466, 21468, 21470, 21472, 21474, 21476, 
+    21478, 21480, 21482, 21484, 21486, 21488, 21490, 21492, 21494, 21496, 
+    21498, 21500, 21502, 21504, 21506, 21508, 21510, 21512, 21514, 21516, 
+    21518, 21520, 21522, 21524, 21526, 21528, 21530, 21532, 21534, 21536, 
+    21538, 21540, 21542, 21544, 21546, 21548, 21550, 21552, 21554, 21556, 
+    21558, 21560, 21562, 21564, 21566, 21568, 21570, 21572, 21574, 21576, 
+    21578, 21580, 21582, 21584, 21586, 21588, 21590, 21592, 21594, 21596, 
+    21598, 21600, 21602, 21604, 21606, 21608, 21610, 21612, 21614, 21616, 
+    21618, 21620, 21622, 21624, 21626, 21628, 21630, 21632, 21634, 21636, 
+    21638, 21640, 21642, 21644, 21646, 21648, 21650, 21652, 21654, 21656, 
+    21658, 21660, 21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 
+    21678, 21680, 21682, 21684, 21686, 21688, 21690, 21692, 21694, 21696, 
+    21698, 21700, 21702, 21704, 21706, 21708, 21710, 21712, 21714, 21716, 
+    21718, 21720, 21722, 21724, 21726, 21728, 21730, 21732, 21734, 21736, 
+    21738, 21740, 21742, 21744, 21746, 21748, 21750, 21752, 21754, 21756, 
+    21758, 21760, 21762, 21764, 21766, 21768, 21770, 21772, 21774, 21776, 
+    21778, 21780, 21782, 21784, 21786, 21788, 21790, 21792, 21794, 21796, 
+    21798, 21800, 21802, 21804, 21806, 21808, 21810, 21812, 21814, 21816, 
+    21818, 21820, 21822, 21824, 21826, 21828, 21830, 21832, 21834, 21836, 
+    21838, 21840, 21842, 21844, 21846, 21848, 21850, 21852, 21854, 21856, 
+    21858, 21860, 21862, 21864, 21866, 21868, 21870, 21872, 21874, 21876, 
+    21878, 21880, 21882, 21884, 21886, 21888, 21890, 21892, 21894, 21896, 
+    21898, 21900, 21902, 21904, 21906, 21908, 21910, 21912, 21914, 21916, 
+    21918, 21920, 21922, 21924, 21926, 21928, 21930, 21932, 21934, 21936, 
+    21938, 21940, 21942, 21944, 21946, 21948, 21950, 21952, 21954, 21956, 
+    21958, 21960, 21962, 21964, 21966, 21968, 21970, 21972, 21974, 21976, 
+    21978, 21980, 21982, 21984, 21986, 21988, 21990, 21992, 21994, 21996, 
+    21998, 22000, 22002, 22004, 22006, 22008, 22010, 22012, 22014, 22016, 
+    22018, 22020, 22022, 22024, 22026, 22028, 22030, 22032, 22034, 22036, 
+    22038, 22040, 22042, 22044, 22046, 22048, 22050, 22052, 22054, 22056, 
+    22058, 22060, 22062, 22064, 22066, 22068, 22070, 22072, 22074, 22076, 
+    22078, 22080, 22082, 22084, 22086, 22088, 22090, 22092, 22094, 22096, 
+    22098, 22100, 22102, 22104, 22106, 22108, 22110, 22112, 22114, 22116, 
+    22118, 22120, 22122, 22124, 22126, 22128, 22130, 22132, 22134, 22136, 
+    22138, 22140, 22142, 22144, 22146, 22148, 22150, 22152, 22154, 22156, 
+    22158, 22160, 22162, 22164, 22166, 22168, 22170, 22172, 22174, 22176, 
+    22178, 22180, 22182, 22184, 22186, 22188, 22190, 22192, 22194, 22196, 
+    22198, 22200, 22202, 22204, 22206, 22208, 22210, 22212, 22214, 22216, 
+    22218, 22220, 22222, 22224, 22226, 22228, 22230, 22232, 22234, 22236, 
+    22238, 22240, 22242, 22244, 22246, 22248, 22250, 22252, 22254, 22256, 
+    22258, 22260, 22262, 22264, 22266, 22268, 22270, 22272, 22274, 22276, 
+    22278, 22280, 22282, 22284, 22286, 22288, 22290, 22292, 22294, 22296, 
+    22298, 22300, 22302, 22304, 22306, 22308, 22310, 22312, 22314, 22316, 
+    22318, 22320, 22322, 22324, 22326, 22328, 22330, 22332, 22334, 22336, 
+    22338, 22340, 22342, 22344, 22346, 22348, 22350, 22352, 22354, 22356, 
+    22358, 22360, 22362, 22364, 22366, 22368, 22370, 22372, 22374, 22376, 
+    22378, 22380, 22382, 22384, 22386, 22388, 22390, 22392, 22394, 22396, 
+    22398, 22400, 22402, 22404, 22406, 22408, 22410, 22412, 22414, 22416, 
+    22418, 22420, 22422, 22424, 22426, 22428, 22430, 22432, 22434, 22436, 
+    22438, 22440, 22442, 22444, 22446, 22448, 22450, 22452, 22454, 22456, 
+    22458, 22460, 22462, 22464, 22466, 22468, 22470, 22472, 22474, 22476, 
+    22478, 22480, 22482, 22484, 22486, 22488, 22490, 22492, 22494, 22496, 
+    22498, 22500, 22502, 22504, 22506, 22508, 22510, 22512, 22514, 22516, 
+    22518, 22520, 22522, 22524, 22526, 22528, 22530, 22532, 22534, 22536, 
+    22538, 22540, 22542, 22544, 22546, 22548, 22550, 22552, 22554, 22556, 
+    22558, 22560, 22562, 22564, 22566, 22568, 22570, 22572, 22574, 22576, 
+    22578, 22580, 22582, 22584, 22586, 22588, 22590, 22592, 22594, 22596, 
+    22598, 22600, 22602, 22604, 22606, 22608, 22610, 22612, 22614, 22616, 
+    22618, 22620, 22622, 22624, 22626, 22628, 22630, 22632, 22634, 22636, 
+    22638, 22640, 22642, 22644, 22646, 22648, 22650, 22652, 22654, 22656, 
+    22658, 22660, 22662, 22664, 22666, 22668, 22670, 22672, 22674, 22676, 
+    22678, 22680, 22682, 22684, 22686, 22688, 22690, 22692, 22694, 22696, 
+    22698, 22700, 22702, 22704, 22706, 22708, 22710, 22712, 22714, 22716, 
+    22718, 22720, 22722, 22724, 22726, 22728, 22730, 22732, 22734, 22736, 
+    22738, 22740, 22742, 22744, 22746, 22748, 22750, 22752, 22754, 22756, 
+    22758, 22760, 22762, 22764, 22766, 22768, 22770, 22772, 22774, 22776, 
+    22778, 22780, 22782, 22784, 22786, 22788, 22790, 22792, 22794, 22796, 
+    22798, 22800, 22802, 22804, 22806, 22808, 22810, 22812, 22814, 22816, 
+    22818, 22820, 22822, 22824, 22826, 22828, 22830, 22832, 22834, 22836, 
+    22838, 22840, 22842, 22844, 22846, 22848, 22850, 22852, 22854, 22856, 
+    22858, 22860, 22862, 22864, 22866, 22868, 22870, 22872, 22874, 22876, 
+    22878, 22880, 22882, 22884, 22886, 22888, 22890, 22892, 22894, 22896, 
+    22898, 22900, 22902, 22904, 22906, 22908, 22910, 22912, 22914, 22916, 
+    22918, 22920, 22922, 22924, 22926, 22928, 22930, 22932, 22934, 22936, 
+    22938, 22940, 22942, 22944, 22946, 22948, 22950, 22952, 22954, 22956, 
+    22958, 22960, 22962, 22964, 22966, 22968, 22970, 22972, 22974, 22976, 
+    22978, 22980, 22982, 22984, 22986, 22988, 22990, 22992, 22994, 22996, 
+    22998, 23000, 23002, 23004, 23006, 23008, 23010, 23012, 23014, 23016, 
+    23018, 23020, 23022, 23024, 23026, 23028, 23030, 23032, 23034, 23036, 
+    23038, 23040, 23042, 23044, 23046, 23048, 23050, 23052, 23054, 23056, 
+    23058, 23060, 23062, 23064, 23066, 23068, 23070, 23072, 23074, 23076, 
+    23078, 23080, 23082, 23084, 23086, 23088, 23090, 23092, 23094, 23096, 
+    23098, 23100, 23102, 23104, 23106, 23108, 23110, 23112, 23114, 23116, 
+    23118, 23120, 23122, 23124, 23126, 23128, 23130, 23132, 23134, 23136, 
+    23138, 23140, 23142, 23144, 23146, 23148, 23150, 23152, 23154, 23156, 
+    23158, 23160, 23162, 23164, 23166, 23168, 23170, 23172, 23174, 23176, 
+    23178, 23180, 23182, 23184, 23186, 23188, 23190, 23192, 23194, 23196, 
+    23198, 23200, 23202, 23204, 23206, 23208, 23210, 23212, 23214, 23216, 
+    23218, 23220, 23222, 23224, 23226, 23228, 23230, 23232, 23234, 23236, 
+    23238, 23240, 23242, 23244, 23246, 23248, 23250, 23252, 23254, 23256, 
+    23258, 23260, 23262, 23264, 23266, 23268, 23270, 23272, 23274, 23276, 
+    23278, 23280, 23282, 23284, 23286, 23288, 23290, 23292, 23294, 23296, 
+    23298, 23300, 23302, 23304, 23306, 23308, 23310, 23312, 23314, 23316, 
+    23318, 23320, 23322, 23324, 23326, 23328, 23330, 23332, 23334, 23336, 
+    23338, 23340, 23342, 23344, 23346, 23348, 23350, 23352, 23354, 23356, 
+    23358, 23360, 23362, 23364, 23366, 23368, 23370, 23372, 23374, 23376, 
+    23378, 23380, 23382, 23384, 23386, 23388, 23390, 23392, 23394, 23396, 
+    23398, 23400, 23402, 23404, 23406, 23408, 23410, 23412, 23414, 23416, 
+    23418, 23420, 23422, 23424, 23426, 23428, 23430, 23432, 23434, 23436, 
+    23438, 23440, 23442, 23444, 23446, 23448, 23450, 23452, 23454, 23456, 
+    23458, 23460, 23462, 23464, 23466, 23468, 23470, 23472, 23474, 23476, 
+    23478, 23480, 23482, 23484, 23486, 23488, 23490, 23492, 23494, 23496, 
+    23498, 23500, 23502, 23504, 23506, 23508, 23510, 23512, 23514, 23516, 
+    23518, 23520, 23522, 23524, 23526, 23528, 23530, 23532, 23534, 23536, 
+    23538, 23540, 23542, 23544, 23546, 23548, 23550, 23552, 23554, 23556, 
+    23558, 23560, 23562, 23564, 23566, 23568, 23570, 23572, 23574, 23576, 
+    23578, 23580, 23582, 23584, 23586, 23588, 23590, 23592, 23594, 23596, 
+    23598, 23600, 23602, 23604, 23606, 23608, 23610, 23612, 23614, 23616, 
+    23618, 23620, 23622, 23624, 23626, 23628, 23630, 23632, 23634, 23636, 
+    23638, 23640, 23642, 23644, 23646, 23648, 23650, 23652, 23654, 23656, 
+    23658, 23660, 23662, 23664, 23666, 23668, 23670, 23672, 23674, 23676, 
+    23678, 23680, 23682, 23684, 23686, 23688, 23690, 23692, 23694, 23696, 
+    23698, 23700, 23702, 23704, 23706, 23708, 23710, 23712, 23714, 23716, 
+    23718, 23720, 23722, 23724, 23726, 23728, 23730, 23732, 23734, 23736, 
+    23738, 23740, 23742, 23744, 23746, 23748, 23750, 23752, 23754, 23756, 
+    23758, 23760, 23762, 23764, 23766, 23768, 23770, 23772, 23774, 23776, 
+    23778, 23780, 23782, 23784, 23786, 23788, 23790, 23792, 23794, 23796, 
+    23798, 23800, 23802, 23804, 23806, 23808, 23810, 23812, 23814, 23816, 
+    23818, 23820, 23822, 23824, 23826, 23828, 23830, 23832, 23834, 23836, 
+    23838, 23840, 23842, 23844, 23846, 23848, 23850, 23852, 23854, 23856, 
+    23858, 23860, 23862, 23864, 23866, 23868, 23870, 23872, 23874, 23876, 
+    23878, 23880, 23882, 23884, 23886, 23888, 23890, 23892, 23894, 23896, 
+    23898, 23900, 23902, 23904, 23906, 23908, 23910, 23912, 23914, 23916, 
+    23918, 23920, 23922, 23924, 23926, 23928, 23930, 23932, 23934, 23936, 
+    23938, 23940, 23942, 23944, 23946, 23948, 23950, 23952, 23954, 23956, 
+    23958, 23960, 23962, 23964, 23966, 23968, 23970, 23972, 23974, 23976, 
+    23978, 23980, 23982, 23984, 23986, 23988, 23990, 23992, 23994, 23996, 
+    23998, 24000, 24002, 24004, 24006, 24008, 24010, 24012, 24014, 24016, 
+    24018, 24020, 24022, 24024, 24026, 24028, 24030, 24032, 24034, 24036, 
+    24038, 24040, 24042, 24044, 24046, 24048, 24050, 24052, 24054, 24056, 
+    24058, 24060, 24062, 24064, 24066, 24068, 24070, 24072, 24074, 24076, 
+    24078, 24080, 24082, 24084, 24086, 24088, 24090, 24092, 24094, 24096, 
+    24098, 24100, 24102, 24104, 24106, 24108, 24110, 24112, 24114, 24116, 
+    24118, 24120, 24122, 24124, 24126, 24128, 24130, 24132, 24134, 24136, 
+    24138, 24140, 24142, 24144, 24146, 24148, 24150, 24152, 24154, 24156, 
+    24158, 24160, 24162, 24164, 24166, 24168, 24170, 24172, 24174, 24176, 
+    24178, 24180, 24182, 24184, 24186, 24188, 24190, 24192, 24194, 24196, 
+    24198, 24200, 24202, 24204, 24206, 24208, 24210, 24212, 24214, 24216, 
+    24218, 24220, 24222, 24224, 24226, 24228, 24230, 24232, 24234, 24236, 
+    24238, 24240, 24242, 24244, 24246, 24248, 24250, 24252, 24254, 24256, 
+    24258, 24260, 24262, 24264, 24266, 24268, 24270, 24272, 24274, 24276, 
+    24278, 24280, 24282, 24284, 24286, 24288, 24290, 24292, 24294, 24296, 
+    24298, 24300, 24302, 24304, 24306, 24308, 24310, 24312, 24314, 24316, 
+    24318, 24320, 24322, 24324, 24326, 24328, 24330, 24332, 24334, 24336, 
+    24338, 24340, 24342, 24344, 24346, 24348, 24350, 24352, 24354, 24356, 
+    24358, 24360, 24362, 24364, 24366, 24368, 24370, 24372, 24374, 24376, 
+    24378, 24380, 24382, 24384, 24386, 24388, 24390, 24392, 24394, 24396, 
+    24398, 24400, 24402, 24404, 24406, 24408, 24410, 24412, 24414, 24416, 
+    24418, 24420, 24422, 24424, 24426, 24428, 24430, 24432, 24434, 24436, 
+    24438, 24440, 24442, 24444, 24446, 24448, 24450, 24452, 24454, 24456, 
+    24458, 24460, 24462, 24464, 24466, 24468, 24470, 24472, 24474, 24476, 
+    24478, 24480, 24482, 24484, 24486, 24488, 24490, 24492, 24494, 24496, 
+    24498, 24500, 24502, 24504, 24506, 24508, 24510, 24512, 24514, 24516, 
+    24518, 24520, 24522, 24524, 24526, 24528, 24530, 24532, 24534, 24536, 
+    24538, 24540, 24542, 24544, 24546, 24548, 24550, 24552, 24554, 24556, 
+    24558, 24560, 24562, 24564, 24566, 24568, 24570, 24572, 24574, 24576, 
+    24578, 24580, 24582, 24584, 24586, 24588, 24590, 24592, 24594, 24596, 
+    24598, 24600, 24602, 24604, 24606, 24608, 24610, 24612, 24614, 24616, 
+    24618, 24620, 24622, 24624, 24626, 24628, 24630, 24632, 24634, 24636, 
+    24638, 24640, 24642, 24644, 24646, 24648, 24650, 24652, 24654, 24656, 
+    24658, 24660, 24662, 24664, 24666, 24668, 24670, 24672, 24674, 24676, 
+    24678 ;
+
+ time = 19740, 19742, 19744, 19746, 19748, 19750, 19752, 19754, 19756, 19758, 
+    19760, 19762, 19764, 19766, 19768, 19770, 19772, 19774, 19776, 19778, 
+    19780, 19782, 19784, 19786, 19788, 19790, 19792, 19794, 19796, 19798, 
+    19800, 19802, 19804, 19806, 19808, 19810, 19812, 19814, 19816, 19818, 
+    19820, 19822, 19824, 19826, 19828, 19830, 19832, 19834, 19836, 19838, 
+    19840, 19842, 19844, 19846, 19848, 19850, 19852, 19854, 19856, 19858, 
+    19860, 19862, 19864, 19866, 19868, 19870, 19872, 19874, 19876, 19878, 
+    19880, 19882, 19884, 19886, 19888, 19890, 19892, 19894, 19896, 19898, 
+    19900, 19902, 19904, 19906, 19908, 19910, 19912, 19914, 19916, 19918, 
+    19920, 19922, 19924, 19926, 19928, 19930, 19932, 19934, 19936, 19938, 
+    19940, 19942, 19944, 19946, 19948, 19950, 19952, 19954, 19956, 19958, 
+    19960, 19962, 19964, 19966, 19968, 19970, 19972, 19974, 19976, 19978, 
+    19980, 19982, 19984, 19986, 19988, 19990, 19992, 19994, 19996, 19998, 
+    20000, 20002, 20004, 20006, 20008, 20010, 20012, 20014, 20016, 20018, 
+    20020, 20022, 20024, 20026, 20028, 20030, 20032, 20034, 20036, 20038, 
+    20040, 20042, 20044, 20046, 20048, 20050, 20052, 20054, 20056, 20058, 
+    20060, 20062, 20064, 20066, 20068, 20070, 20072, 20074, 20076, 20078, 
+    20080, 20082, 20084, 20086, 20088, 20090, 20092, 20094, 20096, 20098, 
+    20100, 20102, 20104, 20106, 20108, 20110, 20112, 20114, 20116, 20118, 
+    20120, 20122, 20124, 20126, 20128, 20130, 20132, 20134, 20136, 20138, 
+    20140, 20142, 20144, 20146, 20148, 20150, 20152, 20154, 20156, 20158, 
+    20160, 20162, 20164, 20166, 20168, 20170, 20172, 20174, 20176, 20178, 
+    20180, 20182, 20184, 20186, 20188, 20190, 20192, 20194, 20196, 20198, 
+    20200, 20202, 20204, 20206, 20208, 20210, 20212, 20214, 20216, 20218, 
+    20220, 20222, 20224, 20226, 20228, 20230, 20232, 20234, 20236, 20238, 
+    20240, 20242, 20244, 20246, 20248, 20250, 20252, 20254, 20256, 20258, 
+    20260, 20262, 20264, 20266, 20268, 20270, 20272, 20274, 20276, 20278, 
+    20280, 20282, 20284, 20286, 20288, 20290, 20292, 20294, 20296, 20298, 
+    20300, 20302, 20304, 20306, 20308, 20310, 20312, 20314, 20316, 20318, 
+    20320, 20322, 20324, 20326, 20328, 20330, 20332, 20334, 20336, 20338, 
+    20340, 20342, 20344, 20346, 20348, 20350, 20352, 20354, 20356, 20358, 
+    20360, 20362, 20364, 20366, 20368, 20370, 20372, 20374, 20376, 20378, 
+    20380, 20382, 20384, 20386, 20388, 20390, 20392, 20394, 20396, 20398, 
+    20400, 20402, 20404, 20406, 20408, 20410, 20412, 20414, 20416, 20418, 
+    20420, 20422, 20424, 20426, 20428, 20430, 20432, 20434, 20436, 20438, 
+    20440, 20442, 20444, 20446, 20448, 20450, 20452, 20454, 20456, 20458, 
+    20460, 20462, 20464, 20466, 20468, 20470, 20472, 20474, 20476, 20478, 
+    20480, 20482, 20484, 20486, 20488, 20490, 20492, 20494, 20496, 20498, 
+    20500, 20502, 20504, 20506, 20508, 20510, 20512, 20514, 20516, 20518, 
+    20520, 20522, 20524, 20526, 20528, 20530, 20532, 20534, 20536, 20538, 
+    20540, 20542, 20544, 20546, 20548, 20550, 20552, 20554, 20556, 20558, 
+    20560, 20562, 20564, 20566, 20568, 20570, 20572, 20574, 20576, 20578, 
+    20580, 20582, 20584, 20586, 20588, 20590, 20592, 20594, 20596, 20598, 
+    20600, 20602, 20604, 20606, 20608, 20610, 20612, 20614, 20616, 20618, 
+    20620, 20622, 20624, 20626, 20628, 20630, 20632, 20634, 20636, 20638, 
+    20640, 20642, 20644, 20646, 20648, 20650, 20652, 20654, 20656, 20658, 
+    20660, 20662, 20664, 20666, 20668, 20670, 20672, 20674, 20676, 20678, 
+    20680, 20682, 20684, 20686, 20688, 20690, 20692, 20694, 20696, 20698, 
+    20700, 20702, 20704, 20706, 20708, 20710, 20712, 20714, 20716, 20718, 
+    20720, 20722, 20724, 20726, 20728, 20730, 20732, 20734, 20736, 20738, 
+    20740, 20742, 20744, 20746, 20748, 20750, 20752, 20754, 20756, 20758, 
+    20760, 20762, 20764, 20766, 20768, 20770, 20772, 20774, 20776, 20778, 
+    20780, 20782, 20784, 20786, 20788, 20790, 20792, 20794, 20796, 20798, 
+    20800, 20802, 20804, 20806, 20808, 20810, 20812, 20814, 20816, 20818, 
+    20820, 20822, 20824, 20826, 20828, 20830, 20832, 20834, 20836, 20838, 
+    20840, 20842, 20844, 20846, 20848, 20850, 20852, 20854, 20856, 20858, 
+    20860, 20862, 20864, 20866, 20868, 20870, 20872, 20874, 20876, 20878, 
+    20880, 20882, 20884, 20886, 20888, 20890, 20892, 20894, 20896, 20898, 
+    20900, 20902, 20904, 20906, 20908, 20910, 20912, 20914, 20916, 20918, 
+    20920, 20922, 20924, 20926, 20928, 20930, 20932, 20934, 20936, 20938, 
+    20940, 20942, 20944, 20946, 20948, 20950, 20952, 20954, 20956, 20958, 
+    20960, 20962, 20964, 20966, 20968, 20970, 20972, 20974, 20976, 20978, 
+    20980, 20982, 20984, 20986, 20988, 20990, 20992, 20994, 20996, 20998, 
+    21000, 21002, 21004, 21006, 21008, 21010, 21012, 21014, 21016, 21018, 
+    21020, 21022, 21024, 21026, 21028, 21030, 21032, 21034, 21036, 21038, 
+    21040, 21042, 21044, 21046, 21048, 21050, 21052, 21054, 21056, 21058, 
+    21060, 21062, 21064, 21066, 21068, 21070, 21072, 21074, 21076, 21078, 
+    21080, 21082, 21084, 21086, 21088, 21090, 21092, 21094, 21096, 21098, 
+    21100, 21102, 21104, 21106, 21108, 21110, 21112, 21114, 21116, 21118, 
+    21120, 21122, 21124, 21126, 21128, 21130, 21132, 21134, 21136, 21138, 
+    21140, 21142, 21144, 21146, 21148, 21150, 21152, 21154, 21156, 21158, 
+    21160, 21162, 21164, 21166, 21168, 21170, 21172, 21174, 21176, 21178, 
+    21180, 21182, 21184, 21186, 21188, 21190, 21192, 21194, 21196, 21198, 
+    21200, 21202, 21204, 21206, 21208, 21210, 21212, 21214, 21216, 21218, 
+    21220, 21222, 21224, 21226, 21228, 21230, 21232, 21234, 21236, 21238, 
+    21240, 21242, 21244, 21246, 21248, 21250, 21252, 21254, 21256, 21258, 
+    21260, 21262, 21264, 21266, 21268, 21270, 21272, 21274, 21276, 21278, 
+    21280, 21282, 21284, 21286, 21288, 21290, 21292, 21294, 21296, 21298, 
+    21300, 21302, 21304, 21306, 21308, 21310, 21312, 21314, 21316, 21318, 
+    21320, 21322, 21324, 21326, 21328, 21330, 21332, 21334, 21336, 21338, 
+    21340, 21342, 21344, 21346, 21348, 21350, 21352, 21354, 21356, 21358, 
+    21360, 21362, 21364, 21366, 21368, 21370, 21372, 21374, 21376, 21378, 
+    21380, 21382, 21384, 21386, 21388, 21390, 21392, 21394, 21396, 21398, 
+    21400, 21402, 21404, 21406, 21408, 21410, 21412, 21414, 21416, 21418, 
+    21420, 21422, 21424, 21426, 21428, 21430, 21432, 21434, 21436, 21438, 
+    21440, 21442, 21444, 21446, 21448, 21450, 21452, 21454, 21456, 21458, 
+    21460, 21462, 21464, 21466, 21468, 21470, 21472, 21474, 21476, 21478, 
+    21480, 21482, 21484, 21486, 21488, 21490, 21492, 21494, 21496, 21498, 
+    21500, 21502, 21504, 21506, 21508, 21510, 21512, 21514, 21516, 21518, 
+    21520, 21522, 21524, 21526, 21528, 21530, 21532, 21534, 21536, 21538, 
+    21540, 21542, 21544, 21546, 21548, 21550, 21552, 21554, 21556, 21558, 
+    21560, 21562, 21564, 21566, 21568, 21570, 21572, 21574, 21576, 21578, 
+    21580, 21582, 21584, 21586, 21588, 21590, 21592, 21594, 21596, 21598, 
+    21600, 21602, 21604, 21606, 21608, 21610, 21612, 21614, 21616, 21618, 
+    21620, 21622, 21624, 21626, 21628, 21630, 21632, 21634, 21636, 21638, 
+    21640, 21642, 21644, 21646, 21648, 21650, 21652, 21654, 21656, 21658, 
+    21660, 21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 
+    21680, 21682, 21684, 21686, 21688, 21690, 21692, 21694, 21696, 21698, 
+    21700, 21702, 21704, 21706, 21708, 21710, 21712, 21714, 21716, 21718, 
+    21720, 21722, 21724, 21726, 21728, 21730, 21732, 21734, 21736, 21738, 
+    21740, 21742, 21744, 21746, 21748, 21750, 21752, 21754, 21756, 21758, 
+    21760, 21762, 21764, 21766, 21768, 21770, 21772, 21774, 21776, 21778, 
+    21780, 21782, 21784, 21786, 21788, 21790, 21792, 21794, 21796, 21798, 
+    21800, 21802, 21804, 21806, 21808, 21810, 21812, 21814, 21816, 21818, 
+    21820, 21822, 21824, 21826, 21828, 21830, 21832, 21834, 21836, 21838, 
+    21840, 21842, 21844, 21846, 21848, 21850, 21852, 21854, 21856, 21858, 
+    21860, 21862, 21864, 21866, 21868, 21870, 21872, 21874, 21876, 21878, 
+    21880, 21882, 21884, 21886, 21888, 21890, 21892, 21894, 21896, 21898, 
+    21900, 21902, 21904, 21906, 21908, 21910, 21912, 21914, 21916, 21918, 
+    21920, 21922, 21924, 21926, 21928, 21930, 21932, 21934, 21936, 21938, 
+    21940, 21942, 21944, 21946, 21948, 21950, 21952, 21954, 21956, 21958, 
+    21960, 21962, 21964, 21966, 21968, 21970, 21972, 21974, 21976, 21978, 
+    21980, 21982, 21984, 21986, 21988, 21990, 21992, 21994, 21996, 21998, 
+    22000, 22002, 22004, 22006, 22008, 22010, 22012, 22014, 22016, 22018, 
+    22020, 22022, 22024, 22026, 22028, 22030, 22032, 22034, 22036, 22038, 
+    22040, 22042, 22044, 22046, 22048, 22050, 22052, 22054, 22056, 22058, 
+    22060, 22062, 22064, 22066, 22068, 22070, 22072, 22074, 22076, 22078, 
+    22080, 22082, 22084, 22086, 22088, 22090, 22092, 22094, 22096, 22098, 
+    22100, 22102, 22104, 22106, 22108, 22110, 22112, 22114, 22116, 22118, 
+    22120, 22122, 22124, 22126, 22128, 22130, 22132, 22134, 22136, 22138, 
+    22140, 22142, 22144, 22146, 22148, 22150, 22152, 22154, 22156, 22158, 
+    22160, 22162, 22164, 22166, 22168, 22170, 22172, 22174, 22176, 22178, 
+    22180, 22182, 22184, 22186, 22188, 22190, 22192, 22194, 22196, 22198, 
+    22200, 22202, 22204, 22206, 22208, 22210, 22212, 22214, 22216, 22218, 
+    22220, 22222, 22224, 22226, 22228, 22230, 22232, 22234, 22236, 22238, 
+    22240, 22242, 22244, 22246, 22248, 22250, 22252, 22254, 22256, 22258, 
+    22260, 22262, 22264, 22266, 22268, 22270, 22272, 22274, 22276, 22278, 
+    22280, 22282, 22284, 22286, 22288, 22290, 22292, 22294, 22296, 22298, 
+    22300, 22302, 22304, 22306, 22308, 22310, 22312, 22314, 22316, 22318, 
+    22320, 22322, 22324, 22326, 22328, 22330, 22332, 22334, 22336, 22338, 
+    22340, 22342, 22344, 22346, 22348, 22350, 22352, 22354, 22356, 22358, 
+    22360, 22362, 22364, 22366, 22368, 22370, 22372, 22374, 22376, 22378, 
+    22380, 22382, 22384, 22386, 22388, 22390, 22392, 22394, 22396, 22398, 
+    22400, 22402, 22404, 22406, 22408, 22410, 22412, 22414, 22416, 22418, 
+    22420, 22422, 22424, 22426, 22428, 22430, 22432, 22434, 22436, 22438, 
+    22440, 22442, 22444, 22446, 22448, 22450, 22452, 22454, 22456, 22458, 
+    22460, 22462, 22464, 22466, 22468, 22470, 22472, 22474, 22476, 22478, 
+    22480, 22482, 22484, 22486, 22488, 22490, 22492, 22494, 22496, 22498, 
+    22500, 22502, 22504, 22506, 22508, 22510, 22512, 22514, 22516, 22518, 
+    22520, 22522, 22524, 22526, 22528, 22530, 22532, 22534, 22536, 22538, 
+    22540, 22542, 22544, 22546, 22548, 22550, 22552, 22554, 22556, 22558, 
+    22560, 22562, 22564, 22566, 22568, 22570, 22572, 22574, 22576, 22578, 
+    22580, 22582, 22584, 22586, 22588, 22590, 22592, 22594, 22596, 22598, 
+    22600, 22602, 22604, 22606, 22608, 22610, 22612, 22614, 22616, 22618, 
+    22620, 22622, 22624, 22626, 22628, 22630, 22632, 22634, 22636, 22638, 
+    22640, 22642, 22644, 22646, 22648, 22650, 22652, 22654, 22656, 22658, 
+    22660, 22662, 22664, 22666, 22668, 22670, 22672, 22674, 22676, 22678, 
+    22680, 22682, 22684, 22686, 22688, 22690, 22692, 22694, 22696, 22698, 
+    22700, 22702, 22704, 22706, 22708, 22710, 22712, 22714, 22716, 22718, 
+    22720, 22722, 22724, 22726, 22728, 22730, 22732, 22734, 22736, 22738, 
+    22740, 22742, 22744, 22746, 22748, 22750, 22752, 22754, 22756, 22758, 
+    22760, 22762, 22764, 22766, 22768, 22770, 22772, 22774, 22776, 22778, 
+    22780, 22782, 22784, 22786, 22788, 22790, 22792, 22794, 22796, 22798, 
+    22800, 22802, 22804, 22806, 22808, 22810, 22812, 22814, 22816, 22818, 
+    22820, 22822, 22824, 22826, 22828, 22830, 22832, 22834, 22836, 22838, 
+    22840, 22842, 22844, 22846, 22848, 22850, 22852, 22854, 22856, 22858, 
+    22860, 22862, 22864, 22866, 22868, 22870, 22872, 22874, 22876, 22878, 
+    22880, 22882, 22884, 22886, 22888, 22890, 22892, 22894, 22896, 22898, 
+    22900, 22902, 22904, 22906, 22908, 22910, 22912, 22914, 22916, 22918, 
+    22920, 22922, 22924, 22926, 22928, 22930, 22932, 22934, 22936, 22938, 
+    22940, 22942, 22944, 22946, 22948, 22950, 22952, 22954, 22956, 22958, 
+    22960, 22962, 22964, 22966, 22968, 22970, 22972, 22974, 22976, 22978, 
+    22980, 22982, 22984, 22986, 22988, 22990, 22992, 22994, 22996, 22998, 
+    23000, 23002, 23004, 23006, 23008, 23010, 23012, 23014, 23016, 23018, 
+    23020, 23022, 23024, 23026, 23028, 23030, 23032, 23034, 23036, 23038, 
+    23040, 23042, 23044, 23046, 23048, 23050, 23052, 23054, 23056, 23058, 
+    23060, 23062, 23064, 23066, 23068, 23070, 23072, 23074, 23076, 23078, 
+    23080, 23082, 23084, 23086, 23088, 23090, 23092, 23094, 23096, 23098, 
+    23100, 23102, 23104, 23106, 23108, 23110, 23112, 23114, 23116, 23118, 
+    23120, 23122, 23124, 23126, 23128, 23130, 23132, 23134, 23136, 23138, 
+    23140, 23142, 23144, 23146, 23148, 23150, 23152, 23154, 23156, 23158, 
+    23160, 23162, 23164, 23166, 23168, 23170, 23172, 23174, 23176, 23178, 
+    23180, 23182, 23184, 23186, 23188, 23190, 23192, 23194, 23196, 23198, 
+    23200, 23202, 23204, 23206, 23208, 23210, 23212, 23214, 23216, 23218, 
+    23220, 23222, 23224, 23226, 23228, 23230, 23232, 23234, 23236, 23238, 
+    23240, 23242, 23244, 23246, 23248, 23250, 23252, 23254, 23256, 23258, 
+    23260, 23262, 23264, 23266, 23268, 23270, 23272, 23274, 23276, 23278, 
+    23280, 23282, 23284, 23286, 23288, 23290, 23292, 23294, 23296, 23298, 
+    23300, 23302, 23304, 23306, 23308, 23310, 23312, 23314, 23316, 23318, 
+    23320, 23322, 23324, 23326, 23328, 23330, 23332, 23334, 23336, 23338, 
+    23340, 23342, 23344, 23346, 23348, 23350, 23352, 23354, 23356, 23358, 
+    23360, 23362, 23364, 23366, 23368, 23370, 23372, 23374, 23376, 23378, 
+    23380, 23382, 23384, 23386, 23388, 23390, 23392, 23394, 23396, 23398, 
+    23400, 23402, 23404, 23406, 23408, 23410, 23412, 23414, 23416, 23418, 
+    23420, 23422, 23424, 23426, 23428, 23430, 23432, 23434, 23436, 23438, 
+    23440, 23442, 23444, 23446, 23448, 23450, 23452, 23454, 23456, 23458, 
+    23460, 23462, 23464, 23466, 23468, 23470, 23472, 23474, 23476, 23478, 
+    23480, 23482, 23484, 23486, 23488, 23490, 23492, 23494, 23496, 23498, 
+    23500, 23502, 23504, 23506, 23508, 23510, 23512, 23514, 23516, 23518, 
+    23520, 23522, 23524, 23526, 23528, 23530, 23532, 23534, 23536, 23538, 
+    23540, 23542, 23544, 23546, 23548, 23550, 23552, 23554, 23556, 23558, 
+    23560, 23562, 23564, 23566, 23568, 23570, 23572, 23574, 23576, 23578, 
+    23580, 23582, 23584, 23586, 23588, 23590, 23592, 23594, 23596, 23598, 
+    23600, 23602, 23604, 23606, 23608, 23610, 23612, 23614, 23616, 23618, 
+    23620, 23622, 23624, 23626, 23628, 23630, 23632, 23634, 23636, 23638, 
+    23640, 23642, 23644, 23646, 23648, 23650, 23652, 23654, 23656, 23658, 
+    23660, 23662, 23664, 23666, 23668, 23670, 23672, 23674, 23676, 23678, 
+    23680, 23682, 23684, 23686, 23688, 23690, 23692, 23694, 23696, 23698, 
+    23700, 23702, 23704, 23706, 23708, 23710, 23712, 23714, 23716, 23718, 
+    23720, 23722, 23724, 23726, 23728, 23730, 23732, 23734, 23736, 23738, 
+    23740, 23742, 23744, 23746, 23748, 23750, 23752, 23754, 23756, 23758, 
+    23760, 23762, 23764, 23766, 23768, 23770, 23772, 23774, 23776, 23778, 
+    23780, 23782, 23784, 23786, 23788, 23790, 23792, 23794, 23796, 23798, 
+    23800, 23802, 23804, 23806, 23808, 23810, 23812, 23814, 23816, 23818, 
+    23820, 23822, 23824, 23826, 23828, 23830, 23832, 23834, 23836, 23838, 
+    23840, 23842, 23844, 23846, 23848, 23850, 23852, 23854, 23856, 23858, 
+    23860, 23862, 23864, 23866, 23868, 23870, 23872, 23874, 23876, 23878, 
+    23880, 23882, 23884, 23886, 23888, 23890, 23892, 23894, 23896, 23898, 
+    23900, 23902, 23904, 23906, 23908, 23910, 23912, 23914, 23916, 23918, 
+    23920, 23922, 23924, 23926, 23928, 23930, 23932, 23934, 23936, 23938, 
+    23940, 23942, 23944, 23946, 23948, 23950, 23952, 23954, 23956, 23958, 
+    23960, 23962, 23964, 23966, 23968, 23970, 23972, 23974, 23976, 23978, 
+    23980, 23982, 23984, 23986, 23988, 23990, 23992, 23994, 23996, 23998, 
+    24000, 24002, 24004, 24006, 24008, 24010, 24012, 24014, 24016, 24018, 
+    24020, 24022, 24024, 24026, 24028, 24030, 24032, 24034, 24036, 24038, 
+    24040, 24042, 24044, 24046, 24048, 24050, 24052, 24054, 24056, 24058, 
+    24060, 24062, 24064, 24066, 24068, 24070, 24072, 24074, 24076, 24078, 
+    24080, 24082, 24084, 24086, 24088, 24090, 24092, 24094, 24096, 24098, 
+    24100, 24102, 24104, 24106, 24108, 24110, 24112, 24114, 24116, 24118, 
+    24120, 24122, 24124, 24126, 24128, 24130, 24132, 24134, 24136, 24138, 
+    24140, 24142, 24144, 24146, 24148, 24150, 24152, 24154, 24156, 24158, 
+    24160, 24162, 24164, 24166, 24168, 24170, 24172, 24174, 24176, 24178, 
+    24180, 24182, 24184, 24186, 24188, 24190, 24192, 24194, 24196, 24198, 
+    24200, 24202, 24204, 24206, 24208, 24210, 24212, 24214, 24216, 24218, 
+    24220, 24222, 24224, 24226, 24228, 24230, 24232, 24234, 24236, 24238, 
+    24240, 24242, 24244, 24246, 24248, 24250, 24252, 24254, 24256, 24258, 
+    24260, 24262, 24264, 24266, 24268, 24270, 24272, 24274, 24276, 24278, 
+    24280, 24282, 24284, 24286, 24288, 24290, 24292, 24294, 24296, 24298, 
+    24300, 24302, 24304, 24306, 24308, 24310, 24312, 24314, 24316, 24318, 
+    24320, 24322, 24324, 24326, 24328, 24330, 24332, 24334, 24336, 24338, 
+    24340, 24342, 24344, 24346, 24348, 24350, 24352, 24354, 24356, 24358, 
+    24360, 24362, 24364, 24366, 24368, 24370, 24372, 24374, 24376, 24378, 
+    24380, 24382, 24384, 24386, 24388, 24390, 24392, 24394, 24396, 24398, 
+    24400, 24402, 24404, 24406, 24408, 24410, 24412, 24414, 24416, 24418, 
+    24420, 24422, 24424, 24426, 24428, 24430, 24432, 24434, 24436, 24438, 
+    24440, 24442, 24444, 24446, 24448, 24450, 24452, 24454, 24456, 24458, 
+    24460, 24462, 24464, 24466, 24468, 24470, 24472, 24474, 24476, 24478, 
+    24480, 24482, 24484, 24486, 24488, 24490, 24492, 24494, 24496, 24498, 
+    24500, 24502, 24504, 24506, 24508, 24510, 24512, 24514, 24516, 24518, 
+    24520, 24522, 24524, 24526, 24528, 24530, 24532, 24534, 24536, 24538, 
+    24540, 24542, 24544, 24546, 24548, 24550, 24552, 24554, 24556, 24558, 
+    24560, 24562, 24564, 24566, 24568, 24570, 24572, 24574, 24576, 24578, 
+    24580, 24582, 24584, 24586, 24588, 24590, 24592, 24594, 24596, 24598, 
+    24600, 24602, 24604, 24606, 24608, 24610, 24612, 24614, 24616, 24618, 
+    24620, 24622, 24624, 24626, 24628, 24630, 24632, 24634, 24636, 24638, 
+    24640, 24642, 24644, 24646, 24648, 24650, 24652, 24654, 24656, 24658, 
+    24660, 24662, 24664, 24666, 24668, 24670, 24672, 24674, 24676, 24678 ;
+
+ pres = 990.85, 989.85, 988.76, 987.4, 985.88, 984.51, 983.34, 982.28, 
+    981.07, 979.81, 978.61, 977.44, 976.2, 974.82, 973.4, 971.95, 970.59, 
+    969.32, 968, 966.71, 965.54, 964.4, 963.32, 962.16, 961.03, 959.76, 
+    958.32, 956.98, 955.78, 954.61, 953.42, 952.23, 951, 949.55, 948.24, 
+    947.04, 945.66, 944.3, 943.04, 941.78, 940.46, 939.19, 937.94, 936.65, 
+    935.4, 934.2, 932.97, 931.7, 930.36, 929, 927.64, 926.38, 925.08, 923.64, 
+    922.28, 921.03, 919.78, 918.58, 917.41, 916.18, 914.76, 913.25, 911.76, 
+    910.62, 909.6, 908.45, 907.15, 905.84, 904.57, 903.2, 901.89, 900.7, 
+    899.5, 898.35, 897.16, 896.07, 894.83, 893.47, 892.12, 890.77, 889.37, 
+    888.13, 887.03, 885.9, 884.61, 883.26, 881.96, 880.75, 879.45, 877.97, 
+    876.64, 875.44, 874.12, 872.79, 871.62, 870.43, 869.21, 867.99, 866.64, 
+    865.3, 864.05, 862.87, 861.51, 860.1, 859.01, 858.07, 857.17, 856.3, 
+    855.35, 854.43, 853.56, 852.67, 851.78, 850.91, 850.07, 849.25, 848.36, 
+    847.41, 846.33, 845.08, 843.84, 842.79, 841.74, 840.45, 839.17, 837.85, 
+    836.68, 835.72, 834.83, 834.07, 833.32, 832.5, 831.69, 830.87, 830.01, 
+    829.04, 827.87, 826.62, 825.45, 824.3, 823.16, 822.19, 821.31, 820.3, 
+    819.33, 818.38, 817.39, 816.42, 815.47, 814.56, 813.66, 812.82, 812.03, 
+    811.28, 810.48, 809.71, 808.86, 807.74, 806.62, 805.53, 804.33, 803.26, 
+    802.23, 801.02, 799.81, 798.59, 797.3, 796.04, 795, 794.16, 793.31, 
+    792.28, 791.27, 790.21, 789.08, 788.06, 787.06, 785.92, 784.89, 784.04, 
+    783.3, 782.6, 781.87, 781.11, 780.24, 779.38, 778.65, 777.92, 777.05, 
+    776.16, 775.36, 774.51, 773.72, 772.93, 772.11, 771.28, 770.23, 768.95, 
+    767.71, 766.74, 765.79, 764.78, 763.71, 762.64, 761.66, 760.64, 759.6, 
+    758.72, 757.96, 757.17, 756.38, 755.68, 755, 754.28, 753.5, 752.71, 
+    751.9, 750.98, 750.04, 749.2, 748.39, 747.56, 746.75, 745.96, 745.26, 
+    744.53, 743.7, 742.67, 741.53, 740.28, 739.05, 738.05, 737.21, 736.46, 
+    735.63, 734.65, 733.55, 732.45, 731.31, 730.24, 729.29, 728.35, 727.25, 
+    726.23, 725.31, 724.42, 723.53, 722.54, 721.44, 720.36, 719.49, 718.75, 
+    718.06, 717.26, 716.47, 715.73, 714.95, 714.22, 713.47, 712.73, 711.97, 
+    711.26, 710.57, 709.88, 709.19, 708.43, 707.72, 707.03, 706.33, 705.6, 
+    704.88, 704.15, 703.4, 702.69, 701.98, 701.31, 700.65, 699.98, 699.27, 
+    698.51, 697.76, 697.02, 696.2, 695.21, 694.09, 693.16, 692.29, 691.4, 
+    690.55, 689.75, 688.98, 688.24, 687.48, 686.73, 686.02, 685.27, 684.46, 
+    683.71, 682.94, 682.26, 681.48, 680.43, 679.27, 678.34, 677.46, 676.4, 
+    675.31, 674.32, 673.53, 672.9, 672.26, 671.6, 670.89, 670.21, 669.6, 
+    668.91, 668.23, 667.57, 666.92, 666.2, 665.47, 664.69, 663.73, 662.66, 
+    661.59, 660.51, 659.6, 658.81, 657.97, 656.97, 655.92, 655.01, 654.17, 
+    653.36, 652.6, 651.93, 651.24, 650.59, 649.92, 649.22, 648.59, 647.92, 
+    647.21, 646.5, 645.77, 645.03, 644.31, 643.61, 642.93, 642.22, 641.43, 
+    640.67, 639.96, 639.3, 638.66, 637.95, 637.25, 636.55, 635.87, 635.26, 
+    634.59, 633.8, 633.03, 632.37, 631.76, 631.13, 630.49, 629.83, 629.16, 
+    628.47, 627.83, 627.19, 626.5, 625.83, 625.17, 624.55, 623.98, 623.37, 
+    622.74, 622.13, 621.5, 620.87, 620.28, 619.62, 618.95, 618.35, 617.73, 
+    617.06, 616.44, 615.84, 615.22, 614.52, 613.84, 613.19, 612.57, 611.92, 
+    611.25, 610.6, 610.01, 609.44, 608.84, 608.19, 607.53, 606.9, 606.33, 
+    605.76, 605.22, 604.64, 604.05, 603.48, 602.87, 602.24, 601.65, 601.03, 
+    600.43, 599.87, 599.26, 598.7, 598.15, 597.58, 596.96, 596.33, 595.73, 
+    595.14, 594.54, 593.91, 593.29, 592.71, 592.11, 591.53, 590.94, 590.29, 
+    589.66, 589.12, 588.56, 587.95, 587.35, 586.74, 586.11, 585.57, 584.98, 
+    584.31, 583.67, 583.09, 582.53, 582, 581.43, 580.8, 580.16, 579.57, 579, 
+    578.47, 577.95, 577.42, 576.85, 576.25, 575.67, 575.1, 574.54, 574.01, 
+    573.51, 572.92, 572.15, 571.1, 570.15, 569.47, 568.85, 568.25, 567.7, 
+    567.11, 566.51, 565.93, 565.36, 564.81, 564.27, 563.74, 563.18, 562.61, 
+    562.07, 561.5, 560.94, 560.4, 559.84, 559.19, 558.49, 557.8, 557.17, 
+    556.58, 556.03, 555.46, 554.92, 554.42, 553.9, 553.4, 552.82, 552.24, 
+    551.67, 551.09, 550.55, 549.95, 549.35, 548.8, 548.22, 547.64, 547.05, 
+    546.5, 545.97, 545.44, 544.88, 544.33, 543.79, 543.27, 542.74, 542.26, 
+    541.77, 541.2, 540.63, 540.07, 539.55, 539.05, 538.53, 538.02, 537.51, 
+    536.97, 536.44, 535.87, 535.28, 534.73, 534.25, 533.77, 533.23, 532.66, 
+    532.08, 531.51, 531.01, 530.51, 529.99, 529.45, 528.92, 528.37, 527.79, 
+    527.24, 526.69, 526.14, 525.63, 525.12, 524.57, 524.05, 523.51, 522.96, 
+    522.46, 522, 521.46, 520.89, 520.37, 519.86, 519.31, 518.81, 518.34, 
+    517.79, 517.07, 516.22, 515.52, 514.9, 514.31, 513.77, 513.2, 512.67, 
+    512.13, 511.62, 511.13, 510.63, 510.12, 509.56, 508.97, 508.43, 507.89, 
+    507.36, 506.87, 506.4, 505.93, 505.42, 504.88, 504.33, 503.74, 503.16, 
+    502.56, 501.91, 501.28, 500.72, 500.22, 499.69, 499.12, 498.55, 497.96, 
+    497.4, 496.85, 496.34, 495.86, 495.42, 494.96, 494.45, 493.91, 493.39, 
+    492.9, 492.44, 491.93, 491.41, 490.83, 490.22, 489.64, 489.09, 488.56, 
+    488.02, 487.51, 487.02, 486.52, 486, 485.43, 484.83, 484.29, 483.75, 
+    483.2, 482.64, 482.1, 481.51, 480.92, 480.42, 479.95, 479.54, 479.07, 
+    478.62, 478.17, 477.71, 477.2, 476.53, 475.72, 474.99, 474.39, 473.77, 
+    473.21, 472.67, 472.11, 471.49, 470.85, 470.21, 469.45, 468.63, 467.81, 
+    467.02, 466.43, 465.88, 465.39, 464.98, 464.56, 464.08, 463.63, 463.15, 
+    462.65, 462.16, 461.67, 461.2, 460.69, 460.21, 459.71, 459.23, 458.75, 
+    458.28, 457.83, 457.39, 456.96, 456.5, 456, 455.5, 455.03, 454.58, 
+    454.14, 453.68, 453.19, 452.69, 452.2, 451.77, 451.31, 450.82, 450.35, 
+    449.91, 449.5, 449.1, 448.63, 448.19, 447.72, 447.23, 446.74, 446.3, 
+    445.85, 445.42, 445, 444.59, 444.19, 443.77, 443.34, 442.92, 442.48, 
+    442.06, 441.64, 441.2, 440.72, 440.26, 439.77, 439.31, 438.85, 438.39, 
+    437.93, 437.47, 436.98, 436.55, 436.11, 435.64, 435.22, 434.8, 434.38, 
+    433.95, 433.52, 433.08, 432.64, 432.19, 431.75, 431.34, 430.95, 430.54, 
+    430.12, 429.69, 429.26, 428.83, 428.43, 428.04, 427.64, 427.2, 426.73, 
+    426.3, 425.81, 425.17, 424.36, 423.54, 422.8, 422.19, 421.68, 421.08, 
+    420.5, 420.06, 419.59, 418.99, 418.42, 417.98, 417.55, 417.13, 416.69, 
+    416.19, 415.71, 415.28, 414.83, 414.38, 413.94, 413.51, 413.1, 412.67, 
+    412.24, 411.82, 411.41, 411, 410.58, 410.17, 409.8, 409.43, 409.03, 
+    408.57, 408.1, 407.72, 407.33, 406.92, 406.49, 405.98, 405.26, 404.47, 
+    403.81, 403.13, 402.42, 401.76, 401.04, 400.31, 399.67, 399, 398.3, 
+    397.64, 396.93, 396.25, 395.62, 394.92, 394.26, 393.72, 393.3, 392.95, 
+    392.57, 392.2, 391.78, 391.33, 390.92, 390.54, 390.13, 389.69, 389.29, 
+    388.91, 388.54, 388.15, 387.75, 387.32, 386.9, 386.48, 386.05, 385.62, 
+    385.19, 384.76, 384.33, 383.93, 383.55, 383.14, 382.73, 382.34, 381.95, 
+    381.55, 381.14, 380.75, 380.36, 379.99, 379.62, 379.25, 378.85, 378.46, 
+    378.1, 377.72, 377.32, 376.94, 376.57, 376.2, 375.83, 375.47, 375.09, 
+    374.7, 374.31, 373.95, 373.59, 373.22, 372.83, 372.41, 372.02, 371.65, 
+    371.29, 370.87, 370.46, 370.09, 369.7, 369.32, 368.91, 368.5, 368.09, 
+    367.7, 367.33, 366.95, 366.57, 366.18, 365.8, 365.41, 365.01, 364.62, 
+    364.22, 363.8, 363.35, 362.94, 362.56, 362.15, 361.78, 361.44, 361.04, 
+    360.62, 360.23, 359.84, 359.46, 359.09, 358.71, 358.31, 357.91, 357.53, 
+    357.14, 356.75, 356.36, 355.98, 355.62, 355.25, 354.9, 354.56, 354.17, 
+    353.78, 353.41, 353.02, 352.65, 352.28, 351.89, 351.51, 351.13, 350.76, 
+    350.39, 350.01, 349.65, 349.28, 348.89, 348.56, 348.2, 347.83, 347.45, 
+    347.08, 346.7, 346.34, 345.99, 345.62, 345.24, 344.81, 344.38, 343.97, 
+    343.54, 343.04, 342.48, 341.99, 341.55, 341.08, 340.67, 340.24, 339.81, 
+    339.39, 339, 338.6, 338.21, 337.83, 337.47, 337.13, 336.79, 336.44, 
+    336.05, 335.67, 335.31, 334.91, 334.5, 334.13, 333.78, 333.42, 333.02, 
+    332.64, 332.25, 331.86, 331.47, 331.08, 330.67, 330.28, 329.93, 329.56, 
+    329.18, 328.8, 328.42, 328.03, 327.63, 327.26, 326.91, 326.57, 326.21, 
+    325.84, 325.49, 325.13, 324.78, 324.42, 324.06, 323.69, 323.31, 322.94, 
+    322.58, 322.21, 321.85, 321.49, 321.16, 320.82, 320.46, 320.09, 319.73, 
+    319.37, 318.98, 318.49, 318, 317.58, 317.22, 316.88, 316.55, 316.2, 
+    315.89, 315.6, 315.25, 314.9, 314.57, 314.22, 313.91, 313.58, 313.24, 
+    312.92, 312.6, 312.26, 311.92, 311.58, 311.21, 310.84, 310.48, 310.11, 
+    309.78, 309.44, 309.08, 308.75, 308.41, 308.05, 307.7, 307.35, 307.01, 
+    306.69, 306.33, 305.95, 305.59, 305.22, 304.86, 304.49, 304.15, 303.83, 
+    303.49, 303.11, 302.7, 302.34, 301.98, 301.63, 301.26, 300.89, 300.5, 
+    300.14, 299.78, 299.42, 299.09, 298.73, 298.38, 298.05, 297.73, 297.39, 
+    297.03, 296.68, 296.32, 295.97, 295.63, 295.3, 294.95, 294.57, 294.16, 
+    293.74, 293.34, 292.94, 292.55, 292.12, 291.7, 291.32, 290.97, 290.64, 
+    290.31, 289.94, 289.59, 289.24, 288.89, 288.56, 288.25, 287.93, 287.59, 
+    287.26, 286.96, 286.65, 286.31, 285.97, 285.63, 285.28, 284.91, 284.5, 
+    283.96, 283.26, 282.56, 281.89, 281.2, 280.59, 280.16, 279.78, 279.41, 
+    279.09, 278.67, 278.13, 277.57, 277.09, 276.75, 276.45, 276.15, 275.83, 
+    275.51, 275.22, 274.92, 274.63, 274.31, 273.97, 273.64, 273.31, 273, 
+    272.68, 272.39, 272.07, 271.74, 271.43, 271.11, 270.78, 270.46, 270.15, 
+    269.86, 269.57, 269.25, 268.93, 268.62, 268.31, 268, 267.72, 267.43, 
+    267.14, 266.82, 266.5, 266.21, 265.93, 265.65, 265.36, 265.05, 264.76, 
+    264.48, 264.16, 263.85, 263.57, 263.3, 262.98, 262.7, 262.42, 262.13, 
+    261.84, 261.54, 261.24, 260.94, 260.66, 260.37, 260.09, 259.79, 259.51, 
+    259.22, 258.88, 258.55, 258.2, 257.87, 257.56, 257.21, 256.81, 256.41, 
+    256.03, 255.51, 254.87, 254.24, 253.61, 252.98, 252.43, 251.87, 251.29, 
+    250.78, 250.24, 249.63, 249.13, 248.77, 248.56, 248.31, 247.9, 247.42, 
+    246.93, 246.46, 246.01, 245.53, 245.06, 244.66, 244.21, 243.72, 243.23, 
+    242.73, 242.25, 241.76, 241.28, 240.91, 240.65, 240.4, 240.14, 239.76, 
+    239.34, 238.95, 238.64, 238.42, 238.23, 238.03, 237.78, 237.54, 237.3, 
+    237.03, 236.73, 236.36, 235.91, 235.45, 235.06, 234.74, 234.43, 234.16, 
+    233.91, 233.65, 233.41, 233.15, 232.91, 232.66, 232.38, 232.1, 231.83, 
+    231.49, 231.13, 230.85, 230.56, 230.27, 229.99, 229.7, 229.42, 229.18, 
+    228.96, 228.73, 228.47, 228.21, 227.97, 227.74, 227.49, 227.26, 227.03, 
+    226.8, 226.57, 226.33, 226.07, 225.83, 225.61, 225.37, 225.13, 224.89, 
+    224.65, 224.42, 224.21, 223.97, 223.71, 223.47, 223.27, 223.03, 222.78, 
+    222.53, 222.29, 222.05, 221.82, 221.6, 221.37, 221.14, 220.91, 220.68, 
+    220.46, 220.23, 220.02, 219.79, 219.56, 219.33, 219.08, 218.86, 218.62, 
+    218.37, 218.11, 217.88, 217.64, 217.36, 217.09, 216.87, 216.62, 216.35, 
+    216.11, 215.86, 215.61, 215.36, 215.11, 214.85, 214.59, 214.34, 214.08, 
+    213.82, 213.57, 213.3, 213.04, 212.77, 212.5, 212.26, 212, 211.72, 
+    211.46, 211.21, 210.92, 210.64, 210.39, 210.14, 209.87, 209.61, 209.35, 
+    209.08, 208.79, 208.53, 208.28, 208.04, 207.77, 207.5, 207.25, 206.99, 
+    206.71, 206.45, 206.19, 205.93, 205.65, 205.38, 205.11, 204.83, 204.56, 
+    204.3, 204.06, 203.82, 203.56, 203.27, 203.01, 202.74, 202.47, 202.2, 
+    201.95, 201.68, 201.4, 201.15, 200.91, 200.65, 200.38, 200.13, 199.85, 
+    199.6, 199.34, 199.08, 198.84, 198.59, 198.36, 198.1, 197.82, 197.57, 
+    197.34, 197.1, 196.85, 196.62, 196.37, 196.11, 195.88, 195.64, 195.38, 
+    195.15, 194.91, 194.67, 194.43, 194.2, 193.96, 193.72, 193.48, 193.26, 
+    193.03, 192.79, 192.55, 192.31, 192.08, 191.84, 191.6, 191.38, 191.14, 
+    190.89, 190.65, 190.43, 190.2, 189.99, 189.76, 189.54, 189.32, 189.09, 
+    188.86, 188.63, 188.41, 188.2, 187.97, 187.72, 187.47, 187.21, 186.97, 
+    186.72, 186.45, 186.2, 185.99, 185.77, 185.54, 185.31, 185.08, 184.86, 
+    184.65, 184.42, 184.2, 184.01, 183.81, 183.59, 183.36, 183.15, 182.95, 
+    182.72, 182.51, 182.31, 182.12, 181.91, 181.7, 181.5, 181.29, 181.09, 
+    180.88, 180.68, 180.48, 180.25, 180.03, 179.83, 179.63, 179.43, 179.24, 
+    179.02, 178.81, 178.61, 178.41, 178.21, 178.02, 177.83, 177.65, 177.45, 
+    177.26, 177.06, 176.86, 176.65, 176.46, 176.27, 176.07, 175.87, 175.68, 
+    175.49, 175.29, 175.1, 174.91, 174.72, 174.53, 174.34, 174.13, 173.92, 
+    173.73, 173.52, 173.33, 173.15, 172.95, 172.75, 172.56, 172.36, 172.16, 
+    171.95, 171.74, 171.55, 171.35, 171.17, 170.99, 170.78, 170.59, 170.4, 
+    170.21, 170.02, 169.81, 169.61, 169.41, 169.2, 169.01, 168.81, 168.61, 
+    168.42, 168.23, 168.04, 167.83, 167.62, 167.4, 167.18, 166.97, 166.75, 
+    166.54, 166.33, 166.14, 165.94, 165.73, 165.54, 165.36, 165.17, 164.97, 
+    164.76, 164.55, 164.34, 164.14, 163.91, 163.7, 163.51, 163.31, 163.11, 
+    162.9, 162.7, 162.51, 162.31, 162.1, 161.9, 161.69, 161.49, 161.28, 
+    161.07, 160.87, 160.67, 160.46, 160.25, 160.05, 159.85, 159.66, 159.48, 
+    159.28, 159.08, 158.88, 158.68, 158.49, 158.29, 158.09, 157.88, 157.69, 
+    157.5, 157.32, 157.15, 156.96, 156.76, 156.55, 156.35, 156.14, 155.95, 
+    155.76, 155.57, 155.37, 155.16, 154.97, 154.79, 154.62, 154.43, 154.24, 
+    154.06, 153.88, 153.68, 153.5, 153.33, 153.17, 152.99, 152.8, 152.63, 
+    152.45, 152.27, 152.11, 151.94, 151.76, 151.59, 151.41, 151.22, 151.05, 
+    150.89, 150.73, 150.58, 150.41, 150.24, 150.07, 149.91, 149.75, 149.57, 
+    149.4, 149.24, 149.08, 148.93, 148.78, 148.62, 148.45, 148.29, 148.1, 
+    147.93, 147.77, 147.61, 147.45, 147.29, 147.12, 146.95, 146.81, 146.65, 
+    146.48, 146.32, 146.15, 145.99, 145.83, 145.66, 145.47, 145.31, 145.15, 
+    144.99, 144.83, 144.67, 144.5, 144.32, 144.14, 143.96, 143.8, 143.63, 
+    143.46, 143.28, 143.11, 142.94, 142.76, 142.59, 142.44, 142.26, 142.08, 
+    141.92, 141.75, 141.58, 141.42, 141.24, 141.06, 140.89, 140.73, 140.55, 
+    140.37, 140.2, 140.02, 139.84, 139.67, 139.5, 139.32, 139.16, 139, 
+    138.81, 138.62, 138.45, 138.28, 138.11, 137.93, 137.74, 137.56, 137.4, 
+    137.22, 137.02, 136.81, 136.61, 136.42, 136.24, 136.08, 135.91, 135.73, 
+    135.56, 135.38, 135.21, 135.05, 134.86, 134.69, 134.51, 134.32, 134.15, 
+    133.99, 133.8, 133.59, 133.41, 133.25, 133.09, 132.92, 132.73, 132.57, 
+    132.41, 132.24, 132.05, 131.87, 131.7, 131.54, 131.36, 131.18, 131, 
+    130.82, 130.66, 130.51, 130.34, 130.16, 130.02, 129.85, 129.67, 129.51, 
+    129.34, 129.18, 129, 128.83, 128.65, 128.49, 128.33, 128.18, 128.03, 
+    127.85, 127.69, 127.54, 127.38, 127.22, 127.07, 126.93, 126.78, 126.63, 
+    126.48, 126.3, 126.12, 125.97, 125.82, 125.66, 125.49, 125.33, 125.17, 
+    124.99, 124.83, 124.68, 124.51, 124.34, 124.18, 124.03, 123.87, 123.7, 
+    123.55, 123.41, 123.23, 123.07, 122.9, 122.75, 122.6, 122.44, 122.28, 
+    122.12, 121.96, 121.8, 121.65, 121.48, 121.32, 121.17, 121.03, 120.88, 
+    120.72, 120.57, 120.41, 120.26, 120.11, 119.96, 119.81, 119.66, 119.52, 
+    119.35, 119.2, 119.05, 118.89, 118.71, 118.54, 118.37, 118.23, 118.07, 
+    117.91, 117.78, 117.62, 117.47, 117.33, 117.16, 117.02, 116.88, 116.72, 
+    116.57, 116.42, 116.28, 116.14, 115.99, 115.84, 115.7, 115.55, 115.41, 
+    115.27, 115.11, 114.97, 114.83, 114.69, 114.55, 114.4, 114.26, 114.12, 
+    113.97, 113.83, 113.68, 113.53, 113.38, 113.24, 113.13, 112.99, 112.85, 
+    112.7, 112.55, 112.41, 112.27, 112.13, 111.98, 111.85, 111.72, 111.6, 
+    111.47, 111.33, 111.19, 111.05, 110.89, 110.75, 110.6, 110.44, 110.3, 
+    110.16, 110, 109.87, 109.73, 109.59, 109.44, 109.29, 109.15, 109.02, 
+    108.88, 108.74, 108.61, 108.46, 108.32, 108.18, 108.05, 107.91, 107.77, 
+    107.62, 107.48, 107.34, 107.2, 107.06, 106.92, 106.79, 106.67, 106.55, 
+    106.4, 106.26, 106.12, 105.99, 105.86, 105.74, 105.61, 105.47, 105.34, 
+    105.21, 105.08, 104.96, 104.83, 104.7, 104.57, 104.42, 104.3, 104.18, 
+    104.05, 103.91, 103.77, 103.64, 103.53, 103.41, 103.29, 103.16, 103.06, 
+    102.94, 102.8, 102.68, 102.56, 102.42, 102.3, 102.19, 102.09, 101.95, 
+    101.81, 101.67, 101.54, 101.41, 101.29, 101.17, 101.05, 100.92, 100.8, 
+    100.68, 100.56, 100.44, 100.32, 100.2, 100.08, 99.98, 99.86, 99.73, 99.6, 
+    99.49, 99.38, 99.26, 99.15, 99.02, 98.89, 98.77, 98.66, 98.54, 98.42, 
+    98.3, 98.16, 98.03, 97.92, 97.81, 97.7, 97.57, 97.44, 97.31, 97.18, 
+    97.05, 96.94, 96.81, 96.68, 96.55, 96.42, 96.3, 96.16, 96.03, 95.9, 
+    95.77, 95.64, 95.51, 95.36, 95.22, 95.08, 94.94, 94.8, 94.67, 94.52, 
+    94.39, 94.24, 94.08, 93.94, 93.81, 93.69, 93.54, 93.39, 93.28, 93.17, 
+    93.04, 92.9, 92.79, 92.67, 92.55, 92.43, 92.3, 92.17, 92.05, 91.93, 91.8, 
+    91.68, 91.56, 91.45, 91.32, 91.19, 91.06, 90.94, 90.82, 90.7, 90.57, 
+    90.45, 90.32, 90.2, 90.09, 89.97, 89.85, 89.73, 89.61, 89.49, 89.37, 
+    89.26, 89.14, 89.01, 88.89, 88.79, 88.69, 88.58, 88.46, 88.35, 88.25, 
+    88.14, 88.03, 87.91, 87.79, 87.67, 87.56, 87.45, 87.33, 87.23, 87.13, 
+    87.02, 86.89, 86.77, 86.66, 86.57, 86.45, 86.34, 86.21, 86.1, 86, 85.88, 
+    85.76, 85.65, 85.52, 85.42, 85.32, 85.22, 85.11, 85.01, 84.9, 84.8, 84.7, 
+    84.6, 84.51, 84.4, 84.28, 84.17, 84.06, 83.96, 83.86, 83.75, 83.65, 
+    83.55, 83.45, 83.33, 83.23, 83.13, 83.02, 82.91, 82.81, 82.7, 82.59, 
+    82.5, 82.4, 82.29, 82.18, 82.07, 81.96, 81.87, 81.76, 81.65, 81.54, 
+    81.43, 81.33, 81.22, 81.12, 81.03, 80.93, 80.81, 80.71, 80.62, 80.51, 
+    80.39, 80.27, 80.17, 80.06, 79.97, 79.86, 79.75, 79.64, 79.52, 79.41, 
+    79.3, 79.19, 79.09, 78.98, 78.85, 78.75, 78.65, 78.54, 78.44, 78.34, 
+    78.24, 78.14, 78.04, 77.94, 77.83, 77.73, 77.63, 77.53, 77.42, 77.33, 
+    77.22, 77.12, 77.01, 76.91, 76.81, 76.71, 76.62, 76.51, 76.4, 76.3, 
+    76.21, 76.12, 76.02, 75.93, 75.84, 75.75, 75.66, 75.55, 75.44, 75.35, 
+    75.25, 75.17, 75.08, 74.99, 74.9, 74.8, 74.7, 74.6, 74.51, 74.43, 74.34, 
+    74.24, 74.13, 74.05, 73.96, 73.87, 73.77, 73.67, 73.56, 73.47, 73.37, 
+    73.27, 73.18, 73.09, 72.99, 72.89, 72.78, 72.69, 72.59, 72.5, 72.41, 
+    72.32, 72.22, 72.12, 72.03, 71.94, 71.83, 71.73, 71.64, 71.54, 71.45, 
+    71.36, 71.26, 71.17, 71.07, 70.97, 70.87, 70.78, 70.67, 70.57, 70.48, 
+    70.38, 70.28, 70.19, 70.09, 70, 69.9, 69.81, 69.7, 69.61, 69.54, 69.44, 
+    69.34, 69.25, 69.15, 69.06, 68.96, 68.85, 68.76, 68.67, 68.58, 68.49, 
+    68.38, 68.28, 68.19, 68.09, 68, 67.9, 67.81, 67.72, 67.62, 67.54, 67.45, 
+    67.36, 67.25, 67.16, 67.07, 66.98, 66.89, 66.8, 66.7, 66.61, 66.52, 
+    66.42, 66.32, 66.22, 66.13, 66.04, 65.95, 65.85, 65.76, 65.67, 65.57, 
+    65.48, 65.39, 65.3, 65.22, 65.14, 65.05, 64.95, 64.85, 64.76, 64.67, 
+    64.58, 64.49, 64.41, 64.32, 64.23, 64.14, 64.05, 63.96, 63.86, 63.79, 
+    63.71, 63.63, 63.55, 63.46, 63.38, 63.29, 63.19, 63.12, 63.05, 62.97, 
+    62.89, 62.81, 62.73, 62.64, 62.55, 62.47, 62.38, 62.3, 62.22, 62.14, 
+    62.05, 61.97, 61.89, 61.81, 61.72, 61.64, 61.56, 61.48, 61.38, 61.3, 
+    61.22, 61.13, 61.05, 60.96, 60.88, 60.81, 60.73, 60.64, 60.55, 60.47, 
+    60.4, 60.32, 60.23, 60.15, 60.07, 59.98, 59.88, 59.8, 59.71, 59.63, 
+    59.54, 59.46, 59.38, 59.3, 59.21, 59.12, 59.03, 58.95, 58.87, 58.78, 
+    58.71, 58.62, 58.53, 58.45, 58.36, 58.27, 58.19, 58.1, 58.02, 57.94, 
+    57.86, 57.77, 57.69, 57.6, 57.51, 57.43, 57.35, 57.26, 57.18, 57.11, 
+    57.02, 56.94, 56.87, 56.79, 56.69, 56.61, 56.53, 56.45, 56.37, 56.29, 
+    56.21, 56.12, 56.04, 55.96, 55.86, 55.77, 55.7, 55.64, 55.56, 55.47, 
+    55.38, 55.3, 55.23, 55.16, 55.08, 55.01, 54.93, 54.84, 54.77, 54.69, 
+    54.61, 54.53, 54.45, 54.38, 54.3, 54.22, 54.14, 54.06, 53.99, 53.92, 
+    53.85, 53.77, 53.69, 53.62, 53.54, 53.47, 53.39, 53.31, 53.23, 53.15, 
+    53.07, 53, 52.93, 52.86, 52.79, 52.72, 52.64, 52.56, 52.48, 52.42, 52.34, 
+    52.26, 52.2, 52.13, 52.07, 52, 51.93, 51.86, 51.79, 51.72, 51.65, 51.58, 
+    51.52, 51.45, 51.39, 51.32, 51.25, 51.18, 51.1, 51.02, 50.96, 50.9, 
+    50.84, 50.78, 50.72, 50.65, 50.58, 50.51, 50.44, 50.37, 50.31, 50.24, 
+    50.17, 50.1, 50.04, 49.97, 49.9, 49.84, 49.77, 49.7, 49.63, 49.56, 49.49, 
+    49.42, 49.35, 49.28, 49.22, 49.14, 49.06, 48.99, 48.92, 48.84, 48.78, 
+    48.72, 48.65, 48.59, 48.52, 48.44, 48.38, 48.3, 48.23, 48.17, 48.11, 
+    48.05, 47.96, 47.89 ;
+
+ tdry = -2.81, -2.53, -2.35, -2.28, -2.22, -2.17, -2.15, -2.15, -2.13, -2.18, 
+    -2.26, -2.32, -2.38, -2.48, -2.6, -2.7, -2.8, -2.89, -2.97, -3.06, -3.15, 
+    -3.24, -3.32, -3.41, -3.48, -3.56, -3.67, -3.77, -3.87, -3.96, -4.04, 
+    -4.11, -4.18, -4.27, -4.36, -4.43, -4.52, -4.61, -4.7, -4.79, -4.89, 
+    -4.98, -5.06, -5.16, -5.25, -5.34, -5.43, -5.52, -5.62, -5.7, -5.78, 
+    -5.86, -5.94, -6.03, -6.12, -6.19, -6.28, -6.36, -6.44, -6.52, -6.6, 
+    -6.68, -6.79, -6.87, -6.93, -6.99, -7.05, -7.12, -7.19, -7.26, -7.34, 
+    -7.42, -7.5, -7.57, -7.64, -7.71, -7.77, -7.85, -7.94, -8.02, -8.09, 
+    -8.17, -8.23, -8.3, -8.37, -8.44, -8.5, -8.58, -8.66, -8.73, -8.8, -8.86, 
+    -8.92, -8.93, -8.94, -8.96, -8.95, -8.84, -8.36, -7.51, -6.9, -6.59, 
+    -6.32, -6.02, -5.73, -5.54, -5.41, -5.34, -5.32, -5.31, -5.32, -5.36, 
+    -5.38, -5.41, -5.46, -5.49, -5.51, -5.53, -5.55, -5.56, -5.58, -5.6, 
+    -5.61, -5.62, -5.67, -5.76, -5.85, -5.92, -5.99, -6.05, -6.1, -6.15, 
+    -6.19, -6.24, -6.3, -6.35, -6.43, -6.51, -6.59, -6.66, -6.74, -6.81, 
+    -6.85, -6.91, -6.98, -7.05, -7.13, -7.22, -7.3, -7.38, -7.47, -7.54, 
+    -7.61, -7.67, -7.74, -7.8, -7.87, -7.94, -8, -8.03, -8.01, -7.99, -7.99, 
+    -7.99, -8.06, -8.13, -8.2, -8.26, -8.3, -8.33, -8.37, -8.43, -8.49, 
+    -8.56, -8.64, -8.72, -8.79, -8.87, -8.93, -8.98, -9.01, -9.05, -9.1, 
+    -9.13, -9.17, -9.22, -9.27, -9.3, -9.33, -9.34, -9.37, -9.4, -9.43, 
+    -9.48, -9.55, -9.61, -9.66, -9.65, -9.67, -9.7, -9.74, -9.78, -9.79, 
+    -9.77, -9.81, -9.88, -9.95, -10.02, -10.07, -10.12, -10.15, -10.14, 
+    -10.13, -10.14, -10.17, -10.21, -10.28, -10.34, -10.38, -10.4, -10.38, 
+    -10.33, -10.23, -10.15, -10.13, -10.1, -10.09, -10.12, -10.16, -10.21, 
+    -10.31, -10.4, -10.46, -10.52, -10.57, -10.63, -10.71, -10.79, -10.86, 
+    -10.9, -10.91, -10.86, -10.74, -10.66, -10.6, -10.47, -10.41, -10.43, 
+    -10.47, -10.56, -10.64, -10.71, -10.77, -10.85, -10.91, -10.96, -11.02, 
+    -11.08, -11.16, -11.24, -11.31, -11.38, -11.44, -11.51, -11.58, -11.66, 
+    -11.73, -11.8, -11.88, -11.95, -12.02, -12.1, -12.16, -12.21, -12.28, 
+    -12.34, -12.4, -12.47, -12.54, -12.61, -12.67, -12.71, -12.74, -12.74, 
+    -12.74, -12.77, -12.8, -12.83, -12.86, -12.86, -12.87, -12.91, -12.94, 
+    -12.93, -12.9, -12.88, -12.89, -12.87, -12.83, -12.8, -12.66, -12.5, 
+    -12.47, -12.51, -12.55, -12.59, -12.64, -12.66, -12.66, -12.67, -12.71, 
+    -12.76, -12.82, -12.87, -12.91, -12.96, -13.02, -13.09, -13.16, -13.23, 
+    -13.29, -13.31, -13.29, -13.24, -13.27, -13.38, -13.5, -13.59, -13.67, 
+    -13.78, -13.9, -14.01, -14.11, -14.21, -14.29, -14.37, -14.44, -14.52, 
+    -14.6, -14.68, -14.75, -14.8, -14.83, -14.82, -14.81, -14.82, -14.85, 
+    -14.9, -14.94, -14.97, -15, -15.02, -15.03, -15.02, -14.98, -14.95, 
+    -14.92, -14.9, -14.92, -14.96, -15, -15.07, -15.15, -15.21, -15.27, 
+    -15.34, -15.39, -15.43, -15.47, -15.53, -15.59, -15.63, -15.64, -15.65, 
+    -15.68, -15.73, -15.76, -15.79, -15.83, -15.86, -15.89, -15.89, -15.9, 
+    -15.9, -15.89, -15.89, -15.91, -15.94, -15.99, -16.03, -16.07, -16.09, 
+    -16.1, -16.11, -16.14, -16.17, -16.2, -16.22, -16.26, -16.3, -16.35, 
+    -16.39, -16.45, -16.51, -16.56, -16.61, -16.66, -16.72, -16.77, -16.8, 
+    -16.8, -16.76, -16.74, -16.77, -16.82, -16.86, -16.91, -16.93, -16.94, 
+    -16.94, -16.95, -16.97, -16.99, -17.02, -17.06, -17.12, -17.19, -17.24, 
+    -17.26, -17.25, -17.26, -17.3, -17.36, -17.41, -17.45, -17.5, -17.55, 
+    -17.62, -17.7, -17.76, -17.81, -17.85, -17.89, -17.95, -18.01, -18.06, 
+    -18.12, -18.19, -18.27, -18.32, -18.37, -18.42, -18.47, -18.52, -18.58, 
+    -18.64, -18.69, -18.74, -18.79, -18.85, -18.9, -18.93, -18.94, -18.96, 
+    -19, -19.05, -19.12, -19.21, -19.26, -19.3, -19.35, -19.41, -19.46, 
+    -19.52, -19.57, -19.62, -19.68, -19.74, -19.8, -19.86, -19.91, -19.95, 
+    -20.02, -20.1, -20.18, -20.26, -20.33, -20.41, -20.48, -20.55, -20.62, 
+    -20.67, -20.73, -20.79, -20.86, -20.93, -20.99, -21.06, -21.13, -21.21, 
+    -21.29, -21.36, -21.44, -21.51, -21.59, -21.67, -21.74, -21.81, -21.88, 
+    -21.95, -22.02, -22.08, -22.15, -22.22, -22.29, -22.36, -22.43, -22.5, 
+    -22.56, -22.63, -22.7, -22.77, -22.84, -22.91, -22.98, -23.05, -23.12, 
+    -23.19, -23.25, -23.3, -23.36, -23.43, -23.51, -23.58, -23.63, -23.67, 
+    -23.72, -23.78, -23.84, -23.91, -23.99, -24.06, -24.13, -24.2, -24.27, 
+    -24.34, -24.41, -24.49, -24.56, -24.63, -24.7, -24.76, -24.83, -24.91, 
+    -24.97, -25.04, -25.11, -25.17, -25.22, -25.28, -25.35, -25.44, -25.53, 
+    -25.6, -25.66, -25.7, -25.76, -25.84, -25.91, -25.97, -26.04, -26.09, 
+    -26.15, -26.22, -26.29, -26.33, -26.37, -26.42, -26.46, -26.5, -26.54, 
+    -26.59, -26.64, -26.7, -26.75, -26.8, -26.85, -26.91, -26.96, -27, 
+    -27.04, -27.11, -27.17, -27.22, -27.28, -27.31, -27.34, -27.39, -27.44, 
+    -27.48, -27.5, -27.53, -27.59, -27.64, -27.69, -27.74, -27.78, -27.83, 
+    -27.88, -27.94, -28, -28.06, -28.07, -28.05, -28.09, -28.14, -28.2, 
+    -28.24, -28.27, -28.27, -28.27, -28.32, -28.37, -28.43, -28.48, -28.53, 
+    -28.57, -28.6, -28.62, -28.61, -28.6, -28.58, -28.51, -28.4, -28.32, 
+    -28.29, -28.32, -28.35, -28.39, -28.44, -28.5, -28.58, -28.66, -28.74, 
+    -28.8, -28.85, -28.94, -29.04, -29.14, -29.25, -29.34, -29.41, -29.46, 
+    -29.5, -29.56, -29.6, -29.63, -29.66, -29.7, -29.75, -29.8, -29.87, 
+    -29.93, -29.99, -30.05, -30.11, -30.17, -30.23, -30.29, -30.35, -30.39, 
+    -30.44, -30.5, -30.56, -30.61, -30.66, -30.72, -30.78, -30.85, -30.92, 
+    -30.98, -31.04, -31.1, -31.17, -31.23, -31.3, -31.36, -31.41, -31.47, 
+    -31.51, -31.55, -31.6, -31.66, -31.69, -31.71, -31.7, -31.69, -31.7, 
+    -31.73, -31.76, -31.8, -31.87, -31.93, -31.99, -32.06, -32.12, -32.18, 
+    -32.24, -32.3, -32.35, -32.4, -32.45, -32.51, -32.58, -32.65, -32.72, 
+    -32.78, -32.84, -32.9, -32.96, -33.01, -33.07, -33.12, -33.18, -33.23, 
+    -33.28, -33.34, -33.4, -33.44, -33.47, -33.52, -33.58, -33.64, -33.7, 
+    -33.75, -33.8, -33.84, -33.87, -33.91, -33.93, -33.93, -33.9, -33.92, 
+    -33.98, -34.03, -34.09, -34.16, -34.18, -34.2, -34.24, -34.24, -34.21, 
+    -34.23, -34.28, -34.33, -34.38, -34.43, -34.46, -34.5, -34.54, -34.6, 
+    -34.63, -34.65, -34.67, -34.7, -34.75, -34.79, -34.8, -34.84, -34.86, 
+    -34.85, -34.84, -34.82, -34.84, -34.88, -34.95, -35.02, -35.07, -35.12, 
+    -35.17, -35.22, -35.27, -35.31, -35.3, -35.26, -35.29, -35.39, -35.48, 
+    -35.57, -35.67, -35.7, -35.74, -35.85, -35.95, -36.05, -36.13, -36.21, 
+    -36.29, -36.37, -36.44, -36.51, -36.58, -36.64, -36.67, -36.7, -36.75, 
+    -36.8, -36.86, -36.92, -36.99, -37.04, -37.08, -37.13, -37.18, -37.24, 
+    -37.3, -37.36, -37.43, -37.5, -37.57, -37.63, -37.7, -37.78, -37.84, 
+    -37.89, -37.94, -38, -38.05, -38.12, -38.18, -38.24, -38.3, -38.36, 
+    -38.42, -38.47, -38.52, -38.57, -38.62, -38.67, -38.73, -38.76, -38.77, 
+    -38.78, -38.81, -38.85, -38.89, -38.94, -38.99, -39.04, -39.09, -39.15, 
+    -39.21, -39.27, -39.33, -39.38, -39.43, -39.49, -39.57, -39.64, -39.69, 
+    -39.76, -39.82, -39.88, -39.94, -40, -40.04, -40.09, -40.14, -40.19, 
+    -40.25, -40.29, -40.34, -40.39, -40.44, -40.48, -40.52, -40.58, -40.64, 
+    -40.69, -40.74, -40.8, -40.83, -40.87, -40.92, -40.97, -41.02, -41.06, 
+    -41.09, -41.15, -41.21, -41.26, -41.29, -41.33, -41.39, -41.46, -41.52, 
+    -41.58, -41.62, -41.65, -41.69, -41.73, -41.77, -41.8, -41.83, -41.85, 
+    -41.87, -41.89, -41.92, -41.96, -42, -42.05, -42.12, -42.18, -42.23, 
+    -42.29, -42.34, -42.41, -42.47, -42.52, -42.54, -42.54, -42.56, -42.6, 
+    -42.65, -42.7, -42.76, -42.81, -42.84, -42.86, -42.91, -42.96, -43.02, 
+    -43.1, -43.19, -43.27, -43.34, -43.42, -43.48, -43.52, -43.58, -43.65, 
+    -43.7, -43.76, -43.81, -43.84, -43.88, -43.93, -43.98, -44.05, -44.12, 
+    -44.18, -44.24, -44.29, -44.35, -44.41, -44.48, -44.55, -44.62, -44.7, 
+    -44.77, -44.85, -44.92, -44.99, -45.06, -45.13, -45.2, -45.28, -45.35, 
+    -45.42, -45.49, -45.57, -45.64, -45.71, -45.77, -45.82, -45.88, -45.94, 
+    -46, -46.07, -46.13, -46.2, -46.27, -46.33, -46.37, -46.43, -46.49, 
+    -46.53, -46.58, -46.64, -46.71, -46.77, -46.84, -46.9, -46.98, -47.07, 
+    -47.13, -47.19, -47.26, -47.31, -47.37, -47.42, -47.48, -47.54, -47.59, 
+    -47.64, -47.69, -47.74, -47.8, -47.86, -47.9, -47.94, -47.99, -48.05, 
+    -48.11, -48.17, -48.23, -48.29, -48.34, -48.39, -48.41, -48.42, -48.45, 
+    -48.48, -48.51, -48.55, -48.6, -48.63, -48.63, -48.65, -48.71, -48.77, 
+    -48.83, -48.9, -48.97, -49.02, -49.07, -49.12, -49.17, -49.23, -49.29, 
+    -49.33, -49.35, -49.41, -49.47, -49.53, -49.61, -49.68, -49.75, -49.8, 
+    -49.85, -49.91, -49.96, -50, -50.05, -50.1, -50.15, -50.2, -50.25, 
+    -50.32, -50.39, -50.45, -50.5, -50.56, -50.62, -50.69, -50.78, -50.84, 
+    -50.92, -50.99, -51.05, -51.1, -51.15, -51.21, -51.28, -51.34, -51.41, 
+    -51.47, -51.53, -51.59, -51.64, -51.68, -51.7, -51.72, -51.73, -51.76, 
+    -51.81, -51.86, -51.89, -51.9, -51.88, -51.86, -51.77, -51.49, -51.26, 
+    -51.11, -51.14, -51.19, -51.15, -51.16, -51.19, -51.22, -51.26, -51.29, 
+    -51.33, -51.37, -51.4, -51.42, -51.46, -51.49, -51.49, -51.52, -51.56, 
+    -51.6, -51.65, -51.7, -51.75, -51.8, -51.87, -51.93, -52, -52.06, -52.12, 
+    -52.18, -52.24, -52.3, -52.37, -52.42, -52.49, -52.55, -52.6, -52.66, 
+    -52.72, -52.77, -52.82, -52.88, -52.93, -52.99, -53.05, -53.11, -53.16, 
+    -53.22, -53.26, -53.32, -53.37, -53.43, -53.49, -53.56, -53.61, -53.66, 
+    -53.7, -53.74, -53.79, -53.84, -53.89, -53.95, -54.01, -54.05, -54.09, 
+    -54.12, -54.14, -54.15, -54.17, -54.21, -54.24, -54.25, -54.26, -54.29, 
+    -54.33, -54.39, -54.47, -54.55, -54.59, -54.61, -54.58, -54.48, -54.44, 
+    -54.47, -54.49, -54.52, -54.54, -54.47, -54.38, -54.1, -53.56, -53.27, 
+    -53.27, -53.33, -53.42, -53.54, -53.67, -53.84, -53.98, -54.06, -54.17, 
+    -54.24, -54.35, -54.51, -54.63, -54.69, -54.77, -54.91, -55.07, -55.2, 
+    -55.3, -55.39, -55.44, -55.47, -55.54, -55.61, -55.55, -55.32, -55.29, 
+    -55.3, -55.15, -55.07, -55.06, -55.09, -55.11, -55.14, -55.15, -55.09, 
+    -55.06, -55.1, -55.15, -55.16, -55.12, -55.01, -54.89, -54.85, -54.85, 
+    -54.84, -54.79, -54.75, -54.72, -54.72, -54.8, -54.85, -54.86, -54.87, 
+    -54.82, -54.74, -54.68, -54.6, -54.53, -54.37, -54.13, -54.02, -54.04, 
+    -54.09, -54.14, -54.18, -54.21, -54.18, -54.13, -54.14, -54.19, -54.25, 
+    -54.3, -54.3, -54.23, -54.12, -53.98, -53.81, -53.68, -53.59, -53.55, 
+    -53.55, -53.53, -53.45, -53.31, -53.22, -53.2, -53.21, -53.21, -53.22, 
+    -53.24, -53.27, -53.3, -53.33, -53.35, -53.38, -53.41, -53.45, -53.47, 
+    -53.43, -53.37, -53.32, -53.27, -53.26, -53.27, -53.23, -53.09, -52.93, 
+    -52.79, -52.6, -52.36, -52.19, -52.11, -52.11, -52.11, -52.05, -51.98, 
+    -51.96, -51.96, -51.96, -51.99, -52.04, -52.05, -52.03, -52.03, -52, 
+    -51.94, -51.9, -51.9, -51.92, -51.92, -51.92, -51.93, -51.96, -52.02, 
+    -52.04, -52.03, -52.03, -52.04, -52.05, -52.08, -52.13, -52.18, -52.22, 
+    -52.27, -52.29, -52.3, -52.31, -52.31, -52.27, -52.21, -52.18, -52.2, 
+    -52.23, -52.26, -52.29, -52.31, -52.29, -52.28, -52.27, -52.23, -52.19, 
+    -52.23, -52.29, -52.34, -52.36, -52.37, -52.38, -52.37, -52.38, -52.43, 
+    -52.47, -52.5, -52.51, -52.52, -52.51, -52.5, -52.47, -52.43, -52.41, 
+    -52.41, -52.41, -52.43, -52.42, -52.35, -52.27, -52.26, -52.29, -52.3, 
+    -52.31, -52.32, -52.32, -52.3, -52.27, -52.24, -52.26, -52.28, -52.3, 
+    -52.33, -52.38, -52.43, -52.48, -52.51, -52.54, -52.56, -52.58, -52.58, 
+    -52.6, -52.63, -52.65, -52.66, -52.66, -52.64, -52.64, -52.65, -52.65, 
+    -52.64, -52.63, -52.68, -52.73, -52.79, -52.85, -52.91, -52.96, -53.02, 
+    -53.06, -53.07, -53.06, -53.03, -53.02, -53.03, -53.02, -52.94, -52.86, 
+    -52.81, -52.75, -52.7, -52.58, -52.44, -52.38, -52.37, -52.37, -52.37, 
+    -52.38, -52.38, -52.36, -52.33, -52.33, -52.37, -52.44, -52.5, -52.56, 
+    -52.63, -52.7, -52.77, -52.83, -52.9, -52.95, -52.98, -52.95, -52.9, 
+    -52.86, -52.81, -52.81, -52.87, -52.91, -52.93, -52.94, -52.96, -53.01, 
+    -53.05, -53.08, -53.11, -53.16, -53.21, -53.26, -53.31, -53.33, -53.33, 
+    -53.29, -53.22, -53.14, -53.07, -52.99, -52.87, -52.77, -52.71, -52.7, 
+    -52.7, -52.67, -52.58, -52.51, -52.49, -52.48, -52.49, -52.52, -52.56, 
+    -52.59, -52.6, -52.61, -52.65, -52.68, -52.71, -52.73, -52.73, -52.72, 
+    -52.73, -52.73, -52.71, -52.68, -52.65, -52.67, -52.72, -52.78, -52.82, 
+    -52.83, -52.85, -52.88, -52.92, -52.97, -53.02, -53.08, -53.13, -53.19, 
+    -53.23, -53.28, -53.29, -53.23, -53.2, -53.22, -53.24, -53.24, -53.26, 
+    -53.28, -53.3, -53.33, -53.35, -53.4, -53.47, -53.54, -53.6, -53.65, 
+    -53.69, -53.7, -53.71, -53.76, -53.82, -53.85, -53.87, -53.87, -53.86, 
+    -53.87, -53.85, -53.86, -53.92, -53.99, -54.05, -54.11, -54.14, -54.18, 
+    -54.23, -54.3, -54.36, -54.41, -54.45, -54.46, -54.46, -54.45, -54.45, 
+    -54.48, -54.53, -54.58, -54.62, -54.63, -54.6, -54.54, -54.47, -54.41, 
+    -54.28, -54.07, -53.88, -53.84, -53.87, -53.81, -53.59, -53.42, -53.43, 
+    -53.48, -53.54, -53.6, -53.67, -53.74, -53.81, -53.87, -53.93, -53.98, 
+    -54.02, -54.11, -54.19, -54.25, -54.31, -54.35, -54.32, -54.23, -54.06, 
+    -53.85, -53.65, -53.44, -53.28, -53.24, -53.23, -53.25, -53.26, -53.14, 
+    -52.99, -52.91, -52.85, -52.79, -52.71, -52.64, -52.59, -52.55, -52.55, 
+    -52.58, -52.63, -52.69, -52.75, -52.81, -52.86, -52.89, -52.87, -52.73, 
+    -52.57, -52.53, -52.53, -52.51, -52.45, -52.4, -52.39, -52.39, -52.37, 
+    -52.32, -52.24, -52.2, -52.18, -52.18, -52.17, -52.11, -52.09, -52.09, 
+    -52.07, -52.06, -52.09, -52.09, -52.05, -52.03, -52.07, -52.12, -52.17, 
+    -52.21, -52.25, -52.29, -52.32, -52.33, -52.33, -52.34, -52.36, -52.38, 
+    -52.4, -52.43, -52.46, -52.49, -52.46, -52.39, -52.33, -52.19, -51.93, 
+    -51.84, -51.87, -51.93, -51.99, -52.04, -52.1, -52.16, -52.21, -52.24, 
+    -52.23, -52.21, -52.15, -52.03, -51.9, -51.82, -51.81, -51.83, -51.84, 
+    -51.82, -51.84, -51.92, -51.99, -52.05, -52.12, -52.18, -52.23, -52.26, 
+    -52.28, -52.32, -52.36, -52.4, -52.43, -52.5, -52.58, -52.63, -52.67, 
+    -52.72, -52.79, -52.86, -52.93, -53.01, -53.09, -53.17, -53.26, -53.34, 
+    -53.41, -53.48, -53.53, -53.58, -53.58, -53.54, -53.53, -53.48, -53.46, 
+    -53.5, -53.55, -53.59, -53.64, -53.69, -53.68, -53.69, -53.72, -53.76, 
+    -53.8, -53.81, -53.83, -53.85, -53.88, -53.89, -53.92, -53.92, -53.86, 
+    -53.81, -53.81, -53.85, -53.9, -53.96, -54.02, -54.07, -54.11, -54.1, 
+    -54.08, -54.1, -54.11, -54.12, -54.18, -54.26, -54.33, -54.4, -54.48, 
+    -54.56, -54.64, -54.72, -54.79, -54.85, -54.88, -54.86, -54.75, -54.66, 
+    -54.63, -54.63, -54.65, -54.68, -54.68, -54.64, -54.59, -54.61, -54.68, 
+    -54.74, -54.77, -54.82, -54.89, -54.96, -55.04, -55.12, -55.19, -55.26, 
+    -55.32, -55.38, -55.44, -55.49, -55.56, -55.63, -55.67, -55.69, -55.69, 
+    -55.67, -55.68, -55.68, -55.55, -55.38, -55.31, -55.27, -55.24, -55.21, 
+    -55.14, -55.08, -55.06, -55.08, -55.12, -55.17, -55.24, -55.3, -55.36, 
+    -55.42, -55.47, -55.49, -55.49, -55.47, -55.48, -55.49, -55.53, -55.57, 
+    -55.62, -55.67, -55.71, -55.75, -55.82, -55.85, -55.9, -55.97, -56.03, 
+    -56.05, -56.04, -56.03, -56.05, -56.09, -56.16, -56.23, -56.3, -56.38, 
+    -56.44, -56.49, -56.52, -56.57, -56.62, -56.68, -56.72, -56.74, -56.67, 
+    -56.57, -56.52, -56.44, -56.4, -56.44, -56.44, -56.38, -56.35, -56.36, 
+    -56.38, -56.42, -56.48, -56.53, -56.58, -56.65, -56.74, -56.83, -56.9, 
+    -56.98, -57.06, -57.12, -57.15, -57.19, -57.25, -57.35, -57.43, -57.5, 
+    -57.57, -57.64, -57.67, -57.7, -57.74, -57.8, -57.86, -57.94, -57.99, 
+    -57.99, -57.95, -57.93, -57.97, -58.01, -58.02, -58.02, -58, -57.98, 
+    -57.97, -57.97, -57.99, -58.02, -58.06, -58.08, -58.11, -58.15, -58.14, 
+    -58.09, -58.1, -58.14, -58.15, -58.16, -58.15, -58.16, -58.15, -58.09, 
+    -57.91, -57.74, -57.67, -57.62, -57.58, -57.58, -57.59, -57.6, -57.61, 
+    -57.62, -57.6, -57.59, -57.63, -57.67, -57.66, -57.62, -57.55, -57.47, 
+    -57.42, -57.35, -57.25, -57.19, -57.17, -57.14, -57.11, -57.13, -57.15, 
+    -57.17, -57.19, -57.24, -57.29, -57.34, -57.36, -57.37, -57.41, -57.46, 
+    -57.49, -57.51, -57.52, -57.56, -57.61, -57.64, -57.68, -57.71, -57.73, 
+    -57.77, -57.82, -57.88, -57.93, -57.96, -58.01, -58.05, -58.09, -58.12, 
+    -58.17, -58.22, -58.29, -58.28, -58.11, -57.89, -57.81, -57.84, -57.93, 
+    -58.01, -58.03, -58, -57.92, -57.89, -57.9, -57.88, -57.93, -57.96, 
+    -57.93, -57.8, -57.67, -57.53, -57.37, -57.27, -57.2, -57.13, -57.09, 
+    -57.11, -57.15, -57.2, -57.24, -57.28, -57.32, -57.35, -57.35, -57.28, 
+    -57.22, -57.23, -57.28, -57.33, -57.34, -57.23, -57.11, -57.05, -57.02, 
+    -57.03, -57.06, -57.1, -57.16, -57.2, -57.19, -57.16, -57.18, -57.21, 
+    -57.23, -57.23, -57.2, -57.21, -57.25, -57.3, -57.36, -57.41, -57.47, 
+    -57.52, -57.57, -57.62, -57.66, -57.68, -57.71, -57.71, -57.7, -57.75, 
+    -57.82, -57.89, -57.95, -58.02, -58.08, -58.11, -58.05, -57.93, -57.87, 
+    -57.87, -57.85, -57.77, -57.69, -57.65, -57.64, -57.64, -57.67, -57.68, 
+    -57.6, -57.5, -57.51, -57.56, -57.61, -57.68, -57.75, -57.82, -57.89, 
+    -57.97, -58.04, -58.12, -58.19, -58.27, -58.35, -58.42, -58.46, -58.51, 
+    -58.56, -58.62, -58.69, -58.74, -58.78, -58.83, -58.88, -58.88, -58.88, 
+    -58.85, -58.84, -58.85, -58.9, -58.97, -59.03, -59.08, -59.13, -59.19, 
+    -59.25, -59.31, -59.4, -59.47, -59.48, -59.51, -59.55, -59.62, -59.69, 
+    -59.75, -59.78, -59.83, -59.9, -59.95, -60.01, -60.08, -60.15, -60.2, 
+    -60.18, -60.07, -60.01, -60.01, -60.03, -60.06, -60, -59.94, -59.92, 
+    -59.86, -59.82, -59.84, -59.89, -59.95, -60, -60.06, -60.1, -60.13, 
+    -60.2, -60.26, -60.31, -60.34, -60.39, -60.41, -60.4, -60.38, -60.38, 
+    -60.39, -60.38, -60.34, -60.23, -60.1, -59.97, -59.92, -59.93, -59.96, 
+    -60.01, -60.03, -60.05, -60.03, -59.96, -59.91, -59.91, -59.94, -60, 
+    -60.07, -60.12, -60.11, -60.08, -60.09, -60.12, -60.15, -60.16, -60.17, 
+    -60.17, -60.17, -60.11, -60.04, -60.02, -59.99, -59.97, -59.95, -59.9, 
+    -59.83, -59.8, -59.79, -59.78, -59.8, -59.86, -59.92, -59.97, -60.02, 
+    -60.05, -59.98, -59.8, -59.63, -59.54, -59.53, -59.55, -59.57, -59.62, 
+    -59.67, -59.7, -59.71, -59.68, -59.65, -59.55, -59.41, -59.37, -59.3, 
+    -59.19, -59.1, -59.06, -59.08, -59.14, -59.19, -59.25, -59.3, -59.33, 
+    -59.39, -59.46, -59.52, -59.58, -59.63, -59.68, -59.75, -59.81, -59.86, 
+    -59.93, -59.99, -60.03, -60.06, -60.04, -59.97, -59.89, -59.83, -59.78, 
+    -59.76, -59.82, -59.88, -59.94, -60, -60.04, -60.06, -60.04, -60.03, 
+    -60.07, -60.12, -60.18, -60.24, -60.31, -60.39, -60.44, -60.42, -60.42, 
+    -60.47, -60.51, -60.56, -60.61, -60.67, -60.73, -60.8, -60.88, -60.95, 
+    -61.01, -61.03, -61.05, -61.08, -61.12, -61.14, -61.17, -61.23, -61.29, 
+    -61.35, -61.43, -61.51, -61.56, -61.6, -61.63, -61.68, -61.73, -61.73, 
+    -61.75, -61.8, -61.87, -61.94, -61.99, -62.04, -62.04, -62.05, -61.99, 
+    -61.95, -61.97, -62.01, -62.04, -62.06, -62.09, -62.14, -62.19, -62.22, 
+    -62.23, -62.24, -62.25, -62.21, -62.13, -62.04, -61.84, -61.6, -61.47, 
+    -61.43, -61.42, -61.42, -61.41, -61.45, -61.5, -61.56, -61.61, -61.65, 
+    -61.7, -61.78, -61.84, -61.9, -61.97, -62.03, -62.09, -62.15, -62.21, 
+    -62.28, -62.36, -62.42, -62.48, -62.55, -62.62, -62.68, -62.74, -62.81, 
+    -62.87, -62.91, -62.92, -62.92, -62.93, -62.95, -62.97, -62.98, -62.98, 
+    -62.99, -63.01, -63.05, -63.11, -63.14, -63.14, -63.11, -63.08, -63.05, 
+    -63.02, -62.99, -62.91, -62.83, -62.81, -62.84, -62.89, -62.95, -63.01, 
+    -63.06, -63.13, -63.21, -63.29, -63.35, -63.35, -63.24, -63.08, -63.04, 
+    -63.08, -63.12, -63.15, -63.2, -63.22, -63.2, -63.09, -62.94, -62.83, 
+    -62.68, -62.57, -62.52, -62.55, -62.6, -62.64, -62.69, -62.71, -62.72, 
+    -62.73, -62.76, -62.82, -62.88, -62.93, -62.99, -63.04, -63.11, -63.16, 
+    -63.2, -63.27, -63.3, -63.34, -63.39, -63.44, -63.49, -63.54, -63.6, 
+    -63.65, -63.69, -63.71, -63.68, -63.67, -63.69, -63.72, -63.74, -63.72, 
+    -63.69, -63.65, -63.57, -63.5, -63.51, -63.52, -63.54, -63.58, -63.63, 
+    -63.68, -63.74, -63.8, -63.86, -63.9, -63.93, -63.96, -63.93, -63.79, 
+    -63.69, -63.63, -63.55, -63.45, -63.34, -63.27, -63.24, -63.2, -63.1, 
+    -63.04, -62.99, -62.98, -62.97, -62.94, -62.91, -62.87, -62.82, -62.78, 
+    -62.76, -62.74, -62.72, -62.67, -62.62, -62.61, -62.65, -62.69, -62.69, 
+    -62.57, -62.33, -62.11, -62, -61.8, -61.45, -61.16, -60.98, -60.89, 
+    -60.86, -60.83, -60.79, -60.74, -60.7, -60.68, -60.64, -60.54, -60.41, 
+    -60.34, -60.37, -60.42, -60.44, -60.42, -60.37, -60.35 ;
+
+ wspd = 3.3, 2.8, 3, 3.5, 3.9, 4.4, 4.7, 5.1, 5.5, 5.8, 6.1, 6.3, 6.6, 6.8, 
+    7, 7.1, 7.3, 7.5, 7.6, 7.7, 7.9, 8.1, 8.2, 8.4, 8.6, 8.7, 8.9, 9.1, 9.3, 
+    9.5, 9.7, 9.8, 9.9, 10, 10.1, 10.2, 10.2, 10.2, 10.2, 10.2, 10.2, 10.1, 
+    10.1, 10.1, 10.1, 10, 10, 10.1, 10.1, 10.1, 10.1, 10.1, 10.2, 10.2, 10.3, 
+    10.3, 10.4, 10.5, 10.5, 10.6, 10.7, 10.8, 10.9, 11, 11.1, 11.3, 11.4, 
+    11.5, 11.7, 11.9, 12, 12.2, 12.4, 12.6, 12.8, 13, 13.2, 13.4, 13.6, 13.7, 
+    13.9, 14, 14.1, 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 15, 15.1, 
+    15.4, 15.6, 15.9, 16.2, 16.5, 16.8, 17.2, 17.5, 17.9, 18.2, 18.5, 18.8, 
+    19.1, 19.3, 19.5, 19.7, 19.8, 19.9, 19.9, 20, 20, 19.9, 19.9, 19.9, 19.8, 
+    19.8, 19.7, 19.7, 19.6, 19.5, 19.5, 19.4, 19.3, 19.3, 19.2, 19.1, 19.1, 
+    19, 19, 19, 19, 19, 18.9, 18.9, 18.9, 18.9, 18.9, 18.9, 18.9, 18.9, 18.8, 
+    18.8, 18.8, 18.8, 18.8, 18.8, 18.8, 18.8, 18.8, 18.8, 18.8, 18.8, 18.8, 
+    18.8, 18.8, 18.7, 18.7, 18.7, 18.7, 18.7, 18.7, 18.7, 18.7, 18.7, 18.7, 
+    18.8, 18.8, 18.8, 18.8, 18.9, 18.9, 18.9, 18.9, 19, 19, 19.1, 19.1, 19.2, 
+    19.3, 19.4, 19.5, 19.7, 19.8, 19.9, 20, 20.1, 20.2, 20.2, 20.3, 20.3, 
+    20.3, 20.2, 20.1, 20.1, 20, 19.9, 19.8, 19.7, 19.7, 19.6, 19.5, 19.5, 
+    19.4, 19.3, 19.3, 19.2, 19.2, 19.1, 19, 19, 18.9, 18.8, 18.8, 18.7, 18.7, 
+    18.6, 18.6, 18.6, 18.6, 18.6, 18.6, 18.6, 18.5, 18.5, 18.5, 18.4, 18.4, 
+    18.3, 18.2, 18, 17.9, 17.8, 17.7, 17.6, 17.5, 17.5, 17.5, 17.5, 17.6, 
+    17.7, 17.8, 17.9, 18, 18.1, 18.2, 18.3, 18.4, 18.4, 18.5, 18.5, 18.5, 
+    18.5, 18.5, 18.4, 18.4, 18.4, 18.4, 18.4, 18.4, 18.3, 18.3, 18.3, 18.3, 
+    18.3, 18.3, 18.3, 18.3, 18.3, 18.3, 18.3, 18.3, 18.3, 18.3, 18.3, 18.4, 
+    18.4, 18.4, 18.4, 18.5, 18.5, 18.5, 18.5, 18.4, 18.4, 18.4, 18.3, 18.2, 
+    18.1, 18, 17.9, 17.8, 17.6, 17.5, 17.3, 17.1, 17, 16.8, 16.6, 16.5, 16.3, 
+    16.2, 16.1, 16, 15.9, 15.8, 15.7, 15.7, 15.7, 15.7, 15.7, 15.7, 15.7, 
+    15.8, 15.9, 16, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.6, 16.7, 16.7, 
+    16.8, 16.8, 16.8, 16.8, 16.7, 16.7, 16.7, 16.7, 16.7, 16.8, 16.8, 16.8, 
+    16.9, 17, 17.1, 17.2, 17.3, 17.4, 17.6, 17.7, 17.8, 18, 18.1, 18.3, 18.4, 
+    18.6, 18.7, 18.9, 19, 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.6, 19.7, 
+    19.8, 19.8, 19.9, 20, 20, 20.1, 20.2, 20.2, 20.3, 20.4, 20.4, 20.5, 20.6, 
+    20.6, 20.7, 20.7, 20.7, 20.7, 20.7, 20.7, 20.7, 20.7, 20.6, 20.6, 20.6, 
+    20.6, 20.6, 20.6, 20.6, 20.7, 20.7, 20.8, 20.9, 21, 21.1, 21.2, 21.3, 
+    21.5, 21.6, 21.7, 21.9, 22, 22.1, 22.3, 22.4, 22.6, 22.7, 22.8, 22.9, 23, 
+    23, 23.1, 23.2, 23.2, 23.2, 23.2, 23.2, 23.2, 23.2, 23.2, 23.2, 23.2, 
+    23.3, 23.3, 23.3, 23.3, 23.4, 23.4, 23.4, 23.4, 23.5, 23.5, 23.5, 23.5, 
+    23.6, 23.6, 23.6, 23.6, 23.5, 23.5, 23.5, 23.4, 23.4, 23.3, 23.3, 23.2, 
+    23.1, 23.1, 23, 22.9, 22.9, 22.8, 22.7, 22.7, 22.6, 22.5, 22.5, 22.4, 
+    22.3, 22.3, 22.2, 22.1, 22.1, 22, 21.9, 21.8, 21.8, 21.7, 21.6, 21.5, 
+    21.5, 21.4, 21.3, 21.3, 21.2, 21.2, 21.1, 21.1, 21, 21, 21, 20.9, 20.9, 
+    20.9, 20.8, 20.8, 20.8, 20.8, 20.7, 20.7, 20.7, 20.7, 20.6, 20.6, 20.6, 
+    20.6, 20.6, 20.5, 20.5, 20.5, 20.5, 20.5, 20.5, 20.5, 20.5, 20.5, 20.4, 
+    20.4, 20.4, 20.4, 20.4, 20.4, 20.4, 20.4, 20.4, 20.4, 20.4, 20.4, 20.4, 
+    20.4, 20.4, 20.4, 20.4, 20.3, 20.3, 20.3, 20.3, 20.3, 20.2, 20.2, 20.2, 
+    20.2, 20.2, 20.1, 20.1, 20.1, 20.1, 20.1, 20.1, 20.1, 20.1, 20.1, 20.1, 
+    20.1, 20.1, 20.1, 20, 20, 20, 20, 20, 20, 19.9, 19.9, 19.9, 20, 20, 20, 
+    20.1, 20.2, 20.2, 20.3, 20.5, 20.6, 20.7, 20.8, 21, 21.1, 21.2, 21.4, 
+    21.5, 21.6, 21.8, 21.9, 22, 22.2, 22.3, 22.4, 22.6, 22.7, 22.9, 23.1, 
+    23.2, 23.4, 23.6, 23.7, 23.9, 24.1, 24.2, 24.4, 24.5, 24.7, 24.8, 24.9, 
+    25, 25.1, 25.2, 25.4, 25.5, 25.6, 25.7, 25.8, 25.9, 26.1, 26.2, 26.4, 
+    26.5, 26.7, 26.9, 27.1, 27.3, 27.5, 27.8, 28, 28.3, 28.6, 28.9, 29.3, 
+    29.6, 29.9, 30.2, 30.5, 30.8, 31, 31.3, 31.5, 31.7, 32, 32.2, 32.4, 32.6, 
+    32.9, 33.1, 33.4, 33.6, 33.9, 34.1, 34.4, 34.7, 34.9, 35.2, 35.4, 35.7, 
+    35.9, 36.1, 36.3, 36.5, 36.7, 36.8, 36.9, 37, 37.1, 37.2, 37.2, 37.3, 
+    37.3, 37.3, 37.3, 37.3, 37.3, 37.3, 37.3, 37.2, 37.2, 37.2, 37.3, 37.3, 
+    37.3, 37.3, 37.3, 37.2, 37.2, 37.2, 37.2, 37.2, 37.1, 37.1, 37, 37, 37, 
+    36.9, 36.9, 36.8, 36.8, 36.7, 36.7, 36.7, 36.6, 36.6, 36.6, 36.6, 36.6, 
+    36.5, 36.5, 36.5, 36.5, 36.5, 36.5, 36.5, 36.4, 36.4, 36.4, 36.4, 36.4, 
+    36.3, 36.3, 36.2, 36.2, 36.1, 36.1, 36, 36, 35.9, 35.9, 35.8, 35.8, 35.8, 
+    35.7, 35.7, 35.7, 35.6, 35.6, 35.5, 35.5, 35.5, 35.4, 35.4, 35.4, 35.3, 
+    35.3, 35.4, 35.4, 35.4, 35.5, 35.6, 35.8, 35.9, 36.1, 36.3, 36.5, 36.7, 
+    36.9, 37.2, 37.4, 37.6, 37.8, 38, 38.2, 38.4, 38.6, 38.8, 39, 39.2, 39.4, 
+    39.6, 39.8, 40.1, 40.3, 40.5, 40.7, 41, 41.2, 41.4, 41.6, 41.7, 41.9, 
+    42.1, 42.2, 42.4, 42.5, 42.7, 42.9, 43.1, 43.2, 43.4, 43.6, 43.9, 44.1, 
+    44.3, 44.6, 44.8, 45.1, 45.3, 45.6, 45.9, 46.2, 46.5, 46.8, 47.1, 47.5, 
+    47.8, 48.1, 48.4, 48.6, 48.9, 49.1, 49.3, 49.4, 49.6, 49.7, 49.8, 49.9, 
+    50, 50.1, 50.1, 50.2, 50.3, 50.4, 50.5, 50.6, 50.7, 50.8, 50.9, 51, 51.1, 
+    51.2, 51.3, 51.4, 51.5, 51.6, 51.7, 51.8, 51.9, 52, 52.1, 52.2, 52.2, 
+    52.3, 52.3, 52.3, 52.3, 52.3, 52.3, 52.3, 52.3, 52.3, 52.3, 52.2, 52.2, 
+    52.2, 52.1, 52.1, 52.1, 52.1, 52.1, 52, 52, 52, 52, 52, 52, 52, 52, 52, 
+    52, 51.9, 51.9, 51.9, 51.9, 51.8, 51.8, 51.8, 51.8, 51.7, 51.7, 51.7, 
+    51.7, 51.6, 51.6, 51.6, 51.6, 51.5, 51.5, 51.4, 51.4, 51.4, 51.3, 51.3, 
+    51.3, 51.2, 51.2, 51.2, 51.2, 51.2, 51.1, 51.1, 51.1, 51, 51, 50.9, 50.9, 
+    50.8, 50.8, 50.7, 50.6, 50.5, 50.4, 50.3, 50.2, 50.1, 50, 49.9, 49.8, 
+    49.7, 49.7, 49.6, 49.5, 49.4, 49.4, 49.3, 49.3, 49.3, 49.3, 49.3, 49.3, 
+    49.4, 49.4, 49.5, 49.6, 49.7, 49.8, 49.9, 50, 50.2, 50.3, 50.5, 50.6, 
+    50.8, 51, 51.2, 51.4, 51.7, 51.9, 52.1, 52.4, 52.6, 52.8, 53, 53.2, 53.4, 
+    53.5, 53.7, 53.8, 53.9, 54, 54.1, 54.1, 54.2, 54.3, 54.3, 54.4, 54.5, 
+    54.5, 54.6, 54.6, 54.7, 54.8, 54.8, 54.9, 55, 55.1, 55.1, 55.2, 55.3, 
+    55.4, 55.5, 55.5, 55.6, 55.7, 55.8, 55.9, 56, 56.1, 56.2, 56.3, 56.5, 
+    56.6, 56.7, 56.8, 57, 57.1, 57.2, 57.3, 57.5, 57.6, 57.7, 57.9, 58, 58.2, 
+    58.3, 58.5, 58.7, 58.8, 59, 59.2, 59.3, 59.5, 59.6, 59.7, 59.8, 59.9, 60, 
+    60.1, 60.1, 60.2, 60.2, 60.2, 60.2, 60.1, 60.1, 60, 59.9, 59.8, 59.7, 
+    59.5, 59.4, 59.2, 59.1, 58.9, 58.8, 58.6, 58.5, 58.3, 58.2, 58, 57.9, 
+    57.8, 57.6, 57.5, 57.3, 57.1, 57, 56.8, 56.6, 56.5, 56.3, 56.1, 56, 55.8, 
+    55.7, 55.5, 55.3, 55.2, 55, 54.9, 54.8, 54.6, 54.5, 54.3, 54.2, 54.1, 54, 
+    53.9, 53.8, 53.7, 53.6, 53.5, 53.3, 53.2, 53.1, 52.9, 52.8, 52.6, 52.4, 
+    52.2, 52, 51.8, 51.6, 51.4, 51.2, 51, 50.8, 50.7, 50.6, 50.4, 50.3, 50.3, 
+    50.2, 50.2, 50.2, 50.2, 50.2, 50.3, 50.4, 50.5, 50.7, 50.8, 51, 51.2, 
+    51.5, 51.7, 52, 52.3, 52.6, 52.9, 53.2, 53.4, 53.7, 54, 54.3, 54.6, 54.8, 
+    55, 55.2, 55.4, 55.5, 55.6, 55.7, 55.8, 55.8, 55.9, 55.9, 55.9, 55.9, 
+    55.9, 55.9, 55.9, 55.9, 55.9, 55.9, 55.8, 55.8, 55.8, 55.8, 55.8, 55.7, 
+    55.7, 55.7, 55.7, 55.7, 55.6, 55.6, 55.6, 55.6, 55.5, 55.5, 55.5, 55.4, 
+    55.4, 55.3, 55.2, 55.2, 55.1, 55, 55, 54.9, 54.8, 54.7, 54.7, 54.6, 54.5, 
+    54.5, 54.4, 54.4, 54.3, 54.2, 54.1, 54.1, 54, 53.8, 53.7, 53.5, 53.3, 53, 
+    52.7, 52.4, 52, 51.5, 51, 50.5, 49.9, 49.3, 48.6, 48, 47.4, 46.7, 46.1, 
+    45.6, 45, 44.6, 44.1, 43.8, 43.4, 43.1, 42.9, 42.7, 42.5, 42.4, 42.2, 
+    42.1, 42, 41.9, 41.8, 41.7, 41.6, 41.5, 41.4, 41.2, 41, 40.8, 40.5, 40.2, 
+    39.9, 39.6, 39.2, 38.8, 38.4, 38, 37.6, 37.2, 36.8, 36.4, 36.1, 35.8, 
+    35.5, 35.2, 35, 34.8, 34.5, 34.3, 34.2, 34, 33.8, 33.7, 33.6, 33.5, 33.4, 
+    33.3, 33.2, 33.1, 33, 32.9, 32.8, 32.8, 32.7, 32.6, 32.6, 32.5, 32.5, 
+    32.5, 32.5, 32.5, 32.5, 32.5, 32.5, 32.6, 32.6, 32.6, 32.6, 32.7, 32.7, 
+    32.7, 32.7, 32.6, 32.6, 32.5, 32.4, 32.3, 32.2, 32.1, 31.9, 31.8, 31.7, 
+    31.6, 31.4, 31.3, 31.2, 31.1, 31, 30.9, 30.9, 30.8, 30.7, 30.7, 30.6, 
+    30.6, 30.5, 30.5, 30.4, 30.3, 30.2, 30.1, 29.9, 29.8, 29.6, 29.4, 29.2, 
+    29, 28.9, 28.7, 28.5, 28.4, 28.3, 28.1, 28, 27.9, 27.8, 27.7, 27.6, 27.5, 
+    27.4, 27.3, 27.2, 27.1, 27, 26.9, 26.8, 26.7, 26.7, 26.6, 26.6, 26.6, 
+    26.6, 26.5, 26.5, 26.5, 26.5, 26.4, 26.4, 26.3, 26.2, 26.2, 26.1, 26, 26, 
+    25.9, 25.9, 25.8, 25.8, 25.8, 25.8, 25.8, 25.8, 25.9, 25.9, 26, 26.1, 
+    26.1, 26.2, 26.3, 26.4, 26.5, 26.6, 26.7, 26.8, 26.8, 26.9, 26.9, 26.8, 
+    26.8, 26.7, 26.6, 26.5, 26.4, 26.2, 26.1, 25.9, 25.8, 25.6, 25.5, 25.3, 
+    25.2, 25.1, 24.9, 24.8, 24.7, 24.5, 24.4, 24.3, 24.2, 24.1, 24, 23.9, 
+    23.8, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 23.7, 
+    23.7, 23.6, 23.6, 23.5, 23.5, 23.4, 23.3, 23.2, 23.1, 23, 22.9, 22.8, 
+    22.8, 22.7, 22.6, 22.5, 22.5, 22.4, 22.3, 22.3, 22.2, 22.1, 22, 21.9, 
+    21.8, 21.7, 21.6, 21.6, 21.5, 21.4, 21.3, 21.2, 21.1, 21, 20.9, 20.8, 
+    20.7, 20.7, 20.6, 20.5, 20.4, 20.4, 20.3, 20.3, 20.3, 20.3, 20.3, 20.4, 
+    20.4, 20.5, 20.6, 20.7, 20.8, 20.9, 21.1, 21.2, 21.4, 21.5, 21.7, 21.8, 
+    22, 22.1, 22.2, 22.4, 22.5, 22.6, 22.7, 22.8, 22.9, 23, 23.1, 23.1, 23.2, 
+    23.2, 23.2, 23.2, 23.2, 23.2, 23.1, 23.1, 23.1, 23.1, 23, 23, 23, 23, 23, 
+    23.1, 23.1, 23.1, 23.2, 23.2, 23.3, 23.4, 23.4, 23.4, 23.5, 23.5, 23.5, 
+    23.5, 23.5, 23.5, 23.5, 23.4, 23.4, 23.3, 23.3, 23.3, 23.2, 23.2, 23.1, 
+    23.1, 23, 23, 22.9, 22.9, 22.8, 22.7, 22.7, 22.6, 22.6, 22.5, 22.5, 22.5, 
+    22.5, 22.5, 22.5, 22.5, 22.6, 22.6, 22.6, 22.6, 22.6, 22.7, 22.7, 22.7, 
+    22.7, 22.7, 22.7, 22.7, 22.7, 22.7, 22.7, 22.7, 22.8, 22.8, 22.9, 22.9, 
+    23, 23, 23.1, 23.2, 23.3, 23.3, 23.4, 23.5, 23.6, 23.7, 23.7, 23.8, 23.9, 
+    24, 24.1, 24.2, 24.3, 24.4, 24.5, 24.7, 24.8, 24.9, 25, 25.1, 25.2, 25.3, 
+    25.4, 25.5, 25.5, 25.6, 25.7, 25.7, 25.8, 25.8, 25.9, 25.9, 26, 26, 26.1, 
+    26.1, 26.2, 26.3, 26.3, 26.4, 26.5, 26.6, 26.6, 26.6, 26.7, 26.7, 26.6, 
+    26.6, 26.5, 26.4, 26.3, 26.2, 26, 25.9, 25.8, 25.7, 25.7, 25.6, 25.6, 
+    25.5, 25.5, 25.5, 25.5, 25.5, 25.5, 25.5, 25.4, 25.3, 25.2, 25.1, 25, 
+    24.8, 24.6, 24.4, 24.2, 23.9, 23.7, 23.5, 23.3, 23.1, 22.9, 22.8, 22.7, 
+    22.6, 22.5, 22.5, 22.4, 22.4, 22.4, 22.5, 22.5, 22.5, 22.6, 22.7, 22.7, 
+    22.8, 22.9, 23, 23.1, 23.2, 23.3, 23.4, 23.5, 23.6, 23.7, 23.8, 23.8, 
+    23.9, 23.9, 23.9, 23.8, 23.8, 23.7, 23.7, 23.6, 23.5, 23.4, 23.4, 23.3, 
+    23.2, 23.2, 23.2, 23.1, 23.1, 23.1, 23, 23, 22.9, 22.8, 22.7, 22.5, 22.4, 
+    22.2, 22, 21.8, 21.5, 21.3, 21.1, 21, 20.8, 20.6, 20.5, 20.4, 20.4, 20.4, 
+    20.3, 20.4, 20.4, 20.5, 20.6, 20.7, 20.8, 20.9, 21, 21.2, 21.3, 21.4, 
+    21.5, 21.6, 21.7, 21.8, 21.8, 21.8, 21.8, 21.8, 21.8, 21.7, 21.6, 21.5, 
+    21.4, 21.3, 21.1, 21, 20.8, 20.6, 20.4, 20.2, 20.1, 19.9, 19.6, 19.4, 
+    19.2, 19, 18.8, 18.7, 18.5, 18.4, 18.2, 18.1, 18.1, 18, 17.9, 17.9, 17.9, 
+    17.8, 17.8, 17.7, 17.6, 17.6, 17.5, 17.4, 17.2, 17.1, 17, 16.8, 16.7, 
+    16.6, 16.4, 16.3, 16.2, 16, 15.9, 15.8, 15.8, 15.7, 15.7, 15.7, 15.7, 
+    15.7, 15.8, 15.8, 15.9, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 16.8, 
+    16.9, 17, 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 18.1, 
+    18.2, 18.3, 18.4, 18.6, 18.7, 18.8, 19, 19.1, 19.2, 19.3, 19.4, 19.5, 
+    19.6, 19.6, 19.7, 19.8, 19.8, 19.9, 19.9, 20, 20.1, 20.2, 20.3, 20.4, 
+    20.5, 20.6, 20.7, 20.8, 20.9, 21, 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 
+    21.7, 21.8, 21.9, 21.9, 22, 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7, 
+    22.8, 22.9, 22.9, 22.9, 22.9, 22.9, 22.9, 22.8, 22.7, 22.6, 22.5, 22.3, 
+    22.2, 22, 21.9, 21.7, 21.6, 21.5, 21.3, 21.2, 21.1, 21.1, 21, 20.9, 20.9, 
+    20.8, 20.7, 20.7, 20.6, 20.5, 20.4, 20.4, 20.3, 20.2, 20.1, 20.1, 20, 20, 
+    20, 20, 20, 20, 20.1, 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.9, 21, 
+    21.2, 21.4, 21.6, 21.8, 22, 22.2, 22.5, 22.7, 22.9, 23.1, 23.2, 23.4, 
+    23.5, 23.7, 23.8, 23.8, 23.9, 23.9, 24, 24, 23.9, 23.9, 23.9, 23.9, 23.9, 
+    23.9, 23.8, 23.8, 23.8, 23.8, 23.8, 23.8, 23.8, 23.8, 23.7, 23.7, 23.6, 
+    23.5, 23.4, 23.3, 23.2, 23.1, 23, 22.9, 22.8, 22.7, 22.6, 22.5, 22.4, 
+    22.3, 22.3, 22.2, 22.2, 22.1, 22.1, 22, 22, 22, 22, 22, 22, 22, 22, 22, 
+    22.1, 22.1, 22.2, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7, 22.7, 22.7, 22.7, 
+    22.6, 22.5, 22.3, 22.1, 21.8, 21.5, 21.1, 20.7, 20.3, 19.9, 19.4, 19, 
+    18.6, 18.2, 17.8, 17.5, 17.3, 17, 16.9, 16.7, 16.6, 16.5, 16.5, 16.5, 
+    16.5, 16.5, 16.5, 16.5, 16.6, 16.6, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 
+    16.6, 16.6, 16.5, 16.5, 16.4, 16.3, 16.1, 16, 15.8, 15.7, 15.5, 15.3, 
+    15.1, 14.9, 14.7, 14.5, 14.4, 14.2, 14, 13.9, 13.8, 13.7, 13.6, 13.5, 
+    13.4, 13.4, 13.3, 13.2, 13.2, 13.1, 13, 13, 12.9, 12.8, 12.7, 12.6, 12.4, 
+    12.3, 12.1, 11.9, 11.7, 11.4, 11.2, 10.9, 10.6, 10.4, 10.1, 9.8, 9.5, 
+    9.3, 9, 8.8, 8.6, 8.4, 8.2, 8, 7.9, 7.8, 7.7, 7.6, 7.5, 7.5, 7.4, 7.4, 
+    7.3, 7.3, 7.3, 7.3, 7.3, 7.3, 7.2, 7.2, 7.2, 7.2, 7.2, 7.1, 7.1, 7.1, 
+    7.1, 7.1, 7.1, 7.2, 7.2, 7.3, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 8, 8.2, 
+    8.3, 8.4, 8.6, 8.7, 8.9, 9, 9.2, 9.5, 9.7, 10, 10.3, 10.6, 10.9, 11.3, 
+    11.7, 12, 12.4, 12.8, 13.2, 13.5, 13.9, 14.2, 14.5, 14.8, 15, 15.3, 15.5, 
+    15.7, 15.9, 16.1, 16.2, 16.4, 16.5, 16.7, 16.8, 16.9, 17, 17.2, 17.2, 
+    17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 18, 18.1, 18.3, 18.4, 18.5, 
+    18.7, 18.8, 18.9, 19, 19.1, 19.1, 19.2, 19.2, 19.2, 19.2, 19.2, 19.1, 
+    19.1, 19.1, 19, 19, 19, 18.9, 18.9, 18.9, 18.9, 18.9, 18.9, 18.9, 18.9, 
+    18.9, 18.9, 18.9, 18.8, 18.8, 18.7, 18.6, 18.5, 18.4, 18.2, 18.1, 17.9, 
+    17.7, 17.5, 17.4, 17.1, 16.9, 16.7, 16.4, 16.2, 15.9, 15.7, 15.4, 15.1, 
+    14.9, 14.6, 14.4, 14.2, 14, 13.8, 13.7, 13.6, 13.5, 13.4, 13.3, 13.3, 
+    13.2, 13.1, 13.1, 13, 12.9, 12.7, 12.6, 12.4, 12.3, 12.1, 11.9, 11.7, 
+    11.5, 11.4, 11.2, 11.1, 10.9, 10.8, 10.7, 10.7, 10.6, 10.6, 10.5, 10.5, 
+    10.5, 10.4, 10.4, 10.4, 10.3, 10.2, 10.1, 10, 9.9, 9.8, 9.7, 9.6, 9.6, 
+    9.5, 9.5, 9.4, 9.4, 9.5, 9.5, 9.5, 9.6, 9.7, 9.8, 9.9, 9.9, 10, 10.1, 
+    10.2, 10.2, 10.3, 10.3, 10.3, 10.4, 10.5, 10.5, 10.6, 10.7, 10.8, 10.9, 
+    11.1, 11.2, 11.3, 11.5, 11.6, 11.8, 11.9, 12, 12.1, 12.2, 12.3, 12.4, 
+    12.5, 12.5, 12.5, 12.6, 12.6, 12.5, 12.5, 12.4, 12.3, 12.2, 12, 11.8, 
+    11.6, 11.4, 11.2, 11, 10.7, 10.5, 10.3, 10.2, 10, 9.9, 9.7, 9.7, 9.6, 
+    9.5, 9.5, 9.5, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 
+    9.4, 9.5, 9.6, 9.7, 9.9, 10, 10.2, 10.4, 10.6, 10.8, 11, 11.2, 11.4, 
+    11.6, 11.7, 11.8, 11.8, 11.9, 11.9, 11.8, 11.8, 11.7, 11.6, 11.5, 11.4, 
+    11.3, 11.2, 11.1, 11, 11, 11, 11, 11, 11, 11.1, 11.1, 11.2, 11.3, 11.4, 
+    11.5, 11.6, 11.7, 11.8, 12, 12.1, 12.2, 12.3, 12.4, 12.6, 12.7, 12.8, 
+    12.9, 12.9, 13, 13.1, 13.2, 13.3, 13.4, 13.4, 13.5, 13.6, 13.7, 13.8, 
+    13.9, 14, 14.1, 14.2, 14.3, 14.4, 14.4, 14.5, 14.6, 14.7, 14.7, 14.8, 
+    14.8, 14.9, 14.9, 14.8, 14.8, 14.8, 14.7, 14.6, 14.5, 14.4, 14.2, 14.1, 
+    13.9, 13.8, 13.6, 13.4, 13.2, 13.1, 12.9, 12.7, 12.6, 12.4, 12.3, 12.1, 
+    12, 11.9, 11.8, 11.7, 11.6, 11.5, 11.4, 11.3, 11.1, 11, 10.8, 10.6, 10.3, 
+    10.1, 9.8, 9.5, 9.3, 9, 8.7, 8.4, 8.2, 8, 7.8, 7.6, 7.4, 7.2, 7, 6.9, 
+    6.7, 6.6, 6.5, 6.3, 6.2, 6.1, 6, 5.9, 5.8, 5.7, 5.6, 5.6, 5.5, 5.5, 5.4, 
+    5.4, 5.4, 5.4, 5.4, 5.5, 5.5, 5.6, 5.7, 5.9, 6, 6.2, 6.4, 6.5, 6.7 ;
+
+ rh = 86, 81.34, 79.19, 77.89, 76.27, 74.4, 72.7, 70.76, 67.93, 66.47, 65.87, 
+    64.75, 63.65, 63.39, 63.68, 63.09, 62.25, 62.15, 62.03, 62.07, 62.29, 
+    62.3, 62.14, 61.96, 61.91, 62.04, 62.23, 62.45, 62.69, 62.95, 63.12, 
+    63.18, 63.34, 63.62, 63.88, 64.06, 64.34, 64.77, 65.23, 65.62, 65.96, 
+    66.38, 66.82, 67.23, 67.67, 68.08, 68.48, 68.93, 69.49, 70.15, 70.74, 
+    71.24, 71.81, 72.52, 73.31, 73.96, 74.49, 74.86, 75.25, 76, 76.89, 77.72, 
+    78.47, 78.95, 79.51, 80.25, 81.05, 81.73, 82.58, 83.51, 84.11, 84.63, 
+    85.18, 85.75, 86.52, 87.46, 88.53, 89.49, 90.5, 91.57, 92.53, 93.22, 
+    93.7, 94.17, 94.64, 95.08, 95.47, 95.89, 96.49, 96.92, 96.68, 96.18, 
+    95.14, 93.37, 92.42, 92.1, 89.68, 81.08, 63.39, 46.37, 35.06, 29.85, 
+    25.06, 20.58, 18.24, 18.33, 18.92, 19.13, 19.57, 20.48, 21.05, 21.11, 
+    21.83, 22.81, 23.22, 23.6, 24.19, 25.14, 26.58, 28.06, 29.58, 30.7, 
+    31.92, 33.46, 35.15, 36.74, 38.33, 40.63, 43.36, 45.19, 47.02, 49.59, 
+    50.82, 50.6, 49.98, 49.98, 51.05, 52.08, 52.48, 53, 53.57, 53.74, 53.55, 
+    53.29, 53.13, 53.15, 53.28, 53.44, 53.58, 53.71, 53.86, 53.99, 54.13, 
+    54.29, 54.37, 54.34, 54.31, 54, 53.38, 52.03, 49.21, 47.04, 45.51, 43.75, 
+    43.06, 42.76, 42.27, 41.49, 40.64, 40.06, 39.22, 37.65, 36.39, 35.62, 
+    35.09, 34.82, 34.52, 33.57, 32.3, 31.34, 30.52, 30.06, 29.79, 29.64, 
+    29.73, 29.9, 30.09, 30.52, 31.89, 34.05, 35.63, 36.48, 36.52, 36.26, 
+    36.22, 36.39, 35.59, 32.69, 30.18, 29.27, 28.67, 28.04, 27.25, 26.66, 
+    26.64, 27.08, 27.83, 28.55, 28.71, 28.83, 29.84, 31.45, 32.65, 33.31, 
+    33.57, 33.69, 33.77, 33.81, 33.74, 33.55, 33.08, 32.22, 31.07, 29.98, 
+    29.29, 28.59, 28, 27.57, 27.2, 26.93, 26.84, 26.88, 26.96, 27.1, 27.42, 
+    28, 28.68, 29.29, 29.7, 30.16, 30.71, 31.45, 30.87, 27.34, 23.72, 19.87, 
+    17.8, 18.16, 18.99, 19.41, 19.58, 19.75, 19.99, 20.55, 21.42, 21.95, 
+    22.28, 22.79, 23.49, 23.94, 24.04, 24.02, 24.05, 24.36, 24.62, 24.84, 
+    25.1, 25.39, 25.63, 25.85, 26.05, 26.02, 25.46, 24.68, 24.46, 24.61, 
+    24.87, 25.03, 25.05, 25.02, 25.12, 25.21, 24.92, 24.33, 24.68, 24.87, 
+    23.45, 21.49, 20.51, 20.92, 22.96, 25.68, 27.29, 26.91, 26.2, 26.24, 
+    26.14, 25.43, 24.23, 23.05, 21.17, 19.13, 18.43, 18.95, 20.1, 21.53, 
+    21.84, 21.25, 20.77, 20.75, 20.95, 21.58, 21.63, 20.9, 20.97, 21.72, 
+    22.26, 22.45, 22.48, 22.41, 21.94, 20.97, 19.6, 17.71, 17.01, 17.35, 
+    17.74, 17.92, 17.92, 17.9, 18, 18.16, 18.39, 18.6, 18.69, 18.73, 18.78, 
+    18.89, 19.01, 19.01, 18.7, 17.52, 15.36, 12.85, 10.39, 9.02, 8.63, 8.39, 
+    8.03, 7.59, 6.92, 6.26, 5.67, 5.09, 4.58, 4.15, 3.95, 3.91, 3.88, 3.86, 
+    3.85, 3.84, 3.82, 3.83, 3.85, 3.86, 3.86, 3.84, 3.82, 3.79, 3.76, 3.7, 
+    3.61, 3.5, 3.44, 3.42, 3.38, 3.33, 3.29, 3.28, 3.25, 3.19, 3.14, 3.14, 
+    3.17, 3.19, 3.26, 3.39, 3.51, 3.62, 3.72, 3.83, 3.86, 3.82, 3.82, 3.85, 
+    3.9, 3.94, 3.96, 3.99, 4.01, 3.99, 3.91, 3.8, 3.66, 3.49, 3.36, 3.26, 
+    3.17, 3.04, 2.96, 2.98, 3.06, 3.06, 3.01, 2.97, 2.94, 2.89, 2.81, 2.74, 
+    2.67, 2.62, 2.58, 2.57, 2.58, 2.57, 2.55, 2.53, 2.54, 2.68, 2.94, 3.27, 
+    3.72, 4.16, 4.36, 4.42, 4.59, 4.82, 5.13, 5.35, 5.22, 4.73, 4.26, 4.19, 
+    4.39, 4.72, 5.18, 5.69, 6, 5.88, 5.66, 5.64, 5.68, 5.68, 5.64, 5.55, 5.4, 
+    5.25, 5.18, 5.14, 5.06, 4.85, 4.48, 4.18, 4.24, 4.38, 4.42, 4.47, 4.63, 
+    4.82, 4.91, 4.97, 5.16, 5.4, 5.62, 5.86, 6.07, 6.23, 6.35, 6.36, 6.24, 
+    6.11, 5.98, 5.86, 5.94, 6.3, 6.87, 7.37, 7.62, 7.79, 7.94, 7.88, 7.62, 
+    7.46, 7.58, 7.87, 8.08, 8.17, 8.22, 8.33, 8.4, 8.42, 8.45, 8.47, 8.46, 
+    8.51, 8.61, 8.68, 8.74, 8.8, 8.86, 8.94, 9, 9.04, 9.09, 9.14, 9.17, 9.2, 
+    9.22, 9.19, 9.14, 9.14, 9.24, 9.52, 9.89, 10.16, 10.13, 10.1, 10.13, 
+    10.14, 10.12, 10.1, 10.17, 10.26, 10.21, 10.09, 10.07, 10.14, 10.21, 
+    10.31, 10.42, 10.5, 10.56, 10.61, 10.64, 10.69, 10.81, 10.95, 11.07, 
+    11.17, 11.25, 11.39, 11.54, 11.62, 11.67, 11.71, 11.74, 11.64, 11.36, 
+    10.99, 10.54, 9.96, 9.7, 9.71, 9.66, 9.59, 9.62, 9.7, 9.78, 9.84, 9.88, 
+    9.78, 9.55, 9.37, 9.14, 8.83, 8.62, 8.49, 8.38, 8.25, 8.14, 8.15, 8.24, 
+    8.25, 8.09, 7.94, 7.92, 7.98, 7.95, 7.82, 7.72, 7.68, 7.62, 7.51, 7.32, 
+    7.04, 6.77, 6.64, 6.51, 6.32, 6.08, 5.9, 5.8, 5.68, 5.56, 5.47, 5.36, 
+    5.23, 5.14, 5.12, 5.11, 5.04, 4.86, 4.65, 4.56, 4.53, 4.5, 4.44, 4.34, 
+    4.2, 4.09, 4.04, 4.04, 4.02, 3.99, 3.97, 3.93, 3.86, 3.75, 3.63, 3.52, 
+    3.4, 3.27, 3.13, 3.01, 2.95, 2.93, 2.97, 3.06, 3.17, 3.26, 3.28, 3.29, 
+    3.42, 3.72, 4.08, 4.31, 4.48, 4.7, 4.91, 5.02, 5.12, 5.27, 5.42, 5.61, 
+    5.82, 5.97, 6.03, 6.08, 6.21, 6.38, 6.5, 6.61, 6.74, 6.96, 7.05, 6.86, 
+    6.73, 6.8, 6.96, 7.14, 7.36, 7.52, 7.5, 7.32, 7.17, 7.17, 7.38, 7.76, 
+    8.23, 8.39, 8.32, 8.26, 8.29, 8.39, 8.49, 8.52, 8.49, 8.39, 8.22, 8.03, 
+    7.98, 7.95, 7.82, 7.49, 7.02, 6.57, 6.28, 6.21, 6.15, 6.1, 6.08, 6.08, 
+    6.13, 6.16, 6.2, 6.25, 6.26, 6.16, 6.02, 5.99, 6.09, 6.2, 6.27, 6.29, 
+    6.27, 6.27, 6.26, 6.23, 6.2, 6.17, 6.12, 6.06, 6.04, 6.03, 6.05, 6.11, 
+    6.08, 5.96, 5.88, 5.91, 5.96, 6, 6.04, 6.05, 6.03, 6.01, 5.95, 5.79, 
+    5.55, 5.29, 5.07, 4.97, 4.96, 4.97, 4.98, 4.98, 4.95, 4.9, 4.86, 4.76, 
+    4.62, 4.55, 4.53, 4.52, 4.52, 4.51, 4.48, 4.45, 4.43, 4.4, 4.37, 4.33, 
+    4.3, 4.28, 4.28, 4.25, 4.21, 4.16, 4.07, 3.93, 3.79, 3.63, 3.52, 3.52, 
+    3.54, 3.54, 3.52, 3.5, 3.49, 3.48, 3.49, 3.66, 4.07, 4.49, 4.7, 4.78, 
+    4.79, 4.83, 4.97, 5.24, 5.48, 5.64, 5.76, 5.94, 6.27, 6.67, 7.15, 7.67, 
+    8.07, 8.36, 8.51, 8.75, 9.42, 10.16, 10.7, 11.2, 11.53, 11.67, 11.9, 
+    12.24, 12.56, 12.77, 12.95, 13.23, 13.64, 14.04, 14.41, 14.81, 15.08, 
+    15.21, 15.32, 15.58, 16.08, 16.65, 17.12, 17.53, 17.92, 18.33, 18.89, 
+    19.54, 19.95, 20.24, 20.56, 20.93, 21.25, 21.45, 21.45, 21.42, 21.45, 
+    21.21, 20.61, 20.28, 20.53, 20.79, 20.9, 21, 21.15, 21.26, 21.39, 21.57, 
+    21.77, 21.88, 21.89, 21.89, 21.92, 22.01, 22.11, 22.17, 22.23, 22.34, 
+    22.5, 22.68, 22.85, 23.01, 23.17, 23.26, 23.11, 22.79, 22.39, 22, 21.59, 
+    21.04, 20.39, 19.77, 19.37, 19.2, 19.08, 18.97, 18.88, 18.84, 18.81, 
+    18.76, 18.74, 18.71, 18.42, 18.03, 17.93, 18.01, 18.06, 17.95, 17.74, 
+    17.67, 17.94, 18.32, 18.56, 18.56, 18.43, 18.38, 18.33, 17.76, 16.61, 
+    15.25, 13.68, 12.41, 11.56, 10.99, 10.58, 10.32, 10.32, 10.52, 10.74, 
+    10.89, 10.97, 10.97, 10.93, 11, 11.15, 11.37, 11.7, 12.24, 12.93, 13.63, 
+    14.31, 14.99, 15.73, 16.48, 17.24, 17.98, 18.58, 18.98, 19.26, 19.41, 
+    19.51, 19.67, 19.96, 20.36, 20.83, 21.3, 21.73, 22.09, 22.38, 22.63, 
+    22.83, 22.97, 23.04, 23.08, 23.08, 23.12, 23.19, 23.23, 23.24, 23.25, 
+    23.26, 23.32, 23.42, 23.55, 23.69, 23.84, 23.98, 24.13, 24.26, 24.4, 
+    24.53, 24.65, 24.78, 24.92, 25.03, 25.14, 25.28, 25.43, 25.56, 25.65, 
+    25.64, 25.61, 25.59, 25.57, 25.56, 25.56, 25.55, 25.54, 25.5, 25.35, 
+    25.14, 24.96, 24.82, 24.7, 24.6, 24.58, 24.63, 24.71, 24.79, 24.84, 
+    24.86, 24.84, 24.8, 24.79, 24.84, 24.9, 24.94, 25, 25.04, 25.05, 25.02, 
+    24.96, 24.92, 24.94, 24.96, 24.94, 24.9, 24.88, 24.92, 25, 24.9, 24.72, 
+    24.55, 24.38, 24.18, 23.9, 23.51, 23.02, 22.56, 22.11, 21.64, 21.14, 
+    20.63, 20.13, 19.69, 19.39, 19.3, 19.35, 19.44, 19.53, 19.56, 19.52, 
+    19.44, 19.36, 19.33, 19.34, 19.42, 19.57, 19.78, 20, 20.18, 20.34, 20.46, 
+    20.55, 20.6, 20.61, 20.6, 20.56, 20.5, 20.44, 20.36, 20.25, 20.14, 20.06, 
+    20.04, 20.05, 20.05, 20, 19.89, 19.74, 19.62, 19.54, 19.5, 19.44, 19.29, 
+    19, 18.6, 18.15, 17.69, 17.32, 17.04, 16.83, 16.67, 16.54, 16.37, 16.19, 
+    16.01, 15.84, 15.66, 15.46, 15.26, 15.08, 14.9, 14.68, 14.38, 13.99, 
+    13.49, 12.88, 12.29, 11.99, 12.13, 12.61, 13.18, 13.57, 13.95, 14.41, 
+    14.86, 15.43, 16.06, 16.63, 17.07, 17.31, 17.42, 17.48, 17.48, 17.46, 
+    17.44, 17.41, 17.39, 17.38, 17.37, 17.35, 17.33, 17.32, 17.36, 17.44, 
+    17.53, 17.59, 17.66, 17.74, 17.82, 17.9, 17.98, 18.04, 18.11, 18.2, 
+    18.28, 18.36, 18.44, 18.51, 18.57, 18.66, 18.72, 18.8, 18.88, 18.93, 
+    18.98, 19.02, 19.07, 19.14, 19.21, 19.27, 19.33, 19.39, 19.42, 19.46, 
+    19.49, 19.51, 19.53, 19.55, 19.56, 19.54, 19.49, 19.41, 19.31, 19.18, 
+    19.02, 18.85, 18.68, 18.53, 18.38, 18.22, 18.07, 17.92, 17.8, 17.69, 
+    17.52, 17.24, 16.86, 16.36, 15.79, 15.22, 14.76, 14.43, 14.2, 13.95, 
+    13.61, 13.2, 12.72, 12.16, 11.65, 11.22, 10.92, 10.73, 10.61, 10.56, 
+    10.57, 10.62, 10.69, 10.79, 10.93, 11.08, 11.26, 11.46, 11.66, 11.86, 
+    12.08, 12.32, 12.57, 12.81, 12.91, 12.93, 12.86, 12.7, 12.48, 12.24, 
+    11.95, 11.59, 11.27, 11, 10.69, 10.38, 10.12, 9.88, 9.65, 9.42, 9.22, 
+    9.04, 8.9, 8.78, 8.64, 8.48, 8.29, 8.09, 7.89, 7.7, 7.52, 7.36, 7.2, 
+    7.05, 6.93, 6.82, 6.7, 6.58, 6.44, 6.25, 6.05, 5.81, 5.56, 5.33, 5.13, 
+    4.94, 4.78, 4.66, 4.58, 4.51, 4.45, 4.39, 4.31, 4.25, 4.21, 4.18, 4.14, 
+    4.09, 4.03, 3.95, 3.85, 3.74, 3.62, 3.51, 3.42, 3.33, 3.26, 3.18, 3.11, 
+    3.05, 3, 2.95, 2.91, 2.87, 2.81, 2.76, 2.72, 2.69, 2.64, 2.61, 2.57, 
+    2.53, 2.49, 2.43, 2.37, 2.31, 2.25, 2.2, 2.16, 2.12, 2.08, 2.02, 1.96, 
+    1.89, 1.83, 1.77, 1.71, 1.66, 1.63, 1.59, 1.55, 1.51, 1.47, 1.43, 1.41, 
+    1.39, 1.36, 1.33, 1.3, 1.27, 1.27, 1.26, 1.25, 1.23, 1.22, 1.2, 1.17, 
+    1.16, 1.15, 1.14, 1.12, 1.1, 1.08, 1.07, 1.07, 1.1, 1.12, 1.12, 1.11, 
+    1.1, 1.07, 1.04, 1.02, 1.01, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ;
+
+ pbl_height_heffter = _ ;
+
+ qc_pbl_height_heffter = _ ;
+
+ regime_type = _ ;
+
+ qc_regime_type = _ ;
+
+ pbl_height_liuliang = _ ;
+
+ qc_pbl_height_liuliang = _ ;
+
+ pbl_height_bulkrichardson_pt25 = _ ;
+
+ qc_pbl_height_bulkrichardson_pt25 = _ ;
+
+ pbl_height_bulkrichardson_pt5 = _ ;
+
+ qc_pbl_height_bulkrichardson_pt5 = _ ;
+
+ pressure_gridded = _, _ ;
+
+ lapserate_theta_ss = _, _ ;
+
+ lapserate_theta_smoothed = _, _ ;
+
+ pressure_ss = _, _ ;
+
+ theta_ss = _, _ ;
+
+ height_ss = _, _ ;
+
+ wspd_ss = _, _ ;
+
+ br_profile = _, _ ;
+
+ thetav = _, _ ;
+
+ bottom_inversion = _, _, _, _, _ ;
+
+ top_inversion = _, _, _, _, _ ;
+
+ max_lapse_rate = _, _, _, _, _ ;
+
+ max_delta_theta = _, _, _, _, _ ;
+
+ ll_level_1 = _ ;
+
+ ll_level_2 = _ ;
+
+ lat = _ ;
+
+ lon = _ ;
+
+ alt = _ ;
+}
