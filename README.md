@@ -31,7 +31,8 @@ Open a terminal and change the current working directory to the location where y
 `$> git clone https://github.com/ARM-DOE/ADI.git` 
 
 Then enter into the main directory  
-`$> cd <installation_area>/ADI/  
+`$> cd <installation_area>/ADI/`  
+
 Make sure you have the latest vbguest addition installed  
 `$> vagrant plugin install vagrant-vbguest`  
 
