@@ -96,17 +96,19 @@ SCRIPT
 Vagrant.configure(2) do |config|
 
   config.vm.box = "bento/centos-6.7"
-  config.vm.synced_folder ".", "/vagrant"
+  config.vm.synced_folder ".", "/vagrant", type: "nfs"
   config.ssh.insert_key = false
   config.ssh.private_key_path = ["~/.ssh/id_rsa","~/.vagrant.d/insecure_private_key"]
   config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination:"~/.ssh/authorized_keys"
   config.ssh.forward_agent = true
 
+  config.vm.network "private_network", ip: "192.168.120.120"
   config.vm.provision :shell, inline: $scriptfirst
 
   config.vm.provision :shell, inline: "sudo yum -y update"
   config.vm.provision :shell, inline: "sudo yum -y install epel-release vim"
   config.vm.provision :shell, inline: "sudo yum -y groupinstall adi6"
+  config.vm.provision :shell, inline: "sudo yum -y install kernel-devel"
   config.vm.provision :shell, inline: "sudo yum -y install netcdf-devel dsdb-sqlite dsdb-python_lib unzip udunits2 man afl-libcds3"
 
   config.vm.provision :shell, inline: $scriptsecond 
