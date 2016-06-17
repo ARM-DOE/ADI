@@ -48,13 +48,11 @@ PLEASE remember your passphrase since you will be asked for it later in the firs
 To set up the virtual machine, run  
 `$> vagrant up`  
 
-This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/)) for ARM's base data directory ($DATA_HOME). The directory location from the host machine    
-   `<installation_area>/ADI/ADI_Vagrant/data`    
-is synced to the directory location on the virtual machine     
-   `/home/vagrant/adi_home/data`
-Allowing you to update and access data files on your host machine, and also use the resources in the virtual machine to read and write data to the same area. 
-
-Under $DATA_HOME the directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).  
+This will complete the installation of the rh6 VM, dependencies, and ADI libraries. A vagrant  [synced folder](https://www.vagrantup.com/docs/synced-folders/) will be setup. The directory location from the host machine  
+`<installation_area>/ADI`    
+is synced to the directory location on the virtual machine  
+`/vagrant`     
+Allowing you to update and access files on your host machine, and also use the resources in the virtual machine. We have created data directory for you. It is `<installation_area>/ADI/data`, and you can also access this data directory by `/vagrant/data` on virtual machine. The directory structure is organized according to ARM's [data directory heiarchy](https://engineering.arm.gov/ADI_doc/pcm.html#define-environment-variables).  
 
 To run ADI processes you will need to secure shell into the virtual development environment.  This is similar to logging into remote servers from your host machine.    
 `$> vagrant ssh`  
@@ -78,16 +76,16 @@ To temporarily stop the virtual machine, type "vagrant halt" under host machine
 To restart the virtual machine after last vagrant halt, type "vagrant up" under host machine  
 `$> vagrant up`
   
-To completely destroy the virtual machine, and release the resources VM uses, run    
+To destroy the virtual machine, and release the resources VM uses, run    
 `$> vagrant destroy`  
-This will destroy the VM but leave the 
-   <installation_area>/ADI/ directory untouched.  
-Thus, leaving the data stored in the synced area and the files needed to resintall the VM, should you choose to by re-executing `vagrant up` to build the virtual environment from scratch.
+This will destroy the VM but leave the `<installation_area>/ADI` directory untouched, thus leaving the data stored in the synced area. You can run `vagrant up` to re-build the virtual environment from scratch.  
 
-Your development area where you keep algorithm's source code is located in
-   `/home/vagrant/adi_home/dev/vap/src`   
-with binaries in   
-   `/home/vagrant/adi_home/dev/vap/bin`   
+To further remove stuff related to adi virtual machine, you can copy your data in `<installation_area>/ADI/data` to somewhere else and then further delete the whole directory `<installation_area>/ADI` as well as the private-key pairs `~/.ssh/id_rsa`,`~/.ssh/id_rsa.pub`. As a result, you can start from the private key generaion step to re-build the adi-virtual machine.
+
+Your development area where you keep algorithm's source code is located in  
+`/home/vagrant/adi_home/dev/vap/src`   
+with binaries in  
+`/home/vagrant/adi_home/dev/vap/bin`   
 
 ####Run ADI_Example  
 The adi_example1 has been downloaded and precompiled.  
