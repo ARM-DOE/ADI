@@ -40,8 +40,8 @@ Make sure you have the latest vbguest addition installed
 For security consideration, you should generate your personal secure key pairs to log in the virtual machine. So run  
 `ssh-keygen -t rsa`  
 
-The above command will generate key pairs under `~/.ssh/`, and ask you a passphrase.  
-PLEASE remember your passphrase since you will be asked for it later in the first ssh into virtual machine!!!  
+The above command will generate key pairs under `~/.ssh/`, and ask you a passphrase. You creat your passphrase here.  
+PLEASE DO remember your passphrase since you will be asked for it later in the first ssh into virtual machine and whenever you vagrant up or vagrant destroy!!!  
 
 
 ####Virtual Machine Access and File Setup
