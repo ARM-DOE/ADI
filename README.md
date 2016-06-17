@@ -92,9 +92,6 @@ The adi_example1 has been downloaded and precompiled.
 In this example, two output data products are created. From within the VM these are located in    `/home/vagrant/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/` and    
 `/home/vagrant/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/`.  
 
-WARNING:  !!!  It is not possible to overwrite output files in the VM. Therefore between runs you must delete existing files before trying to recreate them!!!!!!   
-If you fail to do this your process will exit with the following status  
-  `dsproc_status: 'Could Not Write To NetCDF File'  `
 
 - Run C version of example1  
   - each time make sure there is no previous written netCDF file in the output directory
