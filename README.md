@@ -24,6 +24,7 @@ Note that we provide two options to install ADI framework. The first one is to r
   
 ####Tools  
 Download and install latest [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org)  
+Note July 2016:  Vagrant 1.8.4 and Virtualbox 5.1.X aren't compatible on MacOS 10.11.  If Vagrant 1.8.4 is installed, install Virtualbox 5.0 OLD BUILD.
 
 ####Install  
 
