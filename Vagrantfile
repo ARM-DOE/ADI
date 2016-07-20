@@ -55,13 +55,13 @@ tar -xzvf adi_vm_home.tar.gz
 rm adi_vm_home.tar.gz
 mv ~/adi_home/data /vagrant/data
 mkdir -p /vagrant/data/db/sqlite
-mkdir -p /home/vagrant/adi_home/data/db/sqlite
-cp /apps/ds/conf/sqlite/20151006.185806.dsdb.sqlite ~/adi_home/data/db/sqlite/dsdb.sqlite
+rm ~/adi_home/env_vars_bash
+rm ~/adi_home/env_vars_bash_linux
 cp /apps/ds/conf/sqlite/20151006.185806.dsdb.sqlite /vagrant/data/db/sqlite/dsdb.sqlite
 
 cat > ~/.db_connect << EOF
-dsdb_data sqlite  /home/vagrant/adi_home/data/db/sqlite/dsdb.sqlite
-dsdb_read sqlite /home/vagrant/adi_home/data/db/sqlite/dsdb.sqlite
+dsdb_data sqlite  /vagrant/data/db/sqlite/dsdb.sqlite
+dsdb_read sqlite /vagrant/data/db/sqlite/dsdb.sqlite
 EOF
 
 cd ~/adi_home/dev/vap/src/adi_example1/process_dod_defs
@@ -73,7 +73,6 @@ cp linux_makefile Makefile
 make clean
 make
 cd ~/
-#rm -rf adi_home.tar.gz adi_home.tar.gz.1 adi-macosx-master adi-python-1.1.tar master.zip
 
 wget -N -r -O adi-python.tar https://engineering.arm.gov/~gaustad/adi-python-1.1.tar
 tar -xvf adi-python.tar

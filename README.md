@@ -24,7 +24,7 @@ Note that we provide two options to install ADI framework. The first one is to r
   
 ####Tools  
 Download and install latest [Vagrant](https://www.vagrantup.com) and [VirtualBox](https://www.virtualbox.org)  
-Note July 2016:  Vagrant 1.8.4 and Virtualbox 5.1.X aren't compatible on MacOS 10.11.  If Vagrant 1.8.4 is installed, install Virtualbox 5.0 OLD BUILD.
+
 
 ####Install  
 
@@ -33,9 +33,7 @@ Open a terminal and change the current working directory to the location where y
 
 Then enter into the main directory  
 `$> cd <installation_area>/ADI/`  
-
-Make sure you have the latest vbguest addition installed  
-`$> vagrant plugin install vagrant-vbguest`  
+ 
 
 ####Secure private key  
 For security consideration, you should generate your personal secure key pairs to log in the virtual machine. So run  
@@ -90,34 +88,34 @@ with binaries in
 
 ####Run ADI_Example  
 The adi_example1 has been downloaded and precompiled.  
-In this example, two output data products are created. From within the VM these are located in    `/home/vagrant/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/` and    
-`/home/vagrant/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/`.  
+In this example, two output data products are created. From within the VM the output will be located in    `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/` and    
+`/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/`.  
 
 
 - Run C version of example1  
-  - each time make sure there is no previous written netCDF file in the output directory
   - go to the `/home/vagrant/adi_home/dev/vap/src/adi_example1` directory
   - run `adi_example1_vap -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   -  The output are:   
     `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
     `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     They can also be acccessed from host machine  
-   `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
-   `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf` 
+   `<installation_area>/ADI/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
+   `<installation_area>/ADI/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf` 
     
     
 - Run Python version of example1
-  - remove any existing output netCDF files located in the output directories   
-     `rm  /vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`
-     `rm  /vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
   - go to the /home/vagrant/adi_home/dev/vap/src/adi_example1_py directory    
   - run `python adi_example1_vap.py -s sbs -f S2 -b 20110401 -e 20110402 -D 2 -R`  
   - The output files created are:  
     `/vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`
     `/vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
     They can also be acccessed from host machine  
-    `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
-    `<installation_area>/ADI/ADI_Vagrant/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`  
+    `<installation_area>/ADI/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf`  
+    `<installation_area>/ADI/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf`
+    
+Note the environment variables can be set in `[vagrant@localhost $]: ~/.bashrc`.  
+To run other examples other than example1, you should first go to `process_dod_defs` under that examples's directory, and run the commands in `.../adi_example_x/process_dod_defs/README` to import the process, then go through the steps like in example1.   
+  
     
     
 
