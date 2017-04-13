@@ -5,6 +5,8 @@ ARM Data Integrator, ADI, is an open source framework that automates the process
 
 ADI is used by the 'Atmospheric Radiation Measurement (ARM) Climate Research Facility <http://www.arm.gov>' to process raw data collected from ARM instruments, and to implement scientific algorithms that process one or more of ARM's existing data products to produce new, higher value, data products.
 
+This package of the code is for users local work station (i.e. not ARM processing systems).  As such it is updated for major changes in functionality and not for minor incremental improvements.  
+
 Important Links
 ===============
 
