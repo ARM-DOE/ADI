@@ -23,23 +23,23 @@ Note that we provide two options to install ADI framework. The first one is to b
 
 For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to install the following dependencies.
 
-    * **build system**
-        * autoconf
-        * automake
-        * gcc
-        * libtool
-        * m4
+* **build system**
+    * autoconf
+    * automake
+    * gcc
+    * libtool
+    * m4
 
-    * **first order library dependencies**
-        * netcdf
-        * openssl
-        * pkg-config
-        * postgresql
-        * udunits
+* **first order library dependencies**
+    * netcdf
+    * openssl
+    * pkg-config
+    * postgresql
+    * udunits
 
-    * **optional**
-        * python
-        * sqlite
+* **optional**
+    * python
+    * sqlite
 
 ### Install  
 
