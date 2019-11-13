@@ -45,9 +45,9 @@ For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to ins
 
 The following commands will download and install all ADI libraries to /usr/local. Top install to a different location run the install_adi.sh script with the --prefix option. For more details run 'install_adi.sh -h'.
 
-`git clone https://github.com/ARM-DOE/ADI.git`
-`cd ADI`
-`install_adi.sh`
+    git clone https://github.com/ARM-DOE/ADI.git
+    cd ADI
+    install_adi.sh
 
 ### Run ADI_Example (coming soon) 
 
