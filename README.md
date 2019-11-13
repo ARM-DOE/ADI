@@ -21,7 +21,7 @@ Note that we provide two options to install ADI framework. The first one is to b
  
 ### Prerequisites
 
-For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to install the following dependencies.
+For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to install the following dependencies. Linux users will need to install both the runtime and devel packages. The highest version available for all packages should work.
 
 * **build system**
     * autoconf
@@ -29,21 +29,28 @@ For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to ins
     * gcc
     * libtool
     * m4
+    * pkgconfig
 
 * **first order library dependencies**
     * netcdf
     * openssl
-    * pkg-config
     * postgresql
-    * udunits
+    * udunits  (macOS)
+    * udunits2 (Linux)
+    * openblas (macOS)
+    * atlas    (Linux)
+
+* **optional** (required for python bindings)
+    * python
+    * cython (on macOS use 'pip3 install cython' instead of brew)
+    * numpy  (on macOS use 'pip3 install numpy'  instead of brew)
 
 * **optional**
-    * python
     * sqlite
 
 ### Install  
 
-The following commands will download and install all ADI libraries to /usr/local. Top install to a different location run the install_adi.sh script with the --prefix option. For more details run 'install_adi.sh -h'.
+The following commands will download and install all ADI libraries to /usr/local. To install to a different location run the install_adi.sh script with the --prefix option. For more details run 'install_adi.sh -h'.
 
     git clone https://github.com/ARM-DOE/ADI.git
     cd ADI
