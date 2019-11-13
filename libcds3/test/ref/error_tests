@@ -1,0 +1,148 @@
+
+============================================================
+Group Error Handling Tests
+============================================================
+
+------------------------------------------------------------
+- Deleting a locked group should fail.
+
+ERROR: Could not delete group: /root/group_1
+ -> the group definition lock is set to: 1
+
+------------------------------------------------------------
+- Defining a subgroup in a locked group should fail.
+
+ERROR: Could not define group: /root/group_1/subgroup_def_in_locked_group
+ -> the parent group definition lock is set to: 1
+
+------------------------------------------------------------
+- Deleting a subgroup from a locked group should fail.
+
+ERROR: Could not delete group: /root/group_1/group_1_1
+ -> the parent group definition lock is set to: 1
+
+------------------------------------------------------------
+- Defining a dimension in a locked group should fail.
+
+ERROR: Could not define dimension: /root/group_1/_dims_/dim_def_in_locked_group
+ -> the group definition lock is set to: 1
+
+------------------------------------------------------------
+- Deleting a dimension from a locked group should fail.
+
+ERROR: Could not delete dimension: /root/group_1/_dims_/dim_1_2
+ -> the group definition lock is set to: 1
+
+------------------------------------------------------------
+- Defining an attribute in a locked group should fail.
+
+ERROR: Could not define attribute: /root/group_1/_atts_/att_def_in_locked_group
+ -> the group definition lock is set to: 1
+
+------------------------------------------------------------
+- Deleting an attribute from a locked group should fail.
+
+ERROR: Could not delete attribute: /root/group_1/_atts_/att_1_1
+ -> the group definition lock is set to: 1
+
+------------------------------------------------------------
+- Defining a variable in a locked group should fail.
+
+ERROR: Could not define variable: /root/group_1/_vars_/var_def_in_locked_group
+ -> the group definition lock is set to: 1
+
+------------------------------------------------------------
+- Deleting a variable from a locked group should fail.
+
+ERROR: Could not delete variable: /root/group_1/_vars_/var_1_1
+ -> the group definition lock is set to: 1
+
+============================================================
+Dimension Error Handling Tests
+============================================================
+
+------------------------------------------------------------
+- Defining a dimension that already exists should fail.
+
+ERROR: Could not define dimension: /root/group_1/_dims_/dim_1_2
+ -> dimension exists
+
+------------------------------------------------------------
+- Deleting a locked dimension should fail.
+
+ERROR: Could not delete dimension: /root/group_1/_dims_/dim_1_2
+ -> the dimension definition lock is set to: 1
+
+------------------------------------------------------------
+- Changing the length of a locked dimension should fail.
+
+ERROR: Could not change dimension length for: /root/group_1/_dims_/dim_1_2
+ -> the dimension definition lock is set to: 1
+
+============================================================
+Attribute Error Handling Tests
+============================================================
+
+------------------------------------------------------------
+- Defining an attribute that already exists should fail.
+
+ERROR: Could not define attribute: /root/group_1/_atts_/att_1_1
+ -> attribute exists
+
+------------------------------------------------------------
+- Deleting a locked attribute should fail.
+
+ERROR: Could not delete attribute: /root/group_1/_atts_/att_1_1
+ -> the attribute definition lock is set to: 1
+
+------------------------------------------------------------
+- Changing the value of a locked attribute should fail.
+
+ERROR: Could not change attribute value for: /root/group_1/_atts_/att_1_1
+ -> the attribute definition lock is set to: 1
+
+============================================================
+Variable Error Handling Tests
+============================================================
+
+------------------------------------------------------------
+- Defining a variable that already exists should fail.
+
+ERROR: Could not define variable: /root/group_1/_vars_/var_1_1
+ -> variable exists
+
+------------------------------------------------------------
+- Defining a variable with an undefined dimension should fail.
+
+ERROR: Could not define variable: /root/group_1/_vars_/var_with_undef_dim
+ -> dimension not defined: undefined_dim
+
+------------------------------------------------------------
+- The record dimension must be first in a variable definition.
+
+ERROR: Could not define variable: /root/group_1/_vars_/var_with_unlim_dim_last
+ -> unlimited dimension must be first: time
+
+------------------------------------------------------------
+- Deleting a locked variable should fail.
+
+ERROR: Could not delete variable: /root/group_1/_vars_/var_1_1
+ -> the variable definition lock is set to: 1
+
+------------------------------------------------------------
+- Changing the data type of a locked variable should fail.
+
+ERROR: Could not convert variable data type for: /root/group_1/_vars_/var_1_1
+ -> the variable definition lock is set to: 1
+
+------------------------------------------------------------
+- Defining an attribute in a locked variable should fail.
+
+ERROR: Could not define attribute: /root/group_1/_vars_/var_1_1/_atts_/att_def_in_locked_var
+ -> the variable definition lock is set to: 1
+
+------------------------------------------------------------
+- Deleting an attribute from a locked variable should fail.
+
+ERROR: Could not delete attribute: /root/group_1/_vars_/var_1_1/_atts_/att_1_1
+ -> the variable definition lock is set to: 1

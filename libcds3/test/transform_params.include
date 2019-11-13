@@ -1,0 +1,15 @@
+# Test Include Transformations Parameters File
+
+# Set the transformation parameters for time:
+time:old_bin_position = trailing edge;
+time:old_bin_width    = 60;
+time:from_include     = this parameter is from the include file;
+
+# Set the transformation parameters for range:
+range:old_bin_position = center;
+range:old_bin_width    = 15;
+
+var_2D:transformation = TRANS_DEFAULT;
+var_2D:weight         = 1.0;
+var_2D:missing_value  = -9999;
+var_2D:qc_mask        = 1;

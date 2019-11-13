@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libncds3
+Description: NetCDF Wrapper using CDS Structures
+Version: @VERSION@
+Requires: cds3 netcdf
+Cflags: -I${includedir} 
+Libs: -L${libdir} -lncds3

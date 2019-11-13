@@ -1,0 +1,1045 @@
+################################################################################
+#
+#  COPYRIGHT (C) 2007 Battelle Memorial Institute.  All Rights Reserved.
+#
+################################################################################
+#
+#  Author:
+#     name:  Brian Ermold
+#     phone: (509) 375-2277
+#     email: brian.ermold@arm.gov
+#
+################################################################################
+
+################################################################################
+#
+# Private Variable Declarations Used For Convenience
+#
+
+my $_DSC_NAME      = 'dsc_name';
+my $_DSC_LEVEL     = 'dsc_level';
+my $_DOD_VERSION   = 'dod_version';
+my $_DOD_TIME      = 'dod_time';
+
+my $_REV_NUM       = 'rev_num';
+my $_REV_USER      = 'rev_user';
+my $_REV_DATA      = 'rev_date';
+my $_REV_CHANGES   = 'rev_changes';
+
+my $_DATA_TYPE     = 'data_type';
+
+my $_DIM_NAME      = 'dim_name';
+my $_DIM_LEN       = 'dim_length';
+my $_DIM_LEN_TXT   = 'dim_length_text';
+my $_DIM_ORDER     = 'dim_order';
+
+my $_ATT_NAME      = 'att_name';
+my $_ATT_VALUE     = 'att_value';
+my $_ATT_TYPE      = 'att_type';
+my $_ATT_ORDER     = 'att_order';
+
+my $_VAR_NAME      = 'var_name';
+my $_VAR_TYPE      = 'var_type';
+my $_VAR_ORDER     = 'var_order';
+
+my $_VAR_DIM_ORDER = 'var_dim_order';
+my $_VAR_ATT_ORDER = 'var_att_order';
+
+my $_SITE          = 'site';
+my $_FAC           = 'facility';
+my $_ATT_TIME      = 'att_time';
+
+my $_PROP_KEY      = 'prop_key';
+my $_PROP_VAL      = 'prop_value';
+
+my $_DS_PROP_NAME  = 'ds_prop_name';
+my $_DS_PROP_VAL   = 'ds_prop_value';
+my $_DS_PROP_TIME  = 'ds_prop_time';
+
+################################################################################
+#
+# The Stored Procedure Argument Types
+#
+
+%DBArgTypes = (
+    $_DSC_NAME      => 'text',
+    $_DSC_LEVEL     => 'text',
+    $_DOD_VERSION   => 'text',
+    $_DOD_TIME      => 'timestamp',
+    $_REV_NUM       => 'integer',
+    $_REV_USER      => 'text',
+    $_REV_DATA      => 'timestamp',
+    $_REV_CHANGES   => 'text',
+    $_DATA_TYPE     => 'text',
+    $_DIM_NAME      => 'text',
+    $_DIM_LEN       => 'integer',
+    $_DIM_LEN_TXT   => 'text',
+    $_DIM_ORDER     => 'integer',
+    $_ATT_NAME      => 'text',
+    $_ATT_VALUE     => 'text',
+    $_ATT_TYPE      => 'text',
+    $_ATT_ORDER     => 'integer',
+    $_VAR_NAME      => 'text',
+    $_VAR_TYPE      => 'text',
+    $_VAR_ORDER     => 'integer',
+    $_VAR_DIM_ORDER => 'integer',
+    $_VAR_ATT_ORDER => 'integer',
+    $_SITE          => 'text',
+    $_FAC           => 'text',
+    $_ATT_TIME      => 'timestamp',
+    $_PROP_KEY      => 'text',
+    $_PROP_VAL      => 'text',
+    $_DS_PROP_NAME  => 'text',
+    $_DS_PROP_VAL   => 'text',
+    $_DS_PROP_TIME  => 'timestamp',
+);
+
+################################################################################
+#
+# The Order In Which Data Must Be Loaded Into The Tables
+#
+
+@DBLoadOrder = (
+    'data_types',
+    'dim_names',
+    'dimensions',
+    'att_names',
+    'attributes',
+    'var_names',
+    'variables',
+    'dod_versions',
+    'dod_revisions',
+    'dod_dims',
+    'dod_atts',
+    'dod_vars',
+    'dod_var_dims',
+    'dod_var_atts',
+    'ds_dods',
+    'ds_atts',
+    'ds_time_atts',
+    'ds_var_atts',
+    'ds_var_time_atts',
+    'ds_property_names',
+    'ds_properties',
+    'dodvar_property_keys',
+    'dodvar_property_values',
+);
+
+################################################################################
+#
+# The Stored Procedure Definitions
+#
+
+%DBSPDefs = (
+
+    ##### Data Types Table #####################################################
+
+    'data_types' => {
+        'define' => {
+            'proc' => 'define_data_type',
+            'args' => [$_DATA_TYPE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_data_type',
+            'args' => [$_DATA_TYPE],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_data_types',
+            'args' => [$_DATA_TYPE],
+            'rets' => [$_DATA_TYPE],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Dimension Names Table ################################################
+
+    'dim_names' => {
+        'define' => {
+            'proc' => 'define_dim_name',
+            'args' => [$_DIM_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dim_name',
+            'args' => [$_DIM_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dim_names',
+            'args' => [$_DIM_NAME],
+            'rets' => [$_DIM_NAME],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Dimensions Table #####################################################
+
+    'dimensions' => {
+        'define' => {
+            'proc' => 'define_dimension',
+            'args' => [$_DIM_NAME, $_DIM_LEN],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dimension',
+            'args' => [$_DIM_NAME, $_DIM_LEN],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dimensions',
+            'args' => [$_DIM_NAME, $_DIM_LEN_TXT],
+            'rets' => [$_DIM_NAME, $_DIM_LEN],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Attribute Names Table ################################################
+
+    'att_names' => {
+        'define' => {
+            'proc' => 'define_att_name',
+            'args' => [$_ATT_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_att_name',
+            'args' => [$_ATT_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_att_names',
+            'args' => [$_ATT_NAME],
+            'rets' => [$_ATT_NAME],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Attributes Table #####################################################
+
+    'attributes' => {
+        'define' => {
+            'proc' => 'define_attribute',
+            'args' => [$_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_attribute',
+            'args' => [$_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_attributes',
+            'args' => [$_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'rets' => [$_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Variable Names Table #################################################
+
+    'var_names' => {
+        'define' => {
+            'proc' => 'define_var_name',
+            'args' => [$_VAR_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_var_name',
+            'args' => [$_VAR_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_var_names',
+            'args' => [$_VAR_NAME],
+            'rets' => [$_VAR_NAME],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Variables Table ######################################################
+
+    'variables' => {
+        'define' => {
+            'proc' => 'define_variable',
+            'args' => [$_VAR_NAME, $_VAR_TYPE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_variable',
+            'args' => [$_VAR_NAME, $_VAR_TYPE],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_variables',
+            'args' => [$_VAR_NAME, $_VAR_TYPE],
+            'rets' => [$_VAR_NAME, $_VAR_TYPE],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DOD Versions Table ###################################################
+
+    'dod_versions' => {
+        'define' => {
+            'proc' => 'define_dod_version',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dod_version',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'delete_definition' => {
+            'proc' => 'delete_dod_version_definition',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'get_highest' => {
+            'proc' => 'get_highest_dod_version',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL],
+            'rets' => [$_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dod_versions',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DOD Revisions Table ###################################################
+
+    'dod_revisions' => {
+        'define' => {
+            'proc' => 'define_dod_revision',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_REV_USER, $_REV_CHANGES],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dod_revisions',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dod_revisions',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_REV_USER],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_REV_NUM, $_REV_USER, $_REV_DATE, $_REV_CHANGES],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DOD Dimensions Table #################################################
+
+    'dod_dims' => {
+        'define' => {
+            'proc' => 'define_dod_dim',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_DIM_NAME, $_DIM_LEN, $_DIM_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dod_dim',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_DIM_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_dod_dims',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'rets' => [$_DIM_NAME, $_DIM_LEN, $_DIM_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dod_dims',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_DIM_NAME, $_DIM_LEN_TXT],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_DIM_NAME, $_DIM_LEN, $_DIM_ORDER],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DOD Attributes Table #################################################
+
+    'dod_atts' => {
+        'define' => {
+            'proc' => 'define_dod_att',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE, $_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dod_att',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_ATT_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_dod_atts',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'rets' => [$_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE, $_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dod_atts',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE, $_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DOD Variables Table #################################################
+
+    'dod_vars' => {
+        'define' => {
+            'proc' => 'define_dod_var',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_VAR_TYPE, $_VAR_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dod_var',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_dod_vars',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'rets' => [$_VAR_NAME, $_VAR_TYPE, $_VAR_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dod_vars',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_VAR_TYPE],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_VAR_TYPE, $_VAR_ORDER],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    #### DOD Variable Property Keys Table ######################################
+
+    'dodvar_property_keys' => {
+        'define' => {
+            'proc' => 'define_dodvar_property_key',
+            'args' => [$_PROP_KEY],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dodvar_property_key',
+            'args' => [$_PROP_KEY],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_dodvar_property_keys',
+            'rets' => [$_PROP_KEY],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dodvar_property_keys',
+            'args' => [$_PROP_KEY],
+            'rets' => [$_PROP_KEY],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    #### DOD Variable Property Values Table ####################################
+
+    'dodvar_property_values' => {
+        'define' => {
+            'proc' => 'define_dodvar_property_value',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_PROP_KEY, $_PROP_VAL],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dodvar_property_value',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_PROP_KEY],
+            'api'  => 'NaturalKey',
+        },
+        'delete_by_dod' => {
+            'proc' => 'delete_dod_properties',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'get_by_dod' => {
+            'proc' => 'get_dod_property_values',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_PROP_KEY, $_PROP_VAL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dodvar_property_values',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_PROP_KEY],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_PROP_KEY, $_PROP_VAL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DOD Variable Dimensions Table ########################################
+
+    'dod_var_dims' => {
+        'define' => {
+            'proc' => 'define_dod_var_dim',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_DIM_NAME, $_VAR_DIM_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dod_var_dim',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_DIM_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_dod_var_dims',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME],
+            'rets' => [$_VAR_NAME, $_DIM_NAME, $_DIM_LEN,
+                       $_VAR_ORDER, $_VAR_DIM_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dod_var_dims',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_DIM_NAME, $_DIM_LEN_TXT],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_DIM_NAME, $_DIM_LEN,
+                       $_VAR_ORDER, $_VAR_DIM_ORDER],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DOD Variable Attributes Table ########################################
+
+    'dod_var_atts' => {
+        'define' => {
+            'proc' => 'define_dod_var_att',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE,
+                       $_VAR_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dod_var_att',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_ATT_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_dod_var_atts',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME],
+            'rets' => [$_VAR_NAME, $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE,
+                       $_VAR_ORDER, $_VAR_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dod_var_atts',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION,
+                       $_VAR_NAME, $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE,
+                       $_VAR_ORDER, $_VAR_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DS DODs Table ########################################################
+
+    'ds_dods' => {
+        'define' => {
+            'proc' => 'define_ds_dod',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_DOD_TIME, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_ds_dod',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_DOD_TIME],
+            'api'  => 'NaturalKey',
+        },
+        'get_versions' => {
+            'proc' => 'get_ds_dod_versions',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL],
+            'rets' => [$_DOD_TIME, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_ds_dods',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_DOD_VERSION],
+            'rets' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_DOD_TIME, $_DOD_VERSION],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DS Attributes Table ##################################################
+
+    'ds_atts' => {
+        'define' => {
+            'proc' => 'define_ds_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_ds_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_ds_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL],
+            'rets' => [$_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_ds_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'rets' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DS Time Attributes Table #############################################
+
+    'ds_time_atts' => {
+        'define' => {
+            'proc' => 'define_ds_time_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_ds_time_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TIME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_ds_time_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_ATT_TIME],
+            'rets' => [$_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'get_att' => {
+            'proc' => 'get_ds_time_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TIME],
+            'rets' => [$_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'get_times' => {
+            'proc' => 'get_ds_att_times',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME],
+            'rets' => [$_ATT_NAME, $_ATT_TIME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_ds_time_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'rets' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL,
+                       $_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DS Variable Attributes Table #########################################
+
+    'ds_var_atts' => {
+        'define' => {
+            'proc' => 'define_ds_var_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_ds_var_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_ds_var_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME],
+            'rets' => [$_VAR_NAME, $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_ds_var_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'rets' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DS Variable Time Attributes Table ####################################
+
+    'ds_var_time_atts' => {
+        'define' => {
+            'proc' => 'define_ds_var_time_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_ds_var_time_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TIME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_ds_var_time_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_TIME],
+            'rets' => [$_VAR_NAME, $_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'get_att' => {
+            'proc' => 'get_ds_var_time_att',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TIME],
+            'rets' => [$_VAR_NAME, $_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'get_times' => {
+            'proc' => 'get_ds_var_att_times',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME],
+            'rets' => [$_VAR_NAME, $_ATT_NAME, $_ATT_TIME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_ds_var_time_atts',
+            'args' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE],
+            'rets' => [$_SITE, $_FAC, $_DSC_NAME, $_DSC_LEVEL, $_VAR_NAME,
+                       $_ATT_NAME, $_ATT_TIME, $_ATT_TYPE, $_ATT_VALUE],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Datastream Properties Tables #########################################
+
+    'ds_property_names' => {
+        'define' => {
+            'proc' => 'define_ds_property_name',
+            'args' => [$_DS_PROP_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_ds_property_name',
+            'args' => [$_DS_PROP_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_ds_property_names',
+            'args' => [$_DS_PROP_NAME],
+            'rets' => [$_DS_PROP_NAME],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'ds_properties' => {
+        'define' => {
+            'proc' => 'define_ds_property',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_SITE, $_FAC, $_VAR_NAME,
+                       $_DS_PROP_NAME, $_DS_PROP_TIME, $_DS_PROP_VAL],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_ds_property',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_SITE, $_FAC, $_VAR_NAME,
+                       $_DS_PROP_NAME, $_DS_PROP_TIME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_ds_properties',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_SITE, $_FAC, $_VAR_NAME,
+                       $_DS_PROP_NAME, $_DS_PROP_VAL],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_SITE, $_FAC, $_VAR_NAME,
+                       $_DS_PROP_NAME, $_DS_PROP_TIME, $_DS_PROP_VAL],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'define_ds_property',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_SITE, $_FAC, $_VAR_NAME,
+                       $_DS_PROP_NAME, $_DS_PROP_TIME, $_DS_PROP_VAL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Inquire Data Attributes ####################################
+
+    'inquire_dod_data_atts' => {
+        'inquire' => {
+            'proc' => 'inquire_dod_data_atts',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_VAR_TYPE, $_ATT_NAME, $_ATT_VALUE],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_VAR_TYPE, $_ATT_NAME, $_ATT_VALUE, $_VAR_ORDER, $_VAR_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Inquire Bad Data Attributes ####################################
+
+    'inquire_bad_dod_data_atts' => {
+        'inquire' => {
+            'proc' => 'inquire_bad_dod_data_atts',
+            'args' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_VAR_TYPE, $_ATT_NAME, $_ATT_VALUE],
+            'rets' => [$_DSC_NAME, $_DSC_LEVEL, $_DOD_VERSION, $_VAR_NAME, $_VAR_TYPE, $_ATT_NAME, $_ATT_TYPE, $_ATT_VALUE, $_VAR_ORDER, $_VAR_ATT_ORDER],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+);
+
+################################################################################
+#
+# Information Needed To Build The Documentation Pages
+#
+
+%DBAutoDoc = (
+    'title'      => 'DOD Object Group',
+    'list_order' => [
+        'ServerAPI        => Server-Side API',
+        'TablesDiagram    => Tables Diagram',
+        'TypeDefinitions  => Data Type Definitions',
+        'TableDefinitions => Table Definitions',
+    ],
+    'ServerAPI' => {
+        'list_order' => [
+            'DODs      => DOD Functions',
+            'DSDODs    => DSDOD Functions',
+            'DataTypes => Data Type Functions',
+            'Dims      => Dimension Functions',
+            'Atts      => Attribute Functions',
+            'Vars      => Variable Functions',
+            'VarProps  => DOD Variable Property Functions',
+            'DSProps   => Datastream Property Functions',
+        ],
+        'DODs' => {
+            'list_order' => [
+                'dod_versions  => DOD Versions',
+                'dod_revisions => DOD Revisions',
+                'dod_dims      => DOD Dimensions',
+                'dod_atts      => DOD Attributes',
+                'dod_vars      => DOD Variables',
+                'dod_var_dims  => DOD Variable Dimensions',
+                'dod_var_atts  => DOD Variable Attributes',
+            ],
+        },
+        'DSDODs' => {
+            'list_order' => [
+                'ds_dods          => DS DODs',
+                'ds_atts          => DS Attributes',
+                'ds_time_atts     => DS Time Varying Attributes',
+                'ds_var_atts      => DS Variable Attributes',
+                'ds_var_time_atts => DS Time Varying Variable Attributes',
+            ],
+        },
+        'DataTypes' => {
+            'list_order' => [
+                'data_types => Data Types',
+            ],
+        },
+        'Dims' => {
+            'list_order' => [
+                'dim_names  => Dimension Names',
+                'dimensions => Dimensions',
+            ],
+        },
+        'Atts' => {
+            'list_order' => [
+                'att_names  => Attribute Names',
+                'attributes => Attributes',
+            ],
+        },
+        'Vars' => {
+            'list_order' => [
+                'var_names  => Variable Names',
+                'variables  => Variables',
+            ],
+        },
+        'VarProps' => {
+            'list_order' => [
+                'dodvar_property_keys   => Variable Property Keys',
+                'dodvar_property_values => Variable Property Values',
+            ],
+        },
+        'DSProps' => {
+            'list_order' => [
+                'ds_property_names => Datastream Property Names',
+                'ds_properties     => Datastream Properties',
+            ],
+        },
+    },
+    'TablesDiagram' => {
+    },
+    'TypeDefinitions' => {
+        'list_order' => [
+            'DODs      => DOD Types',
+            'DSDODs    => DSDOD Types',
+            'DataTypes => "Data Type" Type',
+            'Dims      => Dimension Types',
+            'Atts      => Attribute Types',
+            'Vars      => Variable Types',
+            'VarProps  => DOD Variable Property Types',
+            'DSProps   => Datastream Property Types',
+        ],
+        'DODs' => {
+            'list_order' => [
+                'dod_version',
+                'dod_revision',
+                'dod_dim',
+                'dod_dimension',
+                'dod_att',
+                'dod_attribute',
+                'dod_var',
+                'dod_variable',
+                'dod_var_dim',
+                'dod_var_dimension',
+                'dod_var_att',
+                'dod_var_attribute',
+            ],
+        },
+        'DSDODs' => {
+            'list_order' => [
+                'ds_dod',
+                'ds_dod_version',
+                'ds_att',
+                'ds_attribute',
+                'ds_att_time',
+                'ds_time_att',
+                'ds_time_attribute',
+                'ds_var_att',
+                'ds_var_attribute',
+                'ds_var_att_time',
+                'ds_var_time_att',
+                'ds_var_time_attribute',
+            ],
+        },
+        'DataTypes' => {
+            'list_order' => [
+                'data_type',
+            ],
+        },
+        'Dims' => {
+            'list_order' => [
+                'dim_name',
+                'dimension',
+            ],
+        },
+        'Atts' => {
+            'list_order' => [
+                'att_name',
+                'attribute',
+            ],
+        },
+        'Vars' => {
+            'list_order' => [
+                'var_name',
+                'variable',
+            ],
+        },
+        'VarProps' => {
+            'list_order' => [
+                'dodvar_property_key',
+                'dodvar_property_value',
+            ],
+        },
+        'DSProps' => {
+            'list_order' => [
+                'ds_property_name',
+                'ds_property',
+            ],
+        },
+    },
+    'TableDefinitions' => {
+        'list_order' => [
+            'DODs      => DOD Tables',
+            'DSDODs    => DSDOD Tables',
+            'DataTypes => Data Type Table',
+            'Dims      => Dimension Tables',
+            'Atts      => Attribute Tables',
+            'Vars      => Variable Tables',
+            'VarProps  => DOD Variable Property Tables',
+            'DSProps   => Datastream Property Tables',
+        ],
+        'DODs' => {
+            'list_order' => [
+                'dod_versions',
+                'dod_revisions',
+                'dod_dims',
+                'dod_atts',
+                'dod_vars',
+                'dod_var_dims',
+                'dod_var_atts',
+            ],
+        },
+        'DSDODs' => {
+            'list_order' => [
+                'ds_dods',
+                'ds_atts',
+                'ds_time_atts',
+                'ds_var_atts',
+                'ds_var_time_atts',
+            ],
+        },
+        'DataTypes' => {
+            'list_order' => [
+                'data_types',
+            ],
+        },
+        'Dims' => {
+            'list_order' => [
+                'dim_names',
+                'dimensions',
+            ],
+        },
+        'Atts' => {
+            'list_order' => [
+                'att_names',
+                'attributes',
+            ],
+        },
+        'Vars' => {
+            'list_order' => [
+                'var_names',
+                'variables',
+            ],
+        },
+        'VarProps' => {
+            'list_order' => [
+                'dodvar_property_keys',
+                'dodvar_property_values',
+            ],
+        },
+        'DSProps' => {
+            'list_order' => [
+                'ds_property_names',
+                'ds_properties',
+            ],
+        },
+    },
+);
+
+1;

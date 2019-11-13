@@ -1,0 +1,332 @@
+
+------------------------------------------------------------
+Boundary variable test with no bounds units
+------------------------------------------------------------
+
+Group: /bounds_var_data_tests
+
+    Dimensions:
+
+        time   = UNLIMITED (5 currently)
+        range  = 10
+        bounds = 2
+
+    Variables:
+
+        time(time) : double
+            long_name = "Time offset from midnight"
+            units     = "seconds since 2013-12-18 00:00:00 0:00"
+            bounds    = "time_bounds"
+
+        time_bounds(time, bounds) : double
+            bound_offsets = [-1.5, 1.5] : double
+
+        range(range) : int
+            units  = "km"
+            bounds = "range_bounds"
+
+        range_bounds(range, bounds) : int
+            bound_offsets = [-5, 5] : int
+
+    Data:
+
+        time = 0, 15, 30, 45, 60
+
+        time_bounds = 
+        -1.5, 1.5,
+        13.5, 16.5,
+        28.5, 31.5,
+        43.5, 46.5,
+        58.5, 61.5
+
+        range = 0, 10, 20, 30, 40, 50, 60, 70, 80, 90
+
+        range_bounds = 
+        -5, 5,
+        5, 15,
+        15, 25,
+        25, 35,
+        35, 45,
+        45, 55,
+        55, 65,
+        65, 75,
+        75, 85,
+        85, 95
+
+------------------------------------------------------------
+Boundary variable test with no bounds units - with time shift
+------------------------------------------------------------
+
+Group: /bounds_var_data_tests
+
+    Dimensions:
+
+        time   = UNLIMITED (5 currently)
+        range  = 10
+        bounds = 2
+
+    Variables:
+
+        time(time) : double
+            long_name = "Seconds since noon"
+            units     = "seconds since 2013-12-17 12:00:00 0:00"
+            bounds    = "time_bounds"
+
+        time_bounds(time, bounds) : double
+            bound_offsets = [-1.5, 1.5] : double
+
+        range(range) : int
+            units  = "km"
+            bounds = "range_bounds"
+
+        range_bounds(range, bounds) : int
+            bound_offsets = [-5, 5] : int
+
+    Data:
+
+        time = 43200, 43215, 43230, 43245, 43260
+
+        time_bounds = 
+        43198.5, 43201.5,
+        43213.5, 43216.5,
+        43228.5, 43231.5,
+        43243.5, 43246.5,
+        43258.5, 43261.5
+
+        range = 0, 10, 20, 30, 40, 50, 60, 70, 80, 90
+
+        range_bounds = 
+        -5, 5,
+        5, 15,
+        15, 25,
+        25, 35,
+        35, 45,
+        45, 55,
+        55, 65,
+        65, 75,
+        75, 85,
+        85, 95
+
+------------------------------------------------------------
+Boundary variable test with no bounds units - range in meters
+------------------------------------------------------------
+
+Group: /bounds_var_data_tests
+
+    Dimensions:
+
+        time   = UNLIMITED (5 currently)
+        range  = 10
+        bounds = 2
+
+    Variables:
+
+        time(time) : double
+            long_name = "Seconds since noon"
+            units     = "seconds since 2013-12-17 12:00:00 0:00"
+            bounds    = "time_bounds"
+
+        time_bounds(time, bounds) : double
+            bound_offsets = [-1.5, 1.5] : double
+
+        range(range) : float
+            units  = "m"
+            bounds = "range_bounds"
+
+        range_bounds(range, bounds) : float
+            bound_offsets = [-5000, 5000] : float
+
+    Data:
+
+        time = 43200, 43215, 43230, 43245, 43260
+
+        time_bounds = 
+        43198.5, 43201.5,
+        43213.5, 43216.5,
+        43228.5, 43231.5,
+        43243.5, 43246.5,
+        43258.5, 43261.5
+
+        range = 0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000,
+    90000
+
+        range_bounds = 
+        -5000, 5000,
+        5000, 15000,
+        15000, 25000,
+        25000, 35000,
+        35000, 45000,
+        45000, 55000,
+        55000, 65000,
+        65000, 75000,
+        75000, 85000,
+        85000, 95000
+
+------------------------------------------------------------
+Boundary variable test with bounds units
+------------------------------------------------------------
+
+Group: /bounds_var_data_tests
+
+    Dimensions:
+
+        time   = UNLIMITED (5 currently)
+        range  = 10
+        bounds = 2
+
+    Variables:
+
+        time(time) : double
+            long_name = "Time offset from midnight"
+            units     = "seconds since 2013-12-18 00:00:00 0:00"
+            bounds    = "time_bounds"
+
+        time_bounds(time, bounds) : double
+            units         = "seconds since 2013-12-18 00:00:00 0:00"
+            bound_offsets = [-1.5, 1.5] : double
+
+        range(range) : int
+            units  = "km"
+            bounds = "range_bounds"
+
+        range_bounds(range, bounds) : int
+            units         = "km"
+            bound_offsets = [-5, 5] : int
+
+    Data:
+
+        time = 0, 15, 30, 45, 60
+
+        time_bounds = 
+        -1.5, 1.5,
+        13.5, 16.5,
+        28.5, 31.5,
+        43.5, 46.5,
+        58.5, 61.5
+
+        range = 0, 10, 20, 30, 40, 50, 60, 70, 80, 90
+
+        range_bounds = 
+        -5, 5,
+        5, 15,
+        15, 25,
+        25, 35,
+        35, 45,
+        45, 55,
+        55, 65,
+        65, 75,
+        75, 85,
+        85, 95
+
+------------------------------------------------------------
+Boundary variable test with bounds units - with time shift
+------------------------------------------------------------
+
+Group: /bounds_var_data_tests
+
+    Dimensions:
+
+        time   = UNLIMITED (5 currently)
+        range  = 10
+        bounds = 2
+
+    Variables:
+
+        time(time) : double
+            long_name = "Seconds since noon"
+            units     = "seconds since 2013-12-17 12:00:00 0:00"
+            bounds    = "time_bounds"
+
+        time_bounds(time, bounds) : double
+            units         = "seconds since 2013-12-17 12:00:00 0:00"
+            bound_offsets = [-1.5, 1.5] : double
+
+        range(range) : int
+            units  = "km"
+            bounds = "range_bounds"
+
+        range_bounds(range, bounds) : int
+            units         = "km"
+            bound_offsets = [-5, 5] : int
+
+    Data:
+
+        time = 43200, 43215, 43230, 43245, 43260
+
+        time_bounds = 
+        43198.5, 43201.5,
+        43213.5, 43216.5,
+        43228.5, 43231.5,
+        43243.5, 43246.5,
+        43258.5, 43261.5
+
+        range = 0, 10, 20, 30, 40, 50, 60, 70, 80, 90
+
+        range_bounds = 
+        -5, 5,
+        5, 15,
+        15, 25,
+        25, 35,
+        35, 45,
+        45, 55,
+        55, 65,
+        65, 75,
+        75, 85,
+        85, 95
+
+------------------------------------------------------------
+Boundary variable test with bounds units - range in meters
+------------------------------------------------------------
+
+Group: /bounds_var_data_tests
+
+    Dimensions:
+
+        time   = UNLIMITED (5 currently)
+        range  = 10
+        bounds = 2
+
+    Variables:
+
+        time(time) : double
+            long_name = "Seconds since noon"
+            units     = "seconds since 2013-12-17 12:00:00 0:00"
+            bounds    = "time_bounds"
+
+        time_bounds(time, bounds) : double
+            units         = "seconds since 2013-12-17 12:00:00 0:00"
+            bound_offsets = [-1.5, 1.5] : double
+
+        range(range) : float
+            units  = "m"
+            bounds = "range_bounds"
+
+        range_bounds(range, bounds) : float
+            units         = "m"
+            bound_offsets = [-5000, 5000] : float
+
+    Data:
+
+        time = 43200, 43215, 43230, 43245, 43260
+
+        time_bounds = 
+        43198.5, 43201.5,
+        43213.5, 43216.5,
+        43228.5, 43231.5,
+        43243.5, 43246.5,
+        43258.5, 43261.5
+
+        range = 0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000,
+    90000
+
+        range_bounds = 
+        -5000, 5000,
+        5000, 15000,
+        15000, 25000,
+        25000, 35000,
+        35000, 45000,
+        45000, 55000,
+        55000, 65000,
+        65000, 75000,
+        75000, 85000,
+        85000, 95000

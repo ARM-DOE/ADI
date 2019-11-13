@@ -1,0 +1,260 @@
+################################################################################
+#
+#  COPYRIGHT (C) 2007 Battelle Memorial Institute.  All Rights Reserved.
+#
+################################################################################
+#
+#  Author:
+#     name:  Brian Ermold
+#     phone: (509) 375-2277
+#     email: brian.ermold@arm.gov
+#
+################################################################################
+
+################################################################################
+#
+# Private Variable Declarations Used For Convenience
+#
+
+my $_CAT         = 'category';
+my $_CLASS       = 'class';
+my $_SITE        = 'site';
+my $_FAC         = 'facility';
+my $_PROCN       = 'proc_name';
+my $_PROCT       = 'proc_type';
+
+my $_FILE_PATH   = 'file_path';
+my $_FILE_NAME   = 'file_name';
+my $_FILE_SIZE   = 'file_size';
+my $_FILE_TIME   = 'file_time';
+my $_FILE_STATE  = 'file_state';
+my $_FILE_ACTION = 'file_action';
+
+my $_ATTN_FLAG   = 'flag_name';
+my $_ATTN_MSG    = 'message';
+my $_ATTN_TIME   = 'message_time';
+
+################################################################################
+#
+# The Stored Procedure Argument Types
+#
+
+%DBArgTypes = (
+
+    $_CAT         => 'text',
+    $_CLASS       => 'text',
+    $_SITE        => 'text',
+    $_FAC         => 'text',
+    $_PROCN       => 'text',
+    $_PROCT       => 'text',
+
+    $_FILE_PATH   => 'text',
+    $_FILE_NAME   => 'text',
+    $_FILE_SIZE   => 'integer',
+    $_FILE_TIME   => 'integer',
+    $_FILE_STATE  => 'text',
+    $_FILE_ACTION => 'text',
+
+    $_ATTN_FLAG   => 'text',
+    $_ATTN_MSG    => 'text',
+    $_ATTN_TIME   => 'timestamp',
+);
+
+################################################################################
+#
+# The Order In Which Data Must Be Loaded Into The Tables
+#
+
+@DBLoadOrder = (
+    'attention_flags',
+    'attention_files',
+    'attention_messages',
+);
+
+################################################################################
+#
+# The Stored Procedure Definitions
+#
+
+%DBSPDefs = (
+
+    ##### Attention Flags Table ################################################
+
+    'attention_flags' => {
+        'define' => {
+            'proc' => 'define_attention_flag',
+            'args' => [$_ATTN_FLAG],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_attention_flag',
+            'args' => [$_ATTN_FLAG],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_attention_flags',
+            'args' => [$_ATTN_FLAG],
+            'rets' => [$_ATTN_FLAG],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Attention Files Table ################################################
+
+    'attention_files' => {
+        'define' => {
+            'proc' => 'update_attention_file',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME,
+                       $_FILE_SIZE, $_FILE_TIME, $_FILE_STATE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_attention_file',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_attention_file',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME,
+                       $_FILE_SIZE, $_FILE_TIME, $_FILE_STATE, $_FILE_ACTION],
+            'api'  => 'NaturalKey',
+        },
+        'gets' => {
+            'proc' => 'get_attention_files',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_STATE, $_FILE_ACTION],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME,
+                       $_FILE_SIZE, $_FILE_TIME, $_FILE_STATE, $_FILE_ACTION],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_attention_files',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME,
+                       $_FILE_STATE, $_FILE_ACTION],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME,
+                       $_FILE_SIZE, $_FILE_TIME, $_FILE_STATE, $_FILE_ACTION],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_attention_file',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME,
+                       $_FILE_SIZE, $_FILE_TIME, $_FILE_STATE],
+            'api'  => 'NaturalKey',
+        },
+        'update_action' => {
+            'proc' => 'update_attention_file_action',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME, $_FILE_ACTION],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Attention Messages Table #############################################
+
+    'attention_messages' => {
+        'define' => {
+            'proc' => 'update_attention_message',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME, $_ATTN_FLAG, $_ATTN_MSG],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_attention_message',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME, $_ATTN_FLAG],
+            'api'  => 'NaturalKey',
+        },
+        'get_proc_types' => {
+            'proc' => 'get_attn_msg_proc_types',
+            'rets' => [$_PROCT],
+            'api'  => 'NaturalKey',
+        },
+        'get_by_proc_type' => {
+            'proc' => 'get_attn_msg_by_proc_type',
+            'args' => [$_PROCT],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME, $_FILE_STATE, $_FILE_ACTION,
+                       $_ATTN_FLAG, $_ATTN_TIME, $_ATTN_MSG],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_attention_messages',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME, $_ATTN_FLAG],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME, $_FILE_STATE, $_FILE_ACTION,
+                       $_ATTN_FLAG, $_ATTN_TIME, $_ATTN_MSG],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_attention_message',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_FILE_PATH, $_FILE_NAME, $_ATTN_FLAG, $_ATTN_MSG],
+            'api'  => 'NaturalKey',
+        },
+    },
+);
+
+################################################################################
+#
+# Information Needed To Build The Documentation Pages
+#
+
+%DBAutoDoc = (
+    'title'      => 'Attention Files Object Group',
+    'list_order' => [
+        'ServerAPI        => Server-Side API',
+        'TablesDiagram    => Tables Diagram',
+        'TypeDefinitions  => Data Type Definitions',
+        'TableDefinitions => Table Definitions',
+    ],
+    'ServerAPI' => {
+        'list_order' => [
+            'AttnFiles => Attention File Procedures',
+        ],
+        'AttnFiles' => {
+            'list_order' => [
+                'attention_files    => Attention Files',
+                'attention_flags    => Attention Flags',
+                'attention_messages => Attention Messages'
+            ],
+        },
+    },
+    'TablesDiagram' => {
+    },
+    'TableDefinitions' => {
+        'list_order' => [
+            'AttnFiles => Attention File Tables',
+        ],
+        'AttnFiles' => {
+            'list_order' => [
+                'attention_files',
+                'attention_flags',
+                'attention_messages'
+            ],
+        },
+    },
+    'TypeDefinitions' => {
+        'list_order' => [
+            'AttnFiles => Attention File Types',
+        ],
+        'AttnFiles' => {
+            'list_order' => [
+                'attention_file',
+                'attention_flag',
+                'attention_message'
+            ],
+        },
+    },
+);
+
+1;

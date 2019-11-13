@@ -1,0 +1,45 @@
+
+------------------------------------------------------------
+Rename dimension test:
+------------------------------------------------------------
+
+- Renaming a dimension to an existing name should fail.
+
+ERROR: Could not rename dimension: /root/_dims_/range to string
+ -> dimension exists
+
+ - Before rename: range = 38
+ - After rename:  range_renamed = 38
+
+------------------------------------------------------------
+Rename attribute test:
+------------------------------------------------------------
+
+- Renaming an attribute to an existing name should fail.
+
+ERROR: Could not rename attribute: /root/_atts_/att_char to att_int
+ -> attribute exists
+
+ - Before rename: att_char = "abcyzABCYZ"
+ - After rename:  att_char_renamed = "abcyzABCYZ"
+
+------------------------------------------------------------
+Rename variable test:
+------------------------------------------------------------
+
+- Renaming a variable to an existing name should fail.
+
+ERROR: Could not rename variable: /root/_vars_/var_2D to var_string
+ -> variable exists
+
+ - Before rename:
+
+var_2D(time, range_renamed) : double
+    long_name = "long_name attribute value"
+    units     = "units attribute value"
+
+ - After rename:
+
+var_2D_renamed(time, range_renamed) : double
+    long_name = "long_name attribute value"
+    units     = "units attribute value"

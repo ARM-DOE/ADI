@@ -1,0 +1,37 @@
+################################################################################
+#
+#  COPYRIGHT (C) 2007 Battelle Memorial Institute.  All Rights Reserved.
+#
+################################################################################
+#
+#  Author:
+#     name:  Brian Ermold
+#     phone: (509) 375-2277
+#     email: brian.ermold@arm.gov
+#
+################################################################################
+
+my $_NAME    = 'object_group';
+my $_PKG     = 'package';
+my $_VERSION = 'object_group_version';
+my $_SUMMARY = 'update_summary';
+
+@DBTableOrder = (
+    'object_group_packages',
+);
+
+%DBSPDefs = (
+    'object_group_packages' => {
+        'get_version' => {
+            'proc' => 'get_object_group_package_version',
+            'args' => [$_NAME, $_PKG],
+        },
+        'update_version' => {
+            'proc' => 'update_object_group_package_version',
+            'args' => [$_NAME, $_PKG, $_VERSION, $_SUMMARY],
+        },
+    },
+);
+
+1;
+
