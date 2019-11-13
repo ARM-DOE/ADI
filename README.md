@@ -15,7 +15,7 @@ This package of the code is for users local work station (i.e. not ARM processin
 - Examples: http://engineering.arm.gov/ADI_doc/algorithm.html#algorithm-development-tutorial
 - ARM Data Archive for accessing ARM data http://archive.arm.gov  
 
-Note that we provide two options to install ADI framework. The first one is to build from source. The second one is to run ADI process using local host.
+Note that we provide two options to install ADI framework. The first one is to build from source. The second one is to install rpms from ARMs yum repository if running on a system compatible with Linux rh6 or rh7.
 
 ## Recommended Installation: Build from source code
  
@@ -23,23 +23,23 @@ Note that we provide two options to install ADI framework. The first one is to b
 
 For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to install the following dependencies.
 
-#### build system
-* autoconf
-* automake
-* gcc
-* libtool
-* m4
+    * **build system**
+        * autoconf
+        * automake
+        * gcc
+        * libtool
+        * m4
 
-#### first order library dependencies
-* netcdf
-* openssl
-* pkg-config
-* postgresql
-* udunits
+    * **first order library dependencies**
+        * netcdf
+        * openssl
+        * pkg-config
+        * postgresql
+        * udunits
 
-#### optional
-* python
-* sqlite
+    * **optional**
+        * python
+        * sqlite
 
 ### Install  
 
@@ -53,11 +53,9 @@ The following commands will download and install all ADI libraries to /usr/local
 
 ### To Add More Process Definitions to the DSDB (coming soon)
 
----
-#Alternative Installation: Run on Host rh6 Machine (this needs to be updated for rh7)
+## Alternative Installation: Run on Host rh6 Machine (this needs to be updated for rh7)
 
-####Dependencies
-================
+### Dependencies
 
 ADI has been tested to run under Red Hat Enterprise Linux 2.5 and 2.6.  Development in Python is for 2.7+, but does not include Python 3.  Development in IDL requires IDL 8.2+.  
 
@@ -74,10 +72,7 @@ The required dependencies to install and compile source code are:
 * 'Unidata NetCDF4-C <http://www.unidata.ucar.edu/downloads/netcdf>'
 * 'PostgreSQL 8.4 <ttp://www.postgresql.org/download/linux/redhat/>'
 
-
-
-####Optional Dependences
-====================
+### Optional Dependences
 
 * 'Multiprotocol file transform library <http://curl.haxx.se/libcurl/>'_7.19.7 is used to access DSDB via a Web Service.
 
@@ -88,15 +83,13 @@ To develop algorithms in Python 2.7+:
 * 'netCDF4 <http://code.google.com/p/netcdf4-python/>'_ 1.0.2+ 
 * 'NumPy <http://www.scipy.org>'_ 1.6+
 
-####Install
-===========
+### Install
 
 Installation and complilation of the source code is not fully documented, but will be in the future.  
 However the latest source code for ADI can be obtained from the GitHub repository,
 https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https://github.com//ARM-DOE/ADI/archive/ADI_source.tar.gz>  of the source code.
 
-
-#### To Install a Build of ADI:
+### To Install a Build of ADI:
 
 - Ensure your version of red hat 6 is up to date
 - Install epel 6, which contains packages ADI depends on. You can download the rpm (for 64-bit RH6) from  [here](http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm)
@@ -112,7 +105,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
 - if developing in IDL, idl82 is required.
 - if developing in Python, Python 2.7 is required. Python 3 is not supported
 
-#### Set Up an Environment for ADI
+### Set Up an Environment for ADI
 
 - Download [adi_home](https://engineering.arm.gov/~gaustad/adi_home.tar.gz). This tarfile contains a directory structure to get you started running ADI quickly. Note that you can also configure the directory structure however you like on your own. 
   
@@ -170,7 +163,7 @@ https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https:
     ~/adi_home/data/datastream/sbs/sbsadicpcexample1S2.a1/sbsadicpcexample1S2.a1.20110401.000000.cdf
     ~/adi_home/data/datastream/sbs/sbsadimetexample1S2.a1/sbsadimetexample1S2.a1.20110401.000000.cdf
 
-#### To Add More Process Definitions to the DSDB:
+### To Add More Process Definitions to the DSDB:
 The process definitions for adi_example1 have been included in your adi_home area. To run additional VAPs against your local database, you will need to import their process information.
 
 - Get the process definition from the PCM
