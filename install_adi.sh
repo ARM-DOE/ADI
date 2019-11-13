@@ -25,7 +25,7 @@ prefix="/usr/local"
 pyprefix=$( which python3 )
 if [ $pyprefix ]; then
     pyprefix=${pyprefix%/bin/*}
-    if [ $pyprefix == "/apps/base/python3" ]; then
+    if [ "$pyprefix" = "/apps/base/python3" ]; then
         pyprefix=/apps/base/python3.6
     fi
 else
@@ -38,7 +38,7 @@ fi
 idlprefix=$( which idl )
 if [ $idlprefix ]; then
     idlprefix=${idlprefix%/bin/idl}
-    if [ $idlprefix == "/apps/base/rsi/idl82" ]; then
+    if [ "$idlprefix" = "/apps/base/rsi/idl82" ]; then
         idlprefix=/apps/base/idl/idl86
     fi
 else
@@ -122,7 +122,7 @@ done
 # Set libdir
 
 kernel=`uname`
-if [ "$kernel" == "Darwin" ]; then
+if [ "$kernel" = "Darwin" ]; then
     libdir="$prefix/lib"
 else
     libdir="$prefix/lib64"
@@ -190,7 +190,7 @@ function build_and_install {
     # Check if this package requires IDL
 
     if grep -Fq -- '--idlprefix=path' ./build.sh; then
-        if [ $idlprefix == 'IDL not found' ]; then
+        if [ "$idlprefix" = "IDL not found" ]; then
             echo "Skipping - IDL not found"
             echo ""
             installed=""
@@ -204,7 +204,7 @@ function build_and_install {
     # Check if thus package requires Python
 
     if grep -Fq -- '--pyprefix=path' ./build.sh; then
-        if [ $pyprefix == 'python3 not found' ]; then
+        if [ "$pyprefix" = "python3 not found" ]; then
             echo "Skipping - python3 not found"
             echo ""
             installed=""
