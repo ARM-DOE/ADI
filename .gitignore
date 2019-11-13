@@ -64,6 +64,7 @@ autom4te.cache
 */build-aux/install-sh
 */build-aux/ltmain.sh
 */build-aux/missing
+*/build-aux/test-driver
 config.h.in
 config.h.in~
 configure
