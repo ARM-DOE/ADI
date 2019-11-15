@@ -10,7 +10,7 @@ if [ $idlprefix ]; then
 fi
 
 if [ ! $idlprefix ] || [ $idlprefix == "/apps/base/rsi/idl82" ]; then
-    idlprefix=/apps/base/idl/idl86
+    idlprefix="/apps/base/idl/idl86"
 fi
 
 # Print usage
@@ -34,6 +34,9 @@ OPTIONS
 
   --prefix=path     absolute path to the installation directory
                     default: \$ADI_HOME or \$ADI_PREFIX
+
+  --libdir=path     absolute path to the library installation directory
+                    default: \$prefix/lib64
 
   --destdir=path    absolute path prepended to prefix 
                     used to perform a staged installation
@@ -67,6 +70,8 @@ do
                        ;;
         --destdir=*)   destdir="${i#*=}"
                        ;;
+        --libdir=*)    libdir="${i#*=}"
+                       ;;
         --idlprefix=*) idlprefix="${i#*=}"
                        ;;
         --prefix=*)    prefix="${i#*=}"
@@ -95,9 +100,7 @@ if [ ! -d "$idlprefix" ]; then
     exit 1
 fi
 
-idl_version=$(echo $idlprefix | grep -Eo '[0-9]+$')
-
-# Set default prefix if not specified
+# Set default prefix and libdir if not specified
 
 if [ ! $prefix ]; then
     if [ $ADI_HOME ]; then
@@ -111,9 +114,12 @@ if [ ! $prefix ]; then
     fi
 fi
 
-# Set libdir
+if [ ! $libdir ]; then
+    libdir="$prefix/lib64"
+fi
 
-libdir="$prefix/lib64/idl$idl_version"
+idl_version=${idlprefix##*/}
+libdir="$libdir/$idl_version"
 
 # Function to echo and run commands
 
