@@ -48,13 +48,21 @@ For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to ins
 * **optional**
     * sqlite
 
-### Install  
+### Install
 
-The following commands will download and install all ADI libraries to /usr/local. To install to a different location run the install_adi.sh script with the --prefix option. For more details run 'install_adi.sh -h'.
+The following commands will download and install all ADI packages to /usr/local. You can change the value of the --prefix option to install to a different location. For more details run `./install_adi.sh -h`.
 
-    git clone https://github.com/ARM-DOE/ADI.git
+    git clone --depth 1 https://github.com/ARM-DOE/ADI.git
     cd ADI
-    install_adi.sh
+    ./install_adi.sh --prefix=/usr/local
+
+You will then need to add one of the following lines to your shell initialization file. Change /usr/local to the installation directory if you specified a different location. If your login shell is bash add this to your ~/.bash_profile and/or ~/.bashrc file.
+
+    source /usr/local/etc/.adi.bashrc
+
+If your login shell is csh add this line to your .cshrc file:
+
+    source /usr/local/etc/.adi.cshrc
 
 ### Run ADI_Example (coming soon) 
 

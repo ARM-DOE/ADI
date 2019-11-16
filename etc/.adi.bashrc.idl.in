@@ -1,0 +1,27 @@
+# Add ADI bindings to IDL_DLM_PATH
+
+ADI_IDL_DLM_PATH="$ADI_PREFIX/@LIBDIR@/@IDLVERSION@"
+
+if [ ! -z "$IDL_DLM_PATH" ]; then
+    export IDL_DLM_PATH=$(strip_path "$IDL_DLM_PATH" "$ADI_IDL_DLM_PATH")
+fi
+
+if [ -z "$IDL_DLM_PATH" ]; then
+    IDL_DLM_PATH="${ADI_IDL_DLM_PATH}:<IDL_DEFAULT>"
+else
+    IDL_DLM_PATH="${ADI_IDL_DLM_PATH}:$IDL_DLM_PATH"
+fi
+
+# Add ADI bindings to IDL_PATH
+#export IDL_PATH=$(prepend_path "$IDL_PATH" "+$ADI_IDL_DLM_PATH")
+
+if [ ! -z "$IDL_PATH" ]; then
+    export IDL_PATH=$(strip_path "$IDL_PATH" "+$ADI_IDL_DLM_PATH")
+fi
+
+if [ -z "$IDL_PATH" ]; then
+    IDL_PATH="+${ADI_IDL_DLM_PATH}:+@IDLPREFIX@/lib"
+else
+    IDL_PATH="+${ADI_IDL_DLM_PATH}:$IDL_PATH"
+fi
+

@@ -1,0 +1,15 @@
+# Add ADI bindings to PYTHONPATH
+
+set ADI_PYTHONPATH = "$ADI_PREFIX/lib/@PYVERSION@/site-packages"
+
+if ( ! $?PYTHONPATH ) then
+    setenv PYTHONPATH "$ADI_PYTHONPATH"
+else
+    setenv PYTHONPATH `echo $PYTHONPATH | strip_path $ADI_PYTHONPATH`
+    if ( "$PYTHONPATH" == "" ) then
+        setenv PYTHONPATH "$ADI_PYTHONPATH"
+    else
+        setenv PYTHONPATH "${ADI_PYTHONPATH}:$PYTHONPATH"
+    endif
+endif
+

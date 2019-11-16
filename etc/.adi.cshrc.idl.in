@@ -1,0 +1,28 @@
+# Add ADI bindings to IDL_DLM_PATH
+
+set ADI_IDL_DLM_PATH = "$ADI_PREFIX/@LIBDIR@/@IDLVERSION@"
+
+if ( ! $?IDL_DLM_PATH ) then
+    setenv IDL_DLM_PATH "${ADI_IDL_DLM_PATH}:<IDL_DEFAULT>"
+else
+    setenv IDL_DLM_PATH `echo $IDL_DLM_PATH | strip_path $ADI_IDL_DLM_PATH`
+    if ( "$IDL_DLM_PATH" == "" ) then
+        setenv IDL_DLM_PATH "${ADI_IDL_DLM_PATH}:<IDL_DEFAULT>"
+    else
+        setenv IDL_DLM_PATH "${ADI_IDL_DLM_PATH}:$IDL_DLM_PATH"
+    endif
+endif
+
+# Add ADI bindings to IDL_PATH
+
+if ( ! $?IDL_PATH ) then
+    setenv IDL_PATH "+${ADI_IDL_DLM_PATH}:+@IDLPREFIX@/lib"
+else
+    setenv IDL_PATH `echo $IDL_PATH | strip_path $ADI_IDL_DLM_PATH`
+    if ( "$IDL_PATH" == "" ) then
+        setenv IDL_PATH "+${ADI_IDL_DLM_PATH}:+@IDLPREFIX@/lib"
+    else
+        setenv IDL_PATH "+${ADI_IDL_DLM_PATH}:$IDL_PATH"
+    endif
+endif
+

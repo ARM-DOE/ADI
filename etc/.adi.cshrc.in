@@ -1,0 +1,45 @@
+# Set ADI installation directory
+
+if ( ! $?ADI_PREFIX ) then
+    setenv ADI_PREFIX "@ADI_PREFIX@"
+endif
+
+# Set environment variables used by applications
+
+setenv DSUTIL_HOME     "$ADI_PREFIX"
+setenv DB_CONNECT_PATH "$ADI_PREFIX/etc"
+
+# Alias used to strip a path from a "PATH" environment variable
+
+alias strip_path 'tr ":" "\n" | grep -v ^\!*$ | tr "\n" ":" | sed ''s/:\$//'''
+
+# Add ADI pkgconfig path to PKG_CONFIG_PATH
+
+set ADI_PKGCONFIG = "$ADI_PREFIX/@LIBDIR@/pkgconfig"
+
+if ( ! $?PKG_CONFIG_PATH ) then
+    setenv PKG_CONFIG_PATH "$ADI_PKGCONFIG"
+else
+    setenv PKG_CONFIG_PATH `echo $PKG_CONFIG_PATH | strip_path $ADI_PKGCONFIG`
+    if ( "$PKG_CONFIG_PATH" == "" ) then
+        setenv PKG_CONFIG_PATH "$ADI_PKGCONFIG"
+    else
+        setenv PKG_CONFIG_PATH "${ADI_PKGCONFIG}:$PKG_CONFIG_PATH"
+    endif
+endif
+
+# Add ADI perl modules path to PERLLIB
+
+set ADI_PERLLIB = $ADI_PREFIX/lib
+
+if ( ! $?PERLLIB ) then
+    setenv PERLLIB "$ADI_PERLLIB"
+else
+    setenv PERLLIB `echo $PERLLIB | strip_path $ADI_PERLLIB`
+    if ( "$PERLLIB" == "" ) then
+        setenv PERLLIB "$ADI_PERLLIB"
+    else
+        setenv PERLLIB "${ADI_PERLLIB}:$PERLLIB"
+    endif
+endif
+

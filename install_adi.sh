@@ -22,28 +22,34 @@ prefix="/usr/local"
 
 # Set default pyprefix
 
-pyprefix=$( which python3 )
-if [ $pyprefix ]; then
-    pyprefix=${pyprefix%/bin/*}
-    if [ "$pyprefix" = "/apps/base/python3" ]; then
-        pyprefix=/apps/base/python3.6
-    fi
+python=$( which python3 )
+if [ -z "$python" ]; then
+    python=$( which python )
+fi
+
+if [ -z "$python" ]; then
+    pyprefix="python not found"
+    echo "python not found - skipping installation of python bindings"
 else
-    pyprefix="python3 not found"
-    echo "python3 not found - skipping installation of python bindings"
+    pyprefix=${python%/bin/*}
+    # hack for old ARM system
+    if [ "$pyprefix" = "/apps/base/python3" ]; then
+        pyprefix="/apps/base/python3.6"
+    fi
 fi
 
 # Set default idlprefix
 
 idlprefix=$( which idl )
-if [ $idlprefix ]; then
-    idlprefix=${idlprefix%/bin/idl}
-    if [ "$idlprefix" = "/apps/base/rsi/idl82" ]; then
-        idlprefix=/apps/base/idl/idl86
-    fi
-else
+if [ -z "$idlprefix" ]; then
     idlprefix="IDL not found"
     echo "IDL not found - skipping installation of IDL bindings"
+else
+    idlprefix=${idlprefix%/bin/idl}
+    # hack for old ARM system
+    if [ "$idlprefix" = "/apps/base/rsi/idl82" ]; then
+        idlprefix="/apps/base/idl/idl86"
+    fi
 fi
 
 # Print usage
@@ -87,6 +93,7 @@ OPTIONS
                     CFLAGS="-g -O0"
 
   --uninstall       uninstall all packages
+                    this does not uninstall the database or etc files
 
   --reinstall       remove all package.installed files and reinstall
                     all packages
@@ -107,6 +114,8 @@ do
                       ;;
         --prefix=*)   prefix="${i#*=}"
                       ;;
+        --pyprefix=*) pyprefix="${i#*=}"
+                      ;;
         --uninstall)  uninstall=1
                       ;;
         --reinstall)  reinstall=1
@@ -114,7 +123,8 @@ do
         -h | --help)  usage
                       exit
                       ;;
-        *)            pkglist="${i#*=}"
+        *)            usage
+                      exit
                       ;;
     esac
 done
@@ -123,30 +133,32 @@ done
 
 kernel=`uname`
 if [ "$kernel" = "Darwin" ]; then
-    libdir="$prefix/lib"
+    libdir="lib"
 else
-    libdir="$prefix/lib64"
+    libdir="lib64"
 fi
 
-##############################################################################
+###############################################################################
 # Functions
 
 sep1="======================================================================"
 sep2="----------------------------------------------------------------------"
 
 function exit_fail {
+    echo ""
     echo "***** FAILED *****"
     exit 1;
 }
 
 function exit_success {
+    echo ""
     echo "***** SUCCESS *****"
     exit 0;
 }
 
-function run {
+function run() {
     echo "> $1"
-    $1 || exit_fail
+    eval $1 || exit_fail
 }
 
 function strip_path () {
@@ -158,7 +170,7 @@ function build_and_install {
 
     echo ""
     echo $sep1
-    echo "PACKAGE = $package"
+    echo "Installing Package: $package"
     echo $sep1
     echo ""
 
@@ -197,34 +209,34 @@ function build_and_install {
             run "cd .."
             return
         else
-            cmd+=" --idlprefix=$idlprefix"
+            cmd+=" --idlprefix='$idlprefix'"
         fi
     fi
 
     # Check if thus package requires Python
 
     if grep -Fq -- '--pyprefix=path' ./build.sh; then
-        if [ "$pyprefix" = "python3 not found" ]; then
-            echo "Skipping - python3 not found"
+        if [ "$pyprefix" = "python not found" ]; then
+            echo "Skipping - python not found"
             echo ""
             installed=""
             run "cd .."
             return
         else
-            cmd+=" --pyprefix=$pyprefix"
+            cmd+=" --pyprefix='$pyprefix'"
         fi
     fi
 
     # Set build.sh options
 
     if [ $destdir ]; then
-        cmd+=" --destdir=$destdir"
+        cmd+=" --destdir='$destdir'"
     fi
 
-    cmd+=" --prefix=$prefix"
+    cmd+=" --prefix='$prefix'"
 
     if grep -Fq -- '--libdir=path' ./build.sh; then
-        cmd+=" --libdir=$libdir"
+        cmd+=" --libdir='$prefix/$libdir'"
     fi
 
     if [ $uninstall ]; then
@@ -256,18 +268,57 @@ function build_and_install {
     run "cd .."
 }
 
-##############################################################################
+function append_adirc_idl {
+    local infile=$1
+    local outfile=$2
+
+    echo "updating: $outfile"
+    echo " -> adding IDL environment settings"
+
+    sed -e "s,@LIBDIR@,$libdir,g" \
+        -e "s,@IDLVERSION@,$idlversion,g" \
+        -e "s,@IDLPREFIX@,$idlprefix,g" \
+        < "$infile" >> "$outfile"
+}
+
+function append_adirc_py {
+    local infile=$1
+    local outfile=$2
+
+    echo "updating: $outfile"
+    echo " -> adding Python environment settings"
+
+    sed -e "s,@LIBDIR@,$libdir,g" \
+        -e "s,@PYVERSION@,$pyversion,g" \
+        < "$infile" >> "$outfile"
+}
+
+function install_in_file {
+    local infile=$1
+    local outfile=$2
+    local mode=$3
+
+    echo "installing: $outfile"
+
+    sed -e "s,@ADI_PREFIX@,$prefix,g" \
+        -e "s,@LIBDIR@,$libdir,g" \
+        < "$infile" > "$outfile"
+
+    run "chmod $mode '$outfile'"
+}
+
+###############################################################################
 # Build and Install
 
 # Add install location to PKG_CONFIG_PATH
 
-ADI_PKG_CONFIG_PATH="$libdir/pkgconfig"
+ADI_PKGCONFIG="$prefix/$libdir/pkgconfig"
 
 if [ -z "$PKG_CONFIG_PATH" ]; then
-    export PKG_CONFIG_PATH=$ADI_PKG_CONFIG_PATH
+    export PKG_CONFIG_PATH="$ADI_PKGCONFIG"
 else
-    export PKG_CONFIG_PATH=$(strip_path $PKG_CONFIG_PATH $ADI_PKG_CONFIG_PATH)
-    export PKG_CONFIG_PATH="${ADI_PKG_CONFIG_PATH}:$PKG_CONFIG_PATH"
+    export PKG_CONFIG_PATH=$(strip_path $PKG_CONFIG_PATH $ADI_PKGCONFIG)
+    export PKG_CONFIG_PATH="${ADI_PKGCONFIG}:$PKG_CONFIG_PATH"
 fi
 
 # Add install location to PERLLIB
@@ -275,13 +326,15 @@ fi
 ADI_PERLLIB="$prefix/lib"
 
 if [ -z "$PERLLIB" ]; then
-    export PERLLIB=$ADI_PERLLIB
+    export PERLLIB="$ADI_PERLLIB"
 else
     export PERLLIB=$(strip_path $PERLLIB $ADI_PERLLIB)
     export PERLLIB="${ADI_PERLLIB}:$PERLLIB"
 fi
 
-# Check if we are updating all packages
+# Check if we are reinstalling all packages
+
+run "cd packages"
 
 if [ $reinstall ]; then
     for pkg in ${pkgs[@]}; do
@@ -291,6 +344,9 @@ if [ $reinstall ]; then
 fi
 
 # Loop over all packages to install
+
+python_bindings_installed=0
+idl_bindings_installed=0
 
 for pkg in ${pkgs[@]}; do
 
@@ -309,12 +365,139 @@ for pkg in ${pkgs[@]}; do
 
             if [ $uninstall ]; then
                 run "rm -f $installed"
+                installed=""
             else
                 run "touch $installed"
             fi
         fi
     fi
 
+    if [ "$pkg" = "adi_py" ] && [ ! -z "$installed" ]; then
+        python_bindings_installed=1
+    fi
+
+    if [ "$pkg" = "adi_idl" ] && [ ! -z "$installed" ]; then
+        idl_bindings_installed=1
+    fi
+
 done
+
+run "cd .."
+
+echo ""
+echo $sep1
+
+if [ $uninstall ]; then
+    echo ""
+    exit_success
+fi
+
+# Get python version if the bindings were installed
+
+if [ $python_bindings_installed ]; then
+
+    if [ -e "$pyprefix/bin/python3" ]; then
+        python="$pyprefix/bin/python3"
+    else
+        python="$pyprefix/bin/python"
+    fi
+
+    pyv=$($python -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+    pyversion="python$pyv"
+fi
+
+# Get IDL version if the bindings were installed
+
+if [ $idl_bindings_installed ]; then
+    idlversion=${idlprefix##*/}
+fi
+
+# Create the $prefix/etc directory if it doesn't exist
+
+outdir="$prefix/etc"
+if [ ! -d "outdir" ]; then
+    echo ""
+    run "mkdir -p '$outdir'"
+fi
+
+# Install .adi.bashrc file
+
+indir="etc"
+infile=".adi.bashrc.in"
+outfile=${infile%.in}
+
+echo ""
+if [ -e "$outdir/$outfile" ]; then
+    echo "skipping: $indir/$infile"
+    echo " -> previously installed file already exists: $outdir/$outfile"
+else
+    install_in_file "$indir/$infile" "$outdir/$outfile" 0644
+
+    if [ $python_bindings_installed ]; then
+        append_adirc_py "$indir/.adi.bashrc.py.in" "$outdir/$outfile"
+    fi
+
+    if [ $idl_bindings_installed ]; then
+        append_adirc_idl "$indir/.adi.bashrc.idl.in" "$outdir/$outfile"
+    fi
+fi
+
+# Install .adi.cshrc file
+
+infile=".adi.cshrc.in"
+outfile=${infile%.in}
+
+echo ""
+if [ -e "$outdir/$outfile" ]; then
+    echo "skipping: $indir/$infile"
+    echo " -> previously installed file already exists: $outdir/$outfile"
+else
+    install_in_file "$indir/$infile" "$outdir/$outfile" 0644
+
+    if [ $python_bindings_installed ]; then
+        append_adirc_py "$indir/.adi.cshrc.py.in" "$outdir/$outfile"
+    fi
+
+    if [ $idl_bindings_installed ]; then
+        append_adirc_idl "$indir/.adi.cshrc.idl.in" "$outdir/$outfile"
+    fi
+fi
+
+# Install .db_connect file
+
+infile=".db_connect.in"
+outfile=${infile%.in}
+
+echo ""
+if [ -e "$outdir/$outfile" ]; then
+    echo "skipping: $indir/$infile"
+    echo " -> previously installed file already exists: $outdir/$outfile"
+else
+    install_in_file "$indir/$infile" "$outdir/$outfile" 0644
+fi
+
+# Create the $prefix/var/adi directory if it doesn't exist
+
+outdir="$prefix/var/adi"
+if [ ! -d "$outdir" ]; then
+    echo ""
+    run "mkdir -p '$outdir'"
+fi
+
+# Install dsdb.sqlite
+
+indir="database"
+infile="dsdb.sqlite"
+outfile="dsdb.sqlite"
+
+echo ""
+if [ -e "$outdir/$outfile" ]; then
+    echo "skipping: $indir/$infile"
+    echo " -> previously installed database already exists: $outdir/$outfile"
+else
+    echo "installing: $outdir/$outfile"
+    run "cp $indir/$infile $outdir/$outfile"
+    run "chmod 0664 $outdir/$outfile"
+fi
 
 exit_success
