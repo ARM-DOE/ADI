@@ -129,6 +129,14 @@ do
     esac
 done
 
+if [ "$pyprefix" = "python not found" ]; then
+    pyprefix=""
+fi
+
+if [ "$idlprefix" = "IDL not found" ]; then
+    idlprefix=""
+fi
+
 # Set libdir
 
 kernel=`uname`
@@ -147,12 +155,14 @@ sep2="----------------------------------------------------------------------"
 function exit_fail {
     echo ""
     echo "***** FAILED *****"
+    echo ""
     exit 1;
 }
 
 function exit_success {
     echo ""
     echo "***** SUCCESS *****"
+    echo ""
     exit 0;
 }
 
@@ -163,6 +173,31 @@ function run() {
 
 function strip_path () {
     echo `echo $1 | tr ":" "\n" | grep -v ^$2$ | tr "\n" ":" | sed ''s/:\$//''`
+}
+
+function get_idlversion() {
+    if [ -z "$idlprefix" ]; then
+        idlversion=""
+    else
+        idlversion=${idlprefix##*/}
+    fi
+    echo $idlversion
+}
+
+function get_pyversion() {
+    if [ -z "$pyprefix" ]; then
+        idlversion=""
+        pyversion=""
+    else
+        if [ -e "$pyprefix/bin/python3" ]; then
+            python="$pyprefix/bin/python3"
+        else
+            python="$pyprefix/bin/python"
+        fi
+        pyv=$($python -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+        pyversion="python$pyv"
+    fi
+    echo $pyversion
 }
 
 function build_and_install {
@@ -202,7 +237,7 @@ function build_and_install {
     # Check if this package requires IDL
 
     if grep -Fq -- '--idlprefix=path' ./build.sh; then
-        if [ "$idlprefix" = "IDL not found" ]; then
+        if [ -z "$idlprefix" ]; then
             echo "Skipping - IDL not found"
             echo ""
             installed=""
@@ -216,7 +251,7 @@ function build_and_install {
     # Check if thus package requires Python
 
     if grep -Fq -- '--pyprefix=path' ./build.sh; then
-        if [ "$pyprefix" = "python not found" ]; then
+        if [ -z "$pyprefix" ]; then
             echo "Skipping - python not found"
             echo ""
             installed=""
@@ -345,9 +380,6 @@ fi
 
 # Loop over all packages to install
 
-python_bindings_installed=0
-idl_bindings_installed=0
-
 for pkg in ${pkgs[@]}; do
 
     # Create file name used to track which packages
@@ -373,11 +405,11 @@ for pkg in ${pkgs[@]}; do
     fi
 
     if [ "$pkg" = "adi_py" ] && [ ! -z "$installed" ]; then
-        python_bindings_installed=1
+        pyversion=$(get_pyversion)
     fi
 
     if [ "$pkg" = "adi_idl" ] && [ ! -z "$installed" ]; then
-        idl_bindings_installed=1
+        idlversion=$(get_idlversion)
     fi
 
 done
@@ -390,26 +422,6 @@ echo $sep1
 if [ $uninstall ]; then
     echo ""
     exit_success
-fi
-
-# Get python version if the bindings were installed
-
-if [ $python_bindings_installed ]; then
-
-    if [ -e "$pyprefix/bin/python3" ]; then
-        python="$pyprefix/bin/python3"
-    else
-        python="$pyprefix/bin/python"
-    fi
-
-    pyv=$($python -c 'import sys; print("%d.%d" % sys.version_info[:2])')
-    pyversion="python$pyv"
-fi
-
-# Get IDL version if the bindings were installed
-
-if [ $idl_bindings_installed ]; then
-    idlversion=${idlprefix##*/}
 fi
 
 # Create the $prefix/etc directory if it doesn't exist
@@ -433,11 +445,11 @@ if [ -e "$outdir/$outfile" ]; then
 else
     install_in_file "$indir/$infile" "$outdir/$outfile" 0644
 
-    if [ $python_bindings_installed ]; then
+    if [ ! -z "$pyversion" ]; then
         append_adirc_py "$indir/.adi.bashrc.py.in" "$outdir/$outfile"
     fi
 
-    if [ $idl_bindings_installed ]; then
+    if [ ! -z "$idlversion" ]; then
         append_adirc_idl "$indir/.adi.bashrc.idl.in" "$outdir/$outfile"
     fi
 fi
@@ -454,11 +466,11 @@ if [ -e "$outdir/$outfile" ]; then
 else
     install_in_file "$indir/$infile" "$outdir/$outfile" 0644
 
-    if [ $python_bindings_installed ]; then
+    if [ ! -z "$pyversion" ]; then
         append_adirc_py "$indir/.adi.cshrc.py.in" "$outdir/$outfile"
     fi
 
-    if [ $idl_bindings_installed ]; then
+    if [ ! -z "$idlversion" ]; then
         append_adirc_idl "$indir/.adi.cshrc.idl.in" "$outdir/$outfile"
     fi
 fi
