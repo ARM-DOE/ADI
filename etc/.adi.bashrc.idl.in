@@ -13,7 +13,6 @@ else
 fi
 
 # Add ADI bindings to IDL_PATH
-#export IDL_PATH=$(prepend_path "$IDL_PATH" "+$ADI_IDL_DLM_PATH")
 
 if [ ! -z "$IDL_PATH" ]; then
     export IDL_PATH=$(strip_path "$IDL_PATH" "+$ADI_IDL_DLM_PATH")
