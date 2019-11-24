@@ -4,6 +4,10 @@ if [ -z "$ADI_PREFIX" ]; then
     export ADI_PREFIX="@ADI_PREFIX@"
 fi
 
+if [ -z "$ADI_HOME" ]; then
+    export ADI_HOME="$ADI_PREFIX"
+fi
+
 # Set environment variables used by applications
 
 export DSUTIL_HOME="$ADI_PREFIX"
