@@ -1,0 +1,4777 @@
+%gDOD = (
+
+  'ds_class'    => 'csvtestamc.b1',
+  'dod_version' => '1.0',
+
+  'dims' => [
+    {
+      'name'   => 'time',
+      'length' => 0,
+    },
+    {
+      'name'   => 'bound',
+      'length' => 2,
+    },
+  ],
+  'atts' => [
+    {
+      'name'  => 'command_line',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'Conventions',
+      'type'  => 'char',
+      'value' => 'ARM-1.0',
+    },
+    {
+      'name'  => 'process_version',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'dod_version',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'input_source',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'site_id',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'platform_id',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'facility_id',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'data_level',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'location_description',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'datastream',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'serial_number',
+      'type'  => 'char',
+    },
+    {
+      'name'  => 'sampling_interval',
+      'type'  => 'char',
+      'value' => '5 minutes',
+    },
+    {
+      'name'  => 'averaging_interval',
+      'type'  => 'char',
+      'value' => '30 minutes',
+    },
+    {
+      'name'  => 'averaging_interval_comment',
+      'type'  => 'char',
+      'value' => 'The time assigned to each data point indicates the beginning of any period of averaging of the geophysical data.',
+    },
+    {
+      'name'  => 'vwc',
+      'type'  => 'char',
+      'value' => 'Volumetric Water Content',
+    },
+    {
+      'name'  => 'par',
+      'type'  => 'char',
+      'value' => 'Photosynthetically Active Radiation',
+    },
+    {
+      'name'  => 'qc_bit_comment',
+      'type'  => 'char',
+      'value' => 'The QC field values are a bit packed representation of true/false values for the tests that may have been performed. A QC value of zero means that none of the tests performed on the value failed.',
+    },
+    {
+      'name'  => 'qc_bit_1_description',
+      'type'  => 'char',
+      'value' => 'Value is equal to missing_value.',
+    },
+    {
+      'name'  => 'qc_bit_1_assessment',
+      'type'  => 'char',
+      'value' => 'Bad',
+    },
+    {
+      'name'  => 'qc_bit_2_description',
+      'type'  => 'char',
+      'value' => 'Value is less than the valid_min.',
+    },
+    {
+      'name'  => 'qc_bit_2_assessment',
+      'type'  => 'char',
+      'value' => 'Bad',
+    },
+    {
+      'name'  => 'qc_bit_3_description',
+      'type'  => 'char',
+      'value' => 'Value is greater than the valid_max.',
+    },
+    {
+      'name'  => 'qc_bit_3_assessment',
+      'type'  => 'char',
+      'value' => 'Bad',
+    },
+    {
+      'name'  => 'history',
+      'type'  => 'char',
+    },
+  ],
+  'vars' => [
+    {
+      'name' => 'base_time',
+      'type' => 'int',
+      'dims' => '',
+      'atts' => [
+        {
+          'name'  => 'string',
+          'type'  => 'char',
+        },
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Base time in Epoch',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'seconds since 1970-1-1 0:00:00 0:00',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'time_offset',
+        },
+      ],
+    },
+    {
+      'name' => 'time_offset',
+      'type' => 'double',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Time offset from base_time',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'base_time',
+        },
+      ],
+    },
+    {
+      'name' => 'time',
+      'type' => 'double',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Time offset from midnight',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+        },
+        {
+          'name'  => 'bounds',
+          'type'  => 'char',
+          'value' => 'time_bounds',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'time',
+        },
+      ],
+    },
+    {
+      'name' => 'time_bounds',
+      'type' => 'double',
+      'dims' => 'time,bound',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Time cell bounds',
+        },
+        {
+          'name'  => 'bound_offsets',
+          'type'  => 'double',
+          'value' => '0, 1800',
+        },
+      ],
+    },
+    {
+      'name' => 'record_number',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Record index number',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+      ],
+    },
+    {
+      'name' => 'logger_volt',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Logger battery voltage',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'V',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '12',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '15',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '50 cm AGL',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_logger_volt',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_logger_volt',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Logger battery voltage',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'logger_enclosure_temp',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Logger enclosure temperature',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-40',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '40',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '50 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_logger_enclosure_temp',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_logger_enclosure_temp',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Logger enclosure temperature',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'logger_enclosure_rh',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Logger enclusure relative humidity',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => '%',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '100',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '50 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_logger_enclosure_rh',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_logger_enclosure_rh',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Logger enclusure relative humidity',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_1',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 1',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_1',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_1',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 1',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_2',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 2',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_2',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_2',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 2',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_3',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 3',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_3',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_3',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 3',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_4',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 4',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_4',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_4',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 4',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_5',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 5',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_5',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_5',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 5',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_6',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 6',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_6',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_6',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 6',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_7',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 7',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_7',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_7',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 7',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_8',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 8',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_8',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_8',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 8',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_9',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 9',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_9',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_9',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 9',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_10',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 10',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_10',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_10',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 10',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_11',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 11',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_11',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_11',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 11',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_12',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content mean 12',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '1',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_12',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_12',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content mean 12',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_1_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 1, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_1_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_1_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 1, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_2_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 2, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_2_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_2_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 2, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_3_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 3, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_3_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_3_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 3, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_4_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 4, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_4_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_4_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 4, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_5_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 5, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_5_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_5_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 5, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_6_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 6, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_6_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_6_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 6, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_7_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 7, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_7_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_7_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 7, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_8_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 8, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_8_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_8_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 8, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_9_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 9, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_9_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_9_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 9, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_10_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 10, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_10_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_10_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 10, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_11_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 11, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_11_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_11_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 11, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'vwc_12_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Volumetric water content 12, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '0.05',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_vwc_12_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_vwc_12_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Volumetric water content 12, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_1',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 1',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_1',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_1',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 1',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_2',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 2',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_2',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_2',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 2',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_3',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 3',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_3',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_3',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 3',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_4',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 4',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_4',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_4',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 4',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_5',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 5',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_5',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_5',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 5',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_6',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 6',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_6',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_6',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 6',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_7',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 7',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_7',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_7',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 7',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_8',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 8',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_8',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_8',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 8',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_9',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 9',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_9',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_9',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 9',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_10',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 10',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_10',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_10',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 10',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_11',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 11',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_11',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_11',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 11',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_12',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged soil temperature 12',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-30',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '70',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_12',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'soil_temperature',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_12',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged soil temperature 12',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_1_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 1',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_1_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_1_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 1',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_2_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 2',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_2_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_2_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 2',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_3_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 3',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_3_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_3_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 3',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_4_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 4',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_4_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_4_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 4',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_5_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 5',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_5_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_5_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 5',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_6_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 6',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_6_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_6_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 6',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_7_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 7',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_7_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_7_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 7',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_8_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 8',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_8_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_8_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 8',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_9_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 9',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_9_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_9_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 9',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_10_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 10',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_10_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_10_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 10',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_11_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 11',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-10 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_11_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_11_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 11',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'soil_temp_12_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard deviation on half hour averaged soil temperature 12',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degC',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '10',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '-30 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_soil_temp_12_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_soil_temp_12_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard deviation on half hour averaged soil temperature 12',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_up_cal',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'PAR calibration constant, upward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'umol/m^2/s/uV',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '200 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+      ],
+    },
+    {
+      'name' => 'par_down_cal',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'PAR calibration constant, downward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'umol/m^2/s/uV',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '200 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+      ],
+    },
+    {
+      'name' => 'par_up',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged PAR, upward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'umol/m^2/s',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '2500',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '200 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_up',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_up',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged PAR, upward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_up_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard Deviation on half hour averaged PAR, upward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '100',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_up_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_up_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard Deviation on half hour averaged PAR, upward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_down',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Half hour averaged PAR, downward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'umol/m^2/s',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '2500',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '200 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_down',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_down',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Half hour averaged PAR, downward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_down_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Standard Deviation on half hour averaged PAR, downward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '100',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_down_std',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_down_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: Standard Deviation on half hour averaged PAR, downward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_up_volt',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'PAR mean voltage, upward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'uV',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '12500',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '200 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_up_volt',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_up_volt',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: PAR mean voltage, upward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_up_volt_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'PAR voltage, upward facing sensor, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_up_volt_std',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_up_volt_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: PAR voltage, upward facing sensor, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_down_volt',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'PAR mean voltage, downward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'uV',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '0',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '12500',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'sensor_height',
+          'type'  => 'char',
+          'value' => '200 cm AGL',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: mean',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_down_volt',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_down_volt',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: PAR mean voltage, downward facing sensor',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'par_down_volt_std',
+      'type' => 'float',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'PAR voltage, downward facing sensor, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'ancillary_variables',
+          'type'  => 'char',
+          'value' => 'qc_par_down_volt_std',
+        },
+        {
+          'name'  => 'missing_value',
+          'type'  => 'float',
+          'value' => '-9999',
+        },
+        {
+          'name'  => 'cell_methods',
+          'type'  => 'char',
+          'value' => 'time: standard_deviation',
+        },
+      ],
+    },
+    {
+      'name' => 'qc_par_down_volt_std',
+      'type' => 'int',
+      'dims' => 'time',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Quality check results on field: PAR voltage, downward facing sensor, standard deviation',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'unitless',
+        },
+        {
+          'name'  => 'description',
+          'type'  => 'char',
+          'value' => 'See global attributes for individual bit descriptions.',
+        },
+        {
+          'name'  => 'flag_method',
+          'type'  => 'char',
+          'value' => 'bit',
+        },
+      ],
+    },
+    {
+      'name' => 'lat',
+      'type' => 'float',
+      'dims' => '',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'North latitude',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degree_N',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-90',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '90',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'latitude',
+        },
+      ],
+    },
+    {
+      'name' => 'lon',
+      'type' => 'float',
+      'dims' => '',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'East longitude',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'degree_E',
+        },
+        {
+          'name'  => 'valid_min',
+          'type'  => 'float',
+          'value' => '-180',
+        },
+        {
+          'name'  => 'valid_max',
+          'type'  => 'float',
+          'value' => '180',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'longitude',
+        },
+      ],
+    },
+    {
+      'name' => 'alt',
+      'type' => 'float',
+      'dims' => '',
+      'atts' => [
+        {
+          'name'  => 'long_name',
+          'type'  => 'char',
+          'value' => 'Altitude above mean sea level',
+        },
+        {
+          'name'  => 'units',
+          'type'  => 'char',
+          'value' => 'm',
+        },
+        {
+          'name'  => 'standard_name',
+          'type'  => 'char',
+          'value' => 'altitude',
+        },
+      ],
+    },
+  ],
+);
+

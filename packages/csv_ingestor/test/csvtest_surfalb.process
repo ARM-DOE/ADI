@@ -1,0 +1,22 @@
+{
+  'locations' => [
+    {
+      'site' => 'sgp',
+      'fac' => 'C1'
+    }
+  ],
+  'outputs' => [
+    'csvtestsurfalb.00',
+    'csvtestsurfalb.a0'
+  ],
+  'name' => 'csvtest_surfalb',
+  'cdesc' => '',
+  'inputs' => [
+    'csvtestsurfalb.00'
+  ],
+  'props' => {},
+  'desc' => '',
+  'type' => 'Ingest',
+  'class' => 'csvtest_surfalb',
+  'category' => 'Instrument'
+}

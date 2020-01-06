@@ -1,0 +1,22 @@
+{
+  'locations' => [
+    {
+      'site' => 'nsa',
+      'fac' => 'C1'
+    }
+  ],
+  'outputs' => [
+    'csvtestamc.00',
+    'csvtestamc.b1'
+  ],
+  'name' => 'csvtest_amc',
+  'cdesc' => '',
+  'inputs' => [
+    'csvtestamc.00'
+  ],
+  'props' => {},
+  'desc' => '',
+  'type' => 'Ingest',
+  'class' => 'csvtest_amc',
+  'category' => 'Instrument'
+}

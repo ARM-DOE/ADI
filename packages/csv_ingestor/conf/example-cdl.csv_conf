@@ -1,0 +1,34 @@
+# Example csv_conf file for a typical CR3000 Campbell Data Logger.
+
+FILE_NAME_PATTERNS:
+
+    \.dat$
+    \.DAT$
+
+FILE_TIME_PATTERNS:
+
+    %Y%0m%0d%0H%0M%0S\.[[:alpha:]]{3}$
+
+DELIMITER:
+
+    ','
+
+HEADER_LINE_NUMBER:
+HEADER_LINE_TAG:
+
+    TIMESTAMP
+
+NUMBER_OF_HEADER_LINES:
+
+    3
+
+HEADER_LINE:
+NUMBER_OF_COLUMNS:
+
+TIME_COLUMN_PATTERNS:
+
+    TIMESTAMP: %Y-%m-%d %H:%M:%S
+
+FIELD_MAP:
+#   dod_var_name:  csv column name [, csv units [, csv missing value string]]
+

@@ -1,0 +1,25 @@
+{
+  'locations' => [
+    {
+      'site' => 'sgp',
+      'fac' => 'C1'
+    }
+  ],
+  'outputs' => [
+    'csvtestqcrad2.00',
+    'csvtestqcrad2.a1'
+  ],
+  'name' => 'csvtest_qcrad_noheader',
+  'cdesc' => '',
+  'inputs' => [
+    'csvtestqcrad2.00'
+  ],
+  'props' => {
+    'warning_mail' => 'brian.ermold@pnnl.gov',
+    'error_mail' => 'brian.ermold@pnnl.gov'
+  },
+  'desc' => '',
+  'type' => 'Ingest',
+  'class' => 'csvtest_qcrad_noheader',
+  'category' => 'Instrument'
+}
