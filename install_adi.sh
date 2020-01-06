@@ -14,6 +14,8 @@ pkgs=( \
     libdsproc3 \
     adi_idl \
     adi_py \
+    csv_ingestor \
+    data_consolidator
 )
 
 # Default installation prefix
