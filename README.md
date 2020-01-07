@@ -17,6 +17,7 @@ This package of the code is for users local work station (i.e. not ARM processin
 
 Note that we provide two options to install ADI framework. The first one is to build from source. The second one is to install rpms from ARMs yum repository if running on a system compatible with Linux rh6 or rh7.
 
+---
 ## Building from source code
  
 ### Prerequisites
@@ -64,6 +65,7 @@ If your login shell is csh add this line to your .cshrc file:
 
     source /usr/local/etc/.adi.cshrc
 
+---
 ## Alternative Installation: Run on Host rh6 Machine (this needs to be updated for rh7)
 
 ### Dependencies
