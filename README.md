@@ -4,7 +4,7 @@ ARM Data Integrator, ADI, is an open source framework that automates the process
 
 ADI is used by the 'Atmospheric Radiation Measurement (ARM) Climate Research Facility <http://www.arm.gov>' to process raw data collected from ARM instruments, and to implement scientific algorithms that process one or more of ARM's existing data products to produce new, higher value, data products.
 
-This package of the code is for users local work station (i.e. not ARM processing systems).  As such it is updated for major changes in functionality and not for minor incremental improvements.  
+This package of the code is for users local work station (i.e. not ARM processing systems).  As such it is updated for major changes in functionality and not for minor incremental improvements.
 
 ## Important Links
 
@@ -17,7 +17,7 @@ This package of the code is for users local work station (i.e. not ARM processin
 
 Note that we provide two options to install ADI framework. The first one is to build from source. The second one is to install rpms from ARMs yum repository if running on a system compatible with Linux rh6 or rh7.
 
-## Recommended Installation: Build from source code
+## Building from source code
  
 ### Prerequisites
 
@@ -35,15 +35,15 @@ For MacOS users [Homebrew](https://docs.brew.sh/Installation) can be used to ins
     * netcdf
     * openssl
     * postgresql
-    * udunits  (macOS)
+    * udunits  (macOS - Homebrew)
     * udunits2 (Linux)
-    * openblas (macOS)
+    * openblas (macOS - Homebrew)
     * atlas    (Linux)
 
 * **optional** (required for python bindings)
     * python
-    * cython (on macOS use 'pip3 install cython' instead of brew)
-    * numpy  (on macOS use 'pip3 install numpy'  instead of brew)
+    * cython (on macOS use 'pip3 install cython' instead of Homebrew)
+    * numpy  (on macOS use 'pip3 install numpy'  instead of Homebrew)
 
 * **optional**
     * sqlite
@@ -64,10 +64,6 @@ If your login shell is csh add this line to your .cshrc file:
 
     source /usr/local/etc/.adi.cshrc
 
-### Run ADI_Example (coming soon) 
-
-### To Add More Process Definitions to the DSDB (coming soon)
-
 ## Alternative Installation: Run on Host rh6 Machine (this needs to be updated for rh7)
 
 ### Dependencies
@@ -81,12 +77,6 @@ Required packages provided in epel6 include:
 - netcdf-4
 - udunits2
 
-The source code is freely availaable, but instructions and Makefiles to support compilation are not.  ARM's development environment uses a in house workflow management system to streamline development activities.  Generic Makefiles are not currently available, but will be provided at a later date. 
-
-The required dependencies to install and compile source code are:
-* 'Unidata NetCDF4-C <http://www.unidata.ucar.edu/downloads/netcdf>'
-* 'PostgreSQL 8.4 <ttp://www.postgresql.org/download/linux/redhat/>'
-
 ### Optional Dependences
 
 * 'Multiprotocol file transform library <http://curl.haxx.se/libcurl/>'_7.19.7 is used to access DSDB via a Web Service.
@@ -97,12 +87,6 @@ To develop new source code templates beyond those provided:
 To develop algorithms in Python 2.7+:
 * 'netCDF4 <http://code.google.com/p/netcdf4-python/>'_ 1.0.2+ 
 * 'NumPy <http://www.scipy.org>'_ 1.6+
-
-### Install
-
-Installation and complilation of the source code is not fully documented, but will be in the future.  
-However the latest source code for ADI can be obtained from the GitHub repository,
-https://github.com/ARM-DOE/ADI by downloading and unpacking the zip file <https://github.com//ARM-DOE/ADI/archive/ADI_source.tar.gz>  of the source code.
 
 ### To Install a Build of ADI:
 
