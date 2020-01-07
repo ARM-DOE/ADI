@@ -1,0 +1,6 @@
+# DSDB connection aliases
+
+dsdb_read  sqlite  @ADI_PREFIX@/var/adi/dsdb.sqlite
+dsdb_data  sqlite  @ADI_PREFIX@/var/adi/dsdb.sqlite
+dsdb_ref   sqlite  @ADI_PREFIX@/var/adi/dsdb.sqlite
+

@@ -1,0 +1,5 @@
+# Add ADI bindings to PYTHONPATH
+
+ADI_PYTHONPATH="$ADI_PREFIX/lib/@PYVERSION@/site-packages"
+export PYTHONPATH=$(prepend_path "$PYTHONPATH" "$ADI_PYTHONPATH")
+

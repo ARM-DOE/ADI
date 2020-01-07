@@ -1,0 +1,2 @@
+#!/bin/sh
+./libcds3_test @top_srcdir@/test

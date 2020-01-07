@@ -1,0 +1,1797 @@
+============================================================
+Integer Array Tests
+============================================================
+
+------------------------------------------------------------
+maxline = 0, indent = "", flags = 0x0
+------------------------------------------------------------
+
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
+
+length = 390
+
+------------------------------------------------------------
+maxline = 80, indent = "", flags = 0x0
+------------------------------------------------------------
+
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81,
+82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
+
+length = 390
+
+------------------------------------------------------------
+maxline = 80, indent = "        ", flags = 0x2
+------------------------------------------------------------
+
+int:   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+        20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+        38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55,
+        56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73,
+        74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91,
+        92, 93, 94, 95, 96, 97, 98, 99]
+
+length = 437
+
+------------------------------------------------------------
+maxline = 30, indent = "", flags = 0x0
+------------------------------------------------------------
+
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+10, 11, 12, 13, 14, 15, 16,
+17, 18, 19, 20, 21, 22, 23,
+24, 25, 26, 27, 28, 29, 30,
+31, 32, 33, 34, 35, 36, 37,
+38, 39, 40, 41, 42, 43, 44,
+45, 46, 47, 48, 49, 50, 51,
+52, 53, 54, 55, 56, 57, 58,
+59, 60, 61, 62, 63, 64, 65,
+66, 67, 68, 69, 70, 71, 72,
+73, 74, 75, 76, 77, 78, 79,
+80, 81, 82, 83, 84, 85, 86,
+87, 88, 89, 90, 91, 92, 93,
+94, 95, 96, 97, 98, 99]
+
+length = 390
+
+------------------------------------------------------------
+maxline = 30, indent = "        ", flags = 0x2
+------------------------------------------------------------
+
+int:   [0, 1, 2, 3, 4, 5, 6,
+        7, 8, 9, 10, 11, 12,
+        13, 14, 15, 16, 17,
+        18, 19, 20, 21, 22,
+        23, 24, 25, 26, 27,
+        28, 29, 30, 31, 32,
+        33, 34, 35, 36, 37,
+        38, 39, 40, 41, 42,
+        43, 44, 45, 46, 47,
+        48, 49, 50, 51, 52,
+        53, 54, 55, 56, 57,
+        58, 59, 60, 61, 62,
+        63, 64, 65, 66, 67,
+        68, 69, 70, 71, 72,
+        73, 74, 75, 76, 77,
+        78, 79, 80, 81, 82,
+        83, 84, 85, 86, 87,
+        88, 89, 90, 91, 92,
+        93, 94, 95, 96, 97,
+        98, 99]
+
+length = 549
+
+------------------------------------------------------------
+maxline = 1, indent = "        ", flags = 0x2
+------------------------------------------------------------
+
+int:   [0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99]
+
+length = 1189
+
+------------------------------------------------------------
+maxline = 1, indent = "", flags = 0x8
+------------------------------------------------------------
+
+0,
+1,
+2,
+3,
+4,
+5,
+6,
+7,
+8,
+9,
+10,
+11,
+12,
+13,
+14,
+15,
+16,
+17,
+18,
+19,
+20,
+21,
+22,
+23,
+24,
+25,
+26,
+27,
+28,
+29,
+30,
+31,
+32,
+33,
+34,
+35,
+36,
+37,
+38,
+39,
+40,
+41,
+42,
+43,
+44,
+45,
+46,
+47,
+48,
+49,
+50,
+51,
+52,
+53,
+54,
+55,
+56,
+57,
+58,
+59,
+60,
+61,
+62,
+63,
+64,
+65,
+66,
+67,
+68,
+69,
+70,
+71,
+72,
+73,
+74,
+75,
+76,
+77,
+78,
+79,
+80,
+81,
+82,
+83,
+84,
+85,
+86,
+87,
+88,
+89,
+90,
+91,
+92,
+93,
+94,
+95,
+96,
+97,
+98,
+99
+
+length = 388
+
+============================================================
+All Data Type Array Tests
+============================================================
+
+------------------------------------------------------------
+maxline = 0, indent = "", flags = 0x0
+------------------------------------------------------------
+
+[-128, -123, -90, -78, -56, -34, -12, -3, 0, 3, 12, 34, 56, 78, 90, 123, 127, -99, -127]
+length = 88
+
+[-32768, -128, -8901, -4567, -123, -90, -78, 0, 78, 90, 123, 4567, 8901, 23456, 127, 32767, -9999, -127, -32767]
+length = 112
+
+[-2147483648, -32768, -128, -345678, -89012, -4567, -123, 0, 123, 4567, 89012, 345678, 127, 32767, 2147483647, -9999, -127, -32767, -2147483647]
+length = 144
+
+[-3.402823e+38, -2.147484e+09, -32768, -128, -123.4567, -34.56789, 0, 34.56789, 123.4567, 123.5678, 127, 32767, 2.147484e+09, 3.402823e+38, -9999, -127, -32767, -2.147484e+09, 9.96921e+36]
+length = 188
+
+[-1.79769313486232e+308, -3.40282346638529e+38, -2147483648, -32768, -128, -123.456789123456, 0, 123.456789123456, 127, 32767, 2147483647, 3.40282346638529e+38, 1.79769313486232e+308, -9999, -127, -32767, -2147483647, 9.96920996838687e+36, 9.96920996838687e+36]
+length = 261
+
+------------------------------------------------------------
+maxline = 0, indent = "        ", flags = 0x1
+------------------------------------------------------------
+
+byte:[-128, -123, -90, -78, -56, -34, -12, -3, 0, 3, 12, 34, 56, 78, 90, 123, 127, -99, -127]
+length = 93
+
+short:[-32768, -128, -8901, -4567, -123, -90, -78, 0, 78, 90, 123, 4567, 8901, 23456, 127, 32767, -9999, -127, -32767]
+length = 118
+
+int:[-2147483648, -32768, -128, -345678, -89012, -4567, -123, 0, 123, 4567, 89012, 345678, 127, 32767, 2147483647, -9999, -127, -32767, -2147483647]
+length = 148
+
+float:[-3.402823e+38, -2.147484e+09, -32768, -128, -123.4567, -34.56789, 0, 34.56789, 123.4567, 123.5678, 127, 32767, 2.147484e+09, 3.402823e+38, -9999, -127, -32767, -2.147484e+09, 9.96921e+36]
+length = 194
+
+double:[-1.79769313486232e+308, -3.40282346638529e+38, -2147483648, -32768, -128, -123.456789123456, 0, 123.456789123456, 127, 32767, 2147483647, 3.40282346638529e+38, 1.79769313486232e+308, -9999, -127, -32767, -2147483647, 9.96920996838687e+36, 9.96920996838687e+36]
+length = 268
+
+------------------------------------------------------------
+maxline = 80, indent = "        ", flags = 0x2
+------------------------------------------------------------
+
+byte:  [-128, -123, -90, -78, -56, -34, -12, -3, 0, 3, 12, 34, 56, 78, 90, 123,
+        127, -99, -127]
+length = 103
+
+short: [-32768, -128, -8901, -4567, -123, -90, -78, 0, 78, 90, 123, 4567, 8901,
+        23456, 127, 32767, -9999, -127, -32767]
+length = 127
+
+int:   [-2147483648, -32768, -128, -345678, -89012, -4567, -123, 0, 123, 4567,
+        89012, 345678, 127, 32767, 2147483647, -9999, -127, -32767, -2147483647]
+length = 159
+
+float: [-3.402823e+38, -2.147484e+09, -32768, -128, -123.4567, -34.56789, 0,
+        34.56789, 123.4567, 123.5678, 127, 32767, 2.147484e+09, 3.402823e+38,
+        -9999, -127, -32767, -2.147484e+09, 9.96921e+36]
+length = 211
+
+double:[-1.79769313486232e+308, -3.40282346638529e+38, -2147483648, -32768,
+        -128, -123.456789123456, 0, 123.456789123456, 127, 32767, 2147483647,
+        3.40282346638529e+38, 1.79769313486232e+308, -9999, -127, -32767,
+        -2147483647, 9.96920996838687e+36, 9.96920996838687e+36]
+length = 292
+
+------------------------------------------------------------
+maxline = 80, indent = "", flags = 0x4
+------------------------------------------------------------
+
+[-128, -123, -90, -78, -56, -34, -12, -3, 0, 3, 12, 34, 56, 78, 90, 123, 127,
+-99, -127]:byte
+length = 93
+
+[-32768, -128, -8901, -4567, -123, -90, -78, 0, 78, 90, 123, 4567, 8901, 23456,
+127, 32767, -9999, -127, -32767]:short
+length = 118
+
+[-2147483648, -32768, -128, -345678, -89012, -4567, -123, 0, 123, 4567, 89012,
+345678, 127, 32767, 2147483647, -9999, -127, -32767, -2147483647]:int
+length = 148
+
+[-3.402823e+38, -2.147484e+09, -32768, -128, -123.4567, -34.56789, 0, 34.56789,
+123.4567, 123.5678, 127, 32767, 2.147484e+09, 3.402823e+38, -9999, -127, -32767,
+-2.147484e+09, 9.96921e+36]:float
+length = 194
+
+[-1.79769313486232e+308, -3.40282346638529e+38, -2147483648, -32768, -128,
+-123.456789123456, 0, 123.456789123456, 127, 32767, 2147483647,
+3.40282346638529e+38, 1.79769313486232e+308, -9999, -127, -32767, -2147483647,
+9.96920996838687e+36, 9.96920996838687e+36]:double
+length = 268
+
+------------------------------------------------------------
+maxline = 80, indent = "", flags = 0x8
+------------------------------------------------------------
+
+-128, -123, -90, -78, -56, -34, -12, -3, 0, 3, 12, 34, 56, 78, 90, 123, 127,
+-99, -127
+length = 86
+
+-32768, -128, -8901, -4567, -123, -90, -78, 0, 78, 90, 123, 4567, 8901, 23456,
+127, 32767, -9999, -127, -32767
+length = 110
+
+-2147483648, -32768, -128, -345678, -89012, -4567, -123, 0, 123, 4567, 89012,
+345678, 127, 32767, 2147483647, -9999, -127, -32767, -2147483647
+length = 142
+
+-3.402823e+38, -2.147484e+09, -32768, -128, -123.4567, -34.56789, 0, 34.56789,
+123.4567, 123.5678, 127, 32767, 2.147484e+09, 3.402823e+38, -9999, -127, -32767,
+-2.147484e+09, 9.96921e+36
+length = 186
+
+-1.79769313486232e+308, -3.40282346638529e+38, -2147483648, -32768, -128,
+-123.456789123456, 0, 123.456789123456, 127, 32767, 2147483647,
+3.40282346638529e+38, 1.79769313486232e+308, -9999, -127, -32767, -2147483647,
+9.96920996838687e+36, 9.96920996838687e+36
+length = 259
+
+------------------------------------------------------------
+maxline = 40, indent = "        ", flags = 0x2
+------------------------------------------------------------
+
+byte:  [-128, -123, -90, -78, -56, -34,
+        -12, -3, 0, 3, 12, 34, 56, 78,
+        90, 123, 127, -99, -127]
+length = 111
+
+short: [-32768, -128, -8901, -4567,
+        -123, -90, -78, 0, 78, 90, 123,
+        4567, 8901, 23456, 127, 32767,
+        -9999, -127, -32767]
+length = 143
+
+int:   [-2147483648, -32768, -128,
+        -345678, -89012, -4567, -123, 0,
+        123, 4567, 89012, 345678, 127,
+        32767, 2147483647, -9999, -127,
+        -32767, -2147483647]
+length = 183
+
+float: [-3.402823e+38, -2.147484e+09,
+        -32768, -128, -123.4567,
+        -34.56789, 0, 34.56789,
+        123.4567, 123.5678, 127, 32767,
+        2.147484e+09, 3.402823e+38,
+        -9999, -127, -32767,
+        -2.147484e+09, 9.96921e+36]
+length = 243
+
+double:[-1.79769313486232e+308,
+        -3.40282346638529e+38,
+        -2147483648, -32768, -128,
+        -123.456789123456, 0,
+        123.456789123456, 127, 32767,
+        2147483647,
+        3.40282346638529e+38,
+        1.79769313486232e+308, -9999,
+        -127, -32767, -2147483647,
+        9.96920996838687e+36,
+        9.96920996838687e+36]
+length = 348
+
+------------------------------------------------------------
+maxline = 1, indent = "        ", flags = 0x2
+------------------------------------------------------------
+
+byte:  [
+        -128,
+        -123,
+        -90,
+        -78,
+        -56,
+        -34,
+        -12,
+        -3,
+        0,
+        3,
+        12,
+        34,
+        56,
+        78,
+        90,
+        123,
+        127,
+        -99,
+        -127]
+length = 248
+
+short: [
+        -32768,
+        -128,
+        -8901,
+        -4567,
+        -123,
+        -90,
+        -78,
+        0,
+        78,
+        90,
+        123,
+        4567,
+        8901,
+        23456,
+        127,
+        32767,
+        -9999,
+        -127,
+        -32767]
+length = 272
+
+int:   [
+        -2147483648,
+        -32768,
+        -128,
+        -345678,
+        -89012,
+        -4567,
+        -123,
+        0,
+        123,
+        4567,
+        89012,
+        345678,
+        127,
+        32767,
+        2147483647,
+        -9999,
+        -127,
+        -32767,
+        -2147483647]
+length = 304
+
+float: [
+        -3.402823e+38,
+        -2.147484e+09,
+        -32768,
+        -128,
+        -123.4567,
+        -34.56789,
+        0,
+        34.56789,
+        123.4567,
+        123.5678,
+        127,
+        32767,
+        2.147484e+09,
+        3.402823e+38,
+        -9999,
+        -127,
+        -32767,
+        -2.147484e+09,
+        9.96921e+36]
+length = 348
+
+double:[
+        -1.79769313486232e+308,
+        -3.40282346638529e+38,
+        -2147483648,
+        -32768,
+        -128,
+        -123.456789123456,
+        0,
+        123.456789123456,
+        127,
+        32767,
+        2147483647,
+        3.40282346638529e+38,
+        1.79769313486232e+308,
+        -9999,
+        -127,
+        -32767,
+        -2147483647,
+        9.96920996838687e+36,
+        9.96920996838687e+36]
+length = 421
+
+============================================================
+String 1 Character Array Tests
+============================================================
+
+------------------------------------------------------------
+maxline = 0, indent = "", flags = 0x0
+------------------------------------------------------------
+
+"The cds_print_array() function can be used to print an array of data values. By default data arrays will be beigin and end with open and close brackets, and character arrays will begin and end with a quote and quotes inside the string will be \"escaped\" with a backslash character.\n"
+"\n"
+"Parameters:\n"
+"    fp      - pointer to the output stream to write to\n"
+"    type    - data type of the array\n"
+"    length  - number of values to print\n"
+"    array   - pointer to the array of values\n"
+"    indent  - line indent string to use for new lines\n"
+"    maxline - maximum number of characters to print per line,\n"
+"              or 0 for no line breaks in numeric arrays and to only\n"
+"              split character arrays on newlines.\n"
+"    linepos - starting line position when this function was called,\n"
+"              ignored if maxline == 0\n"
+"    flags   - control flags:\n"
+"                - 0x01: Print data type name for numeric arrays.\n"
+"                - 0x02: Print padded data type name for numeric arrays.\n"
+"                - 0x04: Print data type name at end of numeric arrays.\n"
+"                - 0x08: Do not print brackets around numeric arrays.\n"
+"                - 0x10: Strip trailing NULLs from the end of strings.\n"
+"\n"
+"Returns:\n"
+"    - number of bytes printed\n"
+"    - (size_t)-1 if an error occurs\n"
+"\0"
+
+length = 1361
+
+------------------------------------------------------------
+maxline = 0, indent = "        ", flags = 0x0
+------------------------------------------------------------
+
+string: "The cds_print_array() function can be used to print an array of data values. By default data arrays will be beigin and end with open and close brackets, and character arrays will begin and end with a quote and quotes inside the string will be \"escaped\" with a backslash character.\n"
+        "\n"
+        "Parameters:\n"
+        "    fp      - pointer to the output stream to write to\n"
+        "    type    - data type of the array\n"
+        "    length  - number of values to print\n"
+        "    array   - pointer to the array of values\n"
+        "    indent  - line indent string to use for new lines\n"
+        "    maxline - maximum number of characters to print per line,\n"
+        "              or 0 for no line breaks in numeric arrays and to only\n"
+        "              split character arrays on newlines.\n"
+        "    linepos - starting line position when this function was called,\n"
+        "              ignored if maxline == 0\n"
+        "    flags   - control flags:\n"
+        "                - 0x01: Print data type name for numeric arrays.\n"
+        "                - 0x02: Print padded data type name for numeric arrays.\n"
+        "                - 0x04: Print data type name at end of numeric arrays.\n"
+        "                - 0x08: Do not print brackets around numeric arrays.\n"
+        "                - 0x10: Strip trailing NULLs from the end of strings.\n"
+        "\n"
+        "Returns:\n"
+        "    - number of bytes printed\n"
+        "    - (size_t)-1 if an error occurs\n"
+        "\0"
+
+length = 1545
+
+------------------------------------------------------------
+maxline = 0, indent = "        ", flags = 0x10
+------------------------------------------------------------
+
+string: "The cds_print_array() function can be used to print an array of data values. By default data arrays will be beigin and end with open and close brackets, and character arrays will begin and end with a quote and quotes inside the string will be \"escaped\" with a backslash character.\n"
+        "\n"
+        "Parameters:\n"
+        "    fp      - pointer to the output stream to write to\n"
+        "    type    - data type of the array\n"
+        "    length  - number of values to print\n"
+        "    array   - pointer to the array of values\n"
+        "    indent  - line indent string to use for new lines\n"
+        "    maxline - maximum number of characters to print per line,\n"
+        "              or 0 for no line breaks in numeric arrays and to only\n"
+        "              split character arrays on newlines.\n"
+        "    linepos - starting line position when this function was called,\n"
+        "              ignored if maxline == 0\n"
+        "    flags   - control flags:\n"
+        "                - 0x01: Print data type name for numeric arrays.\n"
+        "                - 0x02: Print padded data type name for numeric arrays.\n"
+        "                - 0x04: Print data type name at end of numeric arrays.\n"
+        "                - 0x08: Do not print brackets around numeric arrays.\n"
+        "                - 0x10: Strip trailing NULLs from the end of strings.\n"
+        "\n"
+        "Returns:\n"
+        "    - number of bytes printed\n"
+        "    - (size_t)-1 if an error occurs\n"
+
+length = 1532
+
+------------------------------------------------------------
+maxline = 80, indent = "", flags = 0x0
+------------------------------------------------------------
+
+"The cds_print_array() function can be used to print an array of data values. "
+"By default data arrays will be beigin and end with open and close brackets, "
+"and character arrays will begin and end with a quote and quotes inside the "
+"string will be \"escaped\" with a backslash character.\n"
+"\n"
+"Parameters:\n"
+"    fp      - pointer to the output stream to write to\n"
+"    type    - data type of the array\n"
+"    length  - number of values to print\n"
+"    array   - pointer to the array of values\n"
+"    indent  - line indent string to use for new lines\n"
+"    maxline - maximum number of characters to print per line,\n"
+"              or 0 for no line breaks in numeric arrays and to only\n"
+"              split character arrays on newlines.\n"
+"    linepos - starting line position when this function was called,\n"
+"              ignored if maxline == 0\n"
+"    flags   - control flags:\n"
+"                - 0x01: Print data type name for numeric arrays.\n"
+"                - 0x02: Print padded data type name for numeric arrays.\n"
+"                - 0x04: Print data type name at end of numeric arrays.\n"
+"                - 0x08: Do not print brackets around numeric arrays.\n"
+"                - 0x10: Strip trailing NULLs from the end of strings.\n"
+"\n"
+"Returns:\n"
+"    - number of bytes printed\n"
+"    - (size_t)-1 if an error occurs\n"
+"\0"
+
+length = 1370
+
+------------------------------------------------------------
+maxline = 80, indent = "        ", flags = 0x0
+------------------------------------------------------------
+
+string: "The cds_print_array() function can be used to print an array of data "
+        "values. By default data arrays will be beigin and end with open and "
+        "close brackets, and character arrays will begin and end with a quote "
+        "and quotes inside the string will be \"escaped\" with a backslash "
+        "character.\n"
+        "\n"
+        "Parameters:\n"
+        "    fp      - pointer to the output stream to write to\n"
+        "    type    - data type of the array\n"
+        "    length  - number of values to print\n"
+        "    array   - pointer to the array of values\n"
+        "    indent  - line indent string to use for new lines\n"
+        "    maxline - maximum number of characters to print per line,\n"
+        "              or 0 for no line breaks in numeric arrays and to only\n"
+        "              split character arrays on newlines.\n"
+        "    linepos - starting line position when this function was called,\n"
+        "              ignored if maxline == 0\n"
+        "    flags   - control flags:\n"
+        "                - 0x01: Print data type name for numeric arrays.\n"
+        "                - 0x02: Print padded data type name for numeric "
+        "arrays.\n"
+        "                - 0x04: Print data type name at end of numeric "
+        "arrays.\n"
+        "                - 0x08: Do not print brackets around numeric arrays.\n"
+        "                - 0x10: Strip trailing NULLs from the end of "
+        "strings.\n"
+        "\n"
+        "Returns:\n"
+        "    - number of bytes printed\n"
+        "    - (size_t)-1 if an error occurs\n"
+        "\0"
+
+length = 1622
+
+------------------------------------------------------------
+maxline = 50, indent = "        ", flags = 0x1
+------------------------------------------------------------
+
+string: "The cds_print_array() function can be "
+        "used to print an array of data values. "
+        "By default data arrays will be beigin "
+        "and end with open and close brackets, "
+        "and character arrays will begin and end "
+        "with a quote and quotes inside the "
+        "string will be \"escaped\" with a "
+        "backslash character.\n"
+        "\n"
+        "Parameters:\n"
+        "    fp      - pointer to the output "
+        "stream to write to\n"
+        "    type    - data type of the array\n"
+        "    length  - number of values to "
+        "print\n"
+        "    array   - pointer to the array of "
+        "values\n"
+        "    indent  - line indent string to use "
+        "for new lines\n"
+        "    maxline - maximum number of "
+        "characters to print per line,\n"
+        "              or 0 for no line breaks "
+        "in numeric arrays and to only\n"
+        "              split character arrays on "
+        "newlines.\n"
+        "    linepos - starting line position "
+        "when this function was called,\n"
+        "              ignored if maxline == 0\n"
+        "    flags   - control flags:\n"
+        "                - 0x01: Print data type "
+        "name for numeric arrays.\n"
+        "                - 0x02: Print padded "
+        "data type name for numeric arrays.\n"
+        "                - 0x04: Print data type "
+        "name at end of numeric arrays.\n"
+        "                - 0x08: Do not print "
+        "brackets around numeric arrays.\n"
+        "                - 0x10: Strip trailing "
+        "NULLs from the end of strings.\n"
+        "\n"
+        "Returns:\n"
+        "    - number of bytes printed\n"
+        "    - (size_t)-1 if an error occurs\n"
+        "\0"
+
+length = 1765
+
+============================================================
+String 2 Character Array Tests
+============================================================
+
+------------------------------------------------------------
+maxline = 0, indent = "", flags = 0x0
+------------------------------------------------------------
+
+"supercalifragilisticexpialidocious\n"
+"\n"
+"even though the sound of it\n"
+"is something quite attrocious\n"
+"if you say it loud enough\n"
+"you'll aways sound precocious\n"
+"\n"
+"supercalifragilisticexpialidocious\n"
+"\n"
+"i was afriad to speak\n"
+"when i was just a lad\n"
+"my father gave my nose a tweak\n"
+"and told me i was bad\n"
+"\n"
+"and then one day i heard a word\n"
+"to save my aching nose\n"
+"it was the biggest word you ever heard\n"
+"and this is how it goes..\n"
+"\n"
+"supercalifragilisticexpialidocious\n"
+"\0"
+
+length = 525
+
+------------------------------------------------------------
+maxline = 0, indent = "        ", flags = 0x10
+------------------------------------------------------------
+
+string: "supercalifragilisticexpialidocious\n"
+        "\n"
+        "even though the sound of it\n"
+        "is something quite attrocious\n"
+        "if you say it loud enough\n"
+        "you'll aways sound precocious\n"
+        "\n"
+        "supercalifragilisticexpialidocious\n"
+        "\n"
+        "i was afriad to speak\n"
+        "when i was just a lad\n"
+        "my father gave my nose a tweak\n"
+        "and told me i was bad\n"
+        "\n"
+        "and then one day i heard a word\n"
+        "to save my aching nose\n"
+        "it was the biggest word you ever heard\n"
+        "and this is how it goes..\n"
+        "\n"
+        "supercalifragilisticexpialidocious\n"
+
+length = 672
+
+------------------------------------------------------------
+maxline = 20, indent = "", flags = 0x0
+------------------------------------------------------------
+
+"supercalifragilist"
+"icexpialidocious\n"
+"\n"
+"even though the "
+"sound of it\n"
+"is something "
+"quite attrocious\n"
+"if you say it "
+"loud enough\n"
+"you'll aways "
+"sound precocious\n"
+"\n"
+"supercalifragilist"
+"icexpialidocious\n"
+"\n"
+"i was afriad to "
+"speak\n"
+"when i was just a "
+"lad\n"
+"my father gave my "
+"nose a tweak\n"
+"and told me i was "
+"bad\n"
+"\n"
+"and then one day "
+"i heard a word\n"
+"to save my aching "
+"nose\n"
+"it was the "
+"biggest word you "
+"ever heard\n"
+"and this is how "
+"it goes..\n"
+"\n"
+"supercalifragilist"
+"icexpialidocious\n"
+"\0"
+
+length = 573
+
+------------------------------------------------------------
+maxline = 1, indent = "        ", flags = 0x10
+------------------------------------------------------------
+
+string: "s"
+        "u"
+        "p"
+        "e"
+        "r"
+        "c"
+        "a"
+        "l"
+        "i"
+        "f"
+        "r"
+        "a"
+        "g"
+        "i"
+        "l"
+        "i"
+        "s"
+        "t"
+        "i"
+        "c"
+        "e"
+        "x"
+        "p"
+        "i"
+        "a"
+        "l"
+        "i"
+        "d"
+        "o"
+        "c"
+        "i"
+        "o"
+        "u"
+        "s"
+        "\n"
+        "\n"
+        "e"
+        "v"
+        "e"
+        "n"
+        " "
+        "t"
+        "h"
+        "o"
+        "u"
+        "g"
+        "h"
+        " "
+        "t"
+        "h"
+        "e"
+        " "
+        "s"
+        "o"
+        "u"
+        "n"
+        "d"
+        " "
+        "o"
+        "f"
+        " "
+        "i"
+        "t"
+        "\n"
+        "i"
+        "s"
+        " "
+        "s"
+        "o"
+        "m"
+        "e"
+        "t"
+        "h"
+        "i"
+        "n"
+        "g"
+        " "
+        "q"
+        "u"
+        "i"
+        "t"
+        "e"
+        " "
+        "a"
+        "t"
+        "t"
+        "r"
+        "o"
+        "c"
+        "i"
+        "o"
+        "u"
+        "s"
+        "\n"
+        "i"
+        "f"
+        " "
+        "y"
+        "o"
+        "u"
+        " "
+        "s"
+        "a"
+        "y"
+        " "
+        "i"
+        "t"
+        " "
+        "l"
+        "o"
+        "u"
+        "d"
+        " "
+        "e"
+        "n"
+        "o"
+        "u"
+        "g"
+        "h"
+        "\n"
+        "y"
+        "o"
+        "u"
+        "'"
+        "l"
+        "l"
+        " "
+        "a"
+        "w"
+        "a"
+        "y"
+        "s"
+        " "
+        "s"
+        "o"
+        "u"
+        "n"
+        "d"
+        " "
+        "p"
+        "r"
+        "e"
+        "c"
+        "o"
+        "c"
+        "i"
+        "o"
+        "u"
+        "s"
+        "\n"
+        "\n"
+        "s"
+        "u"
+        "p"
+        "e"
+        "r"
+        "c"
+        "a"
+        "l"
+        "i"
+        "f"
+        "r"
+        "a"
+        "g"
+        "i"
+        "l"
+        "i"
+        "s"
+        "t"
+        "i"
+        "c"
+        "e"
+        "x"
+        "p"
+        "i"
+        "a"
+        "l"
+        "i"
+        "d"
+        "o"
+        "c"
+        "i"
+        "o"
+        "u"
+        "s"
+        "\n"
+        "\n"
+        "i"
+        " "
+        "w"
+        "a"
+        "s"
+        " "
+        "a"
+        "f"
+        "r"
+        "i"
+        "a"
+        "d"
+        " "
+        "t"
+        "o"
+        " "
+        "s"
+        "p"
+        "e"
+        "a"
+        "k"
+        "\n"
+        "w"
+        "h"
+        "e"
+        "n"
+        " "
+        "i"
+        " "
+        "w"
+        "a"
+        "s"
+        " "
+        "j"
+        "u"
+        "s"
+        "t"
+        " "
+        "a"
+        " "
+        "l"
+        "a"
+        "d"
+        "\n"
+        "m"
+        "y"
+        " "
+        "f"
+        "a"
+        "t"
+        "h"
+        "e"
+        "r"
+        " "
+        "g"
+        "a"
+        "v"
+        "e"
+        " "
+        "m"
+        "y"
+        " "
+        "n"
+        "o"
+        "s"
+        "e"
+        " "
+        "a"
+        " "
+        "t"
+        "w"
+        "e"
+        "a"
+        "k"
+        "\n"
+        "a"
+        "n"
+        "d"
+        " "
+        "t"
+        "o"
+        "l"
+        "d"
+        " "
+        "m"
+        "e"
+        " "
+        "i"
+        " "
+        "w"
+        "a"
+        "s"
+        " "
+        "b"
+        "a"
+        "d"
+        "\n"
+        "\n"
+        "a"
+        "n"
+        "d"
+        " "
+        "t"
+        "h"
+        "e"
+        "n"
+        " "
+        "o"
+        "n"
+        "e"
+        " "
+        "d"
+        "a"
+        "y"
+        " "
+        "i"
+        " "
+        "h"
+        "e"
+        "a"
+        "r"
+        "d"
+        " "
+        "a"
+        " "
+        "w"
+        "o"
+        "r"
+        "d"
+        "\n"
+        "t"
+        "o"
+        " "
+        "s"
+        "a"
+        "v"
+        "e"
+        " "
+        "m"
+        "y"
+        " "
+        "a"
+        "c"
+        "h"
+        "i"
+        "n"
+        "g"
+        " "
+        "n"
+        "o"
+        "s"
+        "e"
+        "\n"
+        "i"
+        "t"
+        " "
+        "w"
+        "a"
+        "s"
+        " "
+        "t"
+        "h"
+        "e"
+        " "
+        "b"
+        "i"
+        "g"
+        "g"
+        "e"
+        "s"
+        "t"
+        " "
+        "w"
+        "o"
+        "r"
+        "d"
+        " "
+        "y"
+        "o"
+        "u"
+        " "
+        "e"
+        "v"
+        "e"
+        "r"
+        " "
+        "h"
+        "e"
+        "a"
+        "r"
+        "d"
+        "\n"
+        "a"
+        "n"
+        "d"
+        " "
+        "t"
+        "h"
+        "i"
+        "s"
+        " "
+        "i"
+        "s"
+        " "
+        "h"
+        "o"
+        "w"
+        " "
+        "i"
+        "t"
+        " "
+        "g"
+        "o"
+        "e"
+        "s"
+        "."
+        "."
+        "\n"
+        "\n"
+        "s"
+        "u"
+        "p"
+        "e"
+        "r"
+        "c"
+        "a"
+        "l"
+        "i"
+        "f"
+        "r"
+        "a"
+        "g"
+        "i"
+        "l"
+        "i"
+        "s"
+        "t"
+        "i"
+        "c"
+        "e"
+        "x"
+        "p"
+        "i"
+        "a"
+        "l"
+        "i"
+        "d"
+        "o"
+        "c"
+        "i"
+        "o"
+        "u"
+        "s"
+        "\n"
+
+length = 5303
+
+------------------------------------------------------------
+maxline = 1, indent = "", flags = 0x10
+------------------------------------------------------------
+
+"s"
+"u"
+"p"
+"e"
+"r"
+"c"
+"a"
+"l"
+"i"
+"f"
+"r"
+"a"
+"g"
+"i"
+"l"
+"i"
+"s"
+"t"
+"i"
+"c"
+"e"
+"x"
+"p"
+"i"
+"a"
+"l"
+"i"
+"d"
+"o"
+"c"
+"i"
+"o"
+"u"
+"s"
+"\n"
+"\n"
+"e"
+"v"
+"e"
+"n"
+" "
+"t"
+"h"
+"o"
+"u"
+"g"
+"h"
+" "
+"t"
+"h"
+"e"
+" "
+"s"
+"o"
+"u"
+"n"
+"d"
+" "
+"o"
+"f"
+" "
+"i"
+"t"
+"\n"
+"i"
+"s"
+" "
+"s"
+"o"
+"m"
+"e"
+"t"
+"h"
+"i"
+"n"
+"g"
+" "
+"q"
+"u"
+"i"
+"t"
+"e"
+" "
+"a"
+"t"
+"t"
+"r"
+"o"
+"c"
+"i"
+"o"
+"u"
+"s"
+"\n"
+"i"
+"f"
+" "
+"y"
+"o"
+"u"
+" "
+"s"
+"a"
+"y"
+" "
+"i"
+"t"
+" "
+"l"
+"o"
+"u"
+"d"
+" "
+"e"
+"n"
+"o"
+"u"
+"g"
+"h"
+"\n"
+"y"
+"o"
+"u"
+"'"
+"l"
+"l"
+" "
+"a"
+"w"
+"a"
+"y"
+"s"
+" "
+"s"
+"o"
+"u"
+"n"
+"d"
+" "
+"p"
+"r"
+"e"
+"c"
+"o"
+"c"
+"i"
+"o"
+"u"
+"s"
+"\n"
+"\n"
+"s"
+"u"
+"p"
+"e"
+"r"
+"c"
+"a"
+"l"
+"i"
+"f"
+"r"
+"a"
+"g"
+"i"
+"l"
+"i"
+"s"
+"t"
+"i"
+"c"
+"e"
+"x"
+"p"
+"i"
+"a"
+"l"
+"i"
+"d"
+"o"
+"c"
+"i"
+"o"
+"u"
+"s"
+"\n"
+"\n"
+"i"
+" "
+"w"
+"a"
+"s"
+" "
+"a"
+"f"
+"r"
+"i"
+"a"
+"d"
+" "
+"t"
+"o"
+" "
+"s"
+"p"
+"e"
+"a"
+"k"
+"\n"
+"w"
+"h"
+"e"
+"n"
+" "
+"i"
+" "
+"w"
+"a"
+"s"
+" "
+"j"
+"u"
+"s"
+"t"
+" "
+"a"
+" "
+"l"
+"a"
+"d"
+"\n"
+"m"
+"y"
+" "
+"f"
+"a"
+"t"
+"h"
+"e"
+"r"
+" "
+"g"
+"a"
+"v"
+"e"
+" "
+"m"
+"y"
+" "
+"n"
+"o"
+"s"
+"e"
+" "
+"a"
+" "
+"t"
+"w"
+"e"
+"a"
+"k"
+"\n"
+"a"
+"n"
+"d"
+" "
+"t"
+"o"
+"l"
+"d"
+" "
+"m"
+"e"
+" "
+"i"
+" "
+"w"
+"a"
+"s"
+" "
+"b"
+"a"
+"d"
+"\n"
+"\n"
+"a"
+"n"
+"d"
+" "
+"t"
+"h"
+"e"
+"n"
+" "
+"o"
+"n"
+"e"
+" "
+"d"
+"a"
+"y"
+" "
+"i"
+" "
+"h"
+"e"
+"a"
+"r"
+"d"
+" "
+"a"
+" "
+"w"
+"o"
+"r"
+"d"
+"\n"
+"t"
+"o"
+" "
+"s"
+"a"
+"v"
+"e"
+" "
+"m"
+"y"
+" "
+"a"
+"c"
+"h"
+"i"
+"n"
+"g"
+" "
+"n"
+"o"
+"s"
+"e"
+"\n"
+"i"
+"t"
+" "
+"w"
+"a"
+"s"
+" "
+"t"
+"h"
+"e"
+" "
+"b"
+"i"
+"g"
+"g"
+"e"
+"s"
+"t"
+" "
+"w"
+"o"
+"r"
+"d"
+" "
+"y"
+"o"
+"u"
+" "
+"e"
+"v"
+"e"
+"r"
+" "
+"h"
+"e"
+"a"
+"r"
+"d"
+"\n"
+"a"
+"n"
+"d"
+" "
+"t"
+"h"
+"i"
+"s"
+" "
+"i"
+"s"
+" "
+"h"
+"o"
+"w"
+" "
+"i"
+"t"
+" "
+"g"
+"o"
+"e"
+"s"
+"."
+"."
+"\n"
+"\n"
+"s"
+"u"
+"p"
+"e"
+"r"
+"c"
+"a"
+"l"
+"i"
+"f"
+"r"
+"a"
+"g"
+"i"
+"l"
+"i"
+"s"
+"t"
+"i"
+"c"
+"e"
+"x"
+"p"
+"i"
+"a"
+"l"
+"i"
+"d"
+"o"
+"c"
+"i"
+"o"
+"u"
+"s"
+"\n"
+
+length = 1783

@@ -1,0 +1,224 @@
+#------------------------------------------------------------------------------
+# This file describes the naming and content of CSV Ingest configuration files.
+#------------------------------------------------------------------------------
+
+# File naming and location:
+# 
+#  - The CSV configuration files must be located in one of the following two
+#    locations, and will be searched for in the order listed:
+# 
+#        $CONF_DATA/<process_name>
+#        $INGEST_HOME/conf/ingest/<process_name>
+# 
+#    where <process_name> is the name of the process as defined in the PCM.
+# 
+#  - The csv_conf file names must contain the name and level of the output
+#    datastream (i.e. aafgust1hz.a1.csv_conf).
+# 
+#  - The site and facility qualifiers can be added if facility specific conf
+#    files are needed (i.e. oliaafgust1hzM1.a1.csv_conf).
+# 
+#  - A date.time timestamp can be added if the input csv file format changes
+#    over time (i.e. oliaafgust1hzM1.a1.20151130.000000.csv_conf) 
+# 
+#    Note that a primary non-timestamped file must still exist that specifies
+#    all file name and file time patterns for all time, and these should not
+#    be specified in the timestamped conf files. The timestamped conf files
+#    should only provide what has changed inside the csv files, such as the
+#    field mapping, delimiter, number of expected columns, etc...
+# 
+#  - When specifying multiple csv_conf files for multiple output datastreams
+#    the file name patterns must be specific enough to uniquely identify the
+#    input files. These are used to determine the correct csv_conf file to use
+#    for each input file.
+
+#------------------------------------------------------------------------------
+
+# General formating rules are:
+# 
+#  - Comments begin with a # sign and continue to the end of the current line.
+# 
+#  - Keywords must be in all caps and must start at the begining of a line.
+#    A keyword may be followed by an optional : or = sign if desired.
+# 
+#  - Values that do not directly follow a keyword on the same line must be
+#    indented using spaces or tabs.
+# 
+#  - Lists of values must be separated by commas or newlines.
+
+#------------------------------------------------------------------------------
+
+FILE_NAME_PATTERNS:
+
+# These are the file pattern(s) the ingest will look for. This can be a list of
+# patterns separated by either commas or newlines. The patterns used are regex
+# expressions described in the regex(7) man page (google: linux man regex(7)).
+# 
+# Some of the most common expressions are:
+# 
+#   ^    matches at the begining
+#   $    matches at the end 
+#   .    matches any character
+#   +    match 1 or more of the preceding character
+#   *    match 0 or more of the preceding character
+#   {#}  match a sequence of exactly # matches of the preceding character
+#   []   match any character in the backets, ranges can be specified with a dash
+#          [xyz]     match either an x, y, or z character
+#          [0-9]     match any single digit
+#          [a-zA-Z]  match any upper or lowercase character
+#   \    used to match characters that would have special meaning otherwise,
+# 
+# Examples:
+# 
+#  \.dat$       match any file with a '.dat' extension
+#  \.[a-z]{3}$  match any file extension containing 3 lower case characters
+#  Table[0-9]   match any file with 'Table' followed by a digit in the name
+
+#------------------------------------------------------------------------------
+
+FILE_TIME_PATTERNS:
+
+# These specify the pattern(s) that can be used to parse the time from input
+# file names. Multiple patterns can be provided and will be searched in the
+# order specified for a match.
+# 
+# A time string pattern can contain a mixture of time format codes and regex
+# expressions (google: linux man regex(7)). The time format codes begin with
+# a % and are followed by one of the following characters:
+# 
+#   'C' - century number (year/100) as a 2-digit integer
+#   'd' - day number in the month (1-31).
+#   'e' - day number in the month (1-31).
+#   'h' - hour * 100 + minute (0-2359)
+#   'H' - hour (0-23)
+#   'j' - day number in the year (1-366).
+#   'm' - month number (1-12)
+#   'M' - minute (0-59)
+#   'n' - arbitrary whitespace
+#   'o' - time offset in seconds
+#   'p' - AM or PM
+#   'q' - Mac-Time: seconds since 1904-01-01 00:00:00 +0000 (UTC)
+#   's' - seconds since Epoch, 1970-01-01 00:00:00 +0000 (UTC)
+#   'S' - second (0-60; 60 may occur for leap seconds)
+#   't' - arbitrary whitespace
+#   'y' - year within century (0-99)
+#   'Y' - year with century as a 4-digit integer
+#   '%' - a literal "%" character
+# 
+# An optional 0 character can be used between the % and format code to
+# specify that the number must be zero padded. For example, '%0d' specifies
+# that the day range is 01 to 31.
+# 
+# Examples:
+# 
+#   %Y%0m%0d\.%0H%0M%0S  would match 20150923.072316
+#   %Y-%m-%d %H:%M:%S    would match 2015-09-23 07:23:16
+
+#------------------------------------------------------------------------------
+
+DELIMITER:
+
+# Single character delimiter. The delimiter must be inside single or double
+# quotes if it is a tab or a space. For space delimited CSV files all
+# consecutive spaces are treated as a single delimiter.
+
+#------------------------------------------------------------------------------
+
+HEADER_LINE_NUMBER:
+HEADER_LINE_TAG:
+
+# Specify how to identify the header line.  The header line can be found by
+# specifing a string to look for (HEADER_LINE_TAG), or the line number it is
+# located on (HEADER_LINE_NUMBER). If both are specified the header line
+# number will be used. If neither are specified the first line in the file
+# will be assumed to be the header line, unless a header line is explicitly
+# provided using the HEADER_LINE keyword.
+
+#------------------------------------------------------------------------------
+
+NUMBER_OF_HEADER_LINES:
+
+# The number of lines in the header. Only the first line of the header will be
+# used, the remaining lines will be skipped before parsing the record lines.
+
+#------------------------------------------------------------------------------
+
+HEADER_LINE:
+
+# Specify the header line to use. This can be provided for files that do not
+# have a header line, or to replace the existing header line in the file. The
+# header line must use the same delimiter as the CSV file. For convenience the
+# header may be split into multiple lines. These lines will be concatenated as
+# they are read in. The white-space used to indent the header line entries will
+# be ignored.
+
+#------------------------------------------------------------------------------
+
+NUMBER_OF_COLUMNS:
+
+# The expected number of columns in the CSV file. This should be specified if
+# the number of columns should never change and an error message should be
+# generated if it does.
+
+#------------------------------------------------------------------------------
+
+TIME_COLUMN_PATTERNS:
+
+# Specify the name(s) of the column(s) containing the record times, and the
+# time pattern(s) required to parse them. These are of the form:
+# 
+#   column name: pattern
+# 
+# See FILE_TIME_PATTERNS above for a description of the pattern string.
+# 
+# Multiple time patterns can be provided for a given column if the time format
+# can change over time. In this case the patterns must be comma delimited.
+# 
+# Single column date/time example:
+# 
+#   TIMESTAMP: %Y-%m-%d %H:%M:%S
+# 
+# Two column date/time examples:
+# 
+#   DATE: %Y-%m-%d
+#   TIME: %H:%M:%S
+# 
+# Some CSV files only provide a column of time-of-day values. In these cases
+# the date parsed from the file name will be used.
+
+#------------------------------------------------------------------------------
+
+SPLIT_INTERVAL:
+
+# Specifies the split interval for output files. Available split intervals are:
+#
+#   DAILY   =  (default) split files daily at midnight UTC.
+#   MONTHLY =  split files on the 1st of every month
+#   YEARLY  =  split files on the 1st of every year
+#   FILE    =  create one output file for every input file
+
+#------------------------------------------------------------------------------
+
+FIELD_MAP:
+
+# This section specifies the mapping between input CSV column names and output
+# DOD variable names. Each line is of the form:
+# 
+#   dod_var_name: csv column name [, csv units [, csv missing value string]]
+# 
+# The units string specifies the units of the data values in the CSV file.
+# A units conversion will be done if these are different than the units of
+# the target variable in the output DOD.
+# 
+# The missing value string can contain a comma delimited list of all possible
+# missing values but the entire list must be surrounded by single or double
+# quotes.
+# 
+# Examples:
+# 
+#  dod_var_name_1: csv collumn name 1
+#  dod_var_name_2: csv collumn name 2, W/m^2
+#  dod_var_name_3: csv collumn name 3, W/m^2, NaN
+#  dod_var_name_4: csv collumn name 4, W/m^2, "NaN, -6999"
+#  dod_var_name_5: csv collumn name 5, , NaN
+

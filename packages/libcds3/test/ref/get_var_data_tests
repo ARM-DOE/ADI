@@ -1,0 +1,519 @@
+------------------------------------------------------------
+short var with missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (11 currently)
+
+    Variables:
+
+        distance(time) : short
+            units         = "km"
+            valid_min     = [-30] : short
+            valid_max     = [30] : short
+            valid_range   = [-30, 30] : short
+            valid_delta   = [1] : short
+            missing_value = [-9999] : short
+            _FillValue    = [-32767] : short
+            convert_units = [-20, 20] : short
+            convert_delta = [2, 3] : short
+            no_conversion = [30, 40] : short
+
+    Data:
+
+        distance = -64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64
+
+missing_value: -127
+byte   [-64, -32, -127, -16, -8, 0, 8, 16, -127, 32, 64]
+
+missing_value: -9999
+short  [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -9999
+int    [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -9999
+float  [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing value: -9999
+double [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+------------------------------------------------------------
+short var *without* missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (11 currently)
+
+    Variables:
+
+        distance(time) : short
+            units         = "km"
+            valid_min     = [-30] : short
+            valid_max     = [30] : short
+            valid_range   = [-30, 30] : short
+            valid_delta   = [1] : short
+            convert_units = [-20, 20] : short
+            convert_delta = [2, 3] : short
+            no_conversion = [30, 40] : short
+
+    Data:
+
+        distance = -64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64
+
+missing_value: -127
+byte   [-64, -32, -128, -16, -8, 0, 8, 16, -128, 32, 64]
+
+missing_value: -32767
+short  [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -2147483647
+int    [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: 9.96921e+36
+float  [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing value: 9.96920996838687e+36
+double [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+------------------------------------------------------------
+double var with missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            missing_value = [-9999] : double
+            _FillValue    = [9.96920996838687e+36] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing_value: -127
+byte   [-128, -128, -128, -128, -128, -127, -128, -127, -32, 0, 32, 127, 127, 127, -127, 127]
+
+missing_value: -9999
+short  [-32768, -32768, -32768, -32768, -32767, -9999, -129, -127, -32, 0, 32, 128, 32767, 32767, -9999, 32767]
+
+missing_value: -9999
+int    [-2147483648, -2147483648, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2147483647, -9999, 2147483647]
+
+missing_value: -9999
+float  [-3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, -9999, 3.402823e+38]
+
+missing value: -9999
+double [-4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2200000000, -9999, 4e+38]
+
+------------------------------------------------------------
+double var *without* missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing_value: -127
+byte   [-128, -128, -128, -128, -128, -128, -128, -127, -32, 0, 32, 127, 127, 127, 127, 127]
+
+missing_value: -32767
+short  [-32768, -32768, -32768, -32768, -32767, -9999, -129, -127, -32, 0, 32, 128, 32767, 32767, 32767, 32767]
+
+missing_value: -2147483647
+int    [-2147483648, -2147483648, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2147483647, 2147483647, 2147483647]
+
+missing_value: 9.96921e+36
+float  [-3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, 9.96921e+36, 3.402823e+38]
+
+missing value: 9.96920996838687e+36
+double [-4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38]
+------------------------------------------------------------
+short var with missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (11 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : short
+        _FillValue    = [-32767] : short
+
+    Variables:
+
+        distance(time) : short
+            units         = "km"
+            valid_min     = [-30] : short
+            valid_max     = [30] : short
+            valid_range   = [-30, 30] : short
+            valid_delta   = [1] : short
+            convert_units = [-20, 20] : short
+            convert_delta = [2, 3] : short
+            no_conversion = [30, 40] : short
+
+    Data:
+
+        distance = -64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64
+
+missing_value: -127
+byte   [-64, -32, -127, -16, -8, 0, 8, 16, -127, 32, 64]
+
+missing_value: -9999
+short  [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -9999
+int    [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -9999
+float  [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing value: -9999
+double [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+------------------------------------------------------------
+short var *without* missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (11 currently)
+
+    Variables:
+
+        distance(time) : short
+            units         = "km"
+            valid_min     = [-30] : short
+            valid_max     = [30] : short
+            valid_range   = [-30, 30] : short
+            valid_delta   = [1] : short
+            convert_units = [-20, 20] : short
+            convert_delta = [2, 3] : short
+            no_conversion = [30, 40] : short
+
+    Data:
+
+        distance = -64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64
+
+missing_value: -127
+byte   [-64, -32, -128, -16, -8, 0, 8, 16, -128, 32, 64]
+
+missing_value: -32767
+short  [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -2147483647
+int    [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: 9.96921e+36
+float  [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing value: 9.96920996838687e+36
+double [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+------------------------------------------------------------
+double var with missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing_value: -127
+byte   [-128, -128, -128, -128, -128, -127, -128, -127, -32, 0, 32, 127, 127, 127, -127, 127]
+
+missing_value: -9999
+short  [-32768, -32768, -32768, -32768, -32767, -9999, -129, -127, -32, 0, 32, 128, 32767, 32767, -9999, 32767]
+
+missing_value: -9999
+int    [-2147483648, -2147483648, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2147483647, -9999, 2147483647]
+
+missing_value: -9999
+float  [-3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, -9999, 3.402823e+38]
+
+missing value: -9999
+double [-4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2200000000, -9999, 4e+38]
+
+------------------------------------------------------------
+double var *without* missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing_value: -127
+byte   [-128, -128, -128, -128, -128, -128, -128, -127, -32, 0, 32, 127, 127, 127, 127, 127]
+
+missing_value: -32767
+short  [-32768, -32768, -32768, -32768, -32767, -9999, -129, -127, -32, 0, 32, 128, 32767, 32767, 32767, 32767]
+
+missing_value: -2147483647
+int    [-2147483648, -2147483648, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2147483647, 2147483647, 2147483647]
+
+missing_value: 9.96921e+36
+float  [-3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, 9.96921e+36, 3.402823e+38]
+
+missing value: 9.96920996838687e+36
+double [-4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38]
+------------------------------------------------------------
+short var with missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (11 currently)
+
+    Attributes:
+
+        missing_value = "-9999"
+        _FillValue    = "-32767"
+
+    Variables:
+
+        distance(time) : short
+            units         = "km"
+            valid_min     = [-30] : short
+            valid_max     = [30] : short
+            valid_range   = [-30, 30] : short
+            valid_delta   = [1] : short
+            convert_units = [-20, 20] : short
+            convert_delta = [2, 3] : short
+            no_conversion = [30, 40] : short
+
+    Data:
+
+        distance = -64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64
+
+missing_value: -127
+byte   [-64, -32, -127, -16, -8, 0, 8, 16, -127, 32, 64]
+
+missing_value: -9999
+short  [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -9999
+int    [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -9999
+float  [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing value: -9999
+double [-64, -32, -9999, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+------------------------------------------------------------
+short var *without* missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (11 currently)
+
+    Variables:
+
+        distance(time) : short
+            units         = "km"
+            valid_min     = [-30] : short
+            valid_max     = [30] : short
+            valid_range   = [-30, 30] : short
+            valid_delta   = [1] : short
+            convert_units = [-20, 20] : short
+            convert_delta = [2, 3] : short
+            no_conversion = [30, 40] : short
+
+    Data:
+
+        distance = -64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64
+
+missing_value: -127
+byte   [-64, -32, -128, -16, -8, 0, 8, 16, -128, 32, 64]
+
+missing_value: -32767
+short  [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: -2147483647
+int    [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing_value: 9.96921e+36
+float  [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+missing value: 9.96920996838687e+36
+double [-64, -32, -32767, -16, -8, 0, 8, 16, -9999, 32, 64]
+
+------------------------------------------------------------
+double var with missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing_value: -127
+byte   [-128, -128, -128, -128, -128, -127, -128, -127, -32, 0, 32, 127, 127, 127, -127, 127]
+
+missing_value: -9999
+short  [-32768, -32768, -32768, -32768, -32767, -9999, -129, -127, -32, 0, 32, 128, 32767, 32767, -9999, 32767]
+
+missing_value: -9999
+int    [-2147483648, -2147483648, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2147483647, -9999, 2147483647]
+
+missing_value: -9999
+float  [-3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, -9999, 3.402823e+38]
+
+missing value: -9999
+double [-4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2200000000, -9999, 4e+38]
+
+------------------------------------------------------------
+double var *without* missing value attributes
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing_value: -127
+byte   [-128, -128, -128, -128, -128, -128, -128, -127, -32, 0, 32, 127, 127, 127, 127, 127]
+
+missing_value: -32767
+short  [-32768, -32768, -32768, -32768, -32767, -9999, -129, -127, -32, 0, 32, 128, 32767, 32767, 32767, 32767]
+
+missing_value: -2147483647
+int    [-2147483648, -2147483648, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2147483647, 2147483647, 2147483647]
+
+missing_value: 9.96921e+36
+float  [-3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, 9.96921e+36, 3.402823e+38]
+
+missing value: 9.96920996838687e+36
+double [-4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129, -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38]

@@ -1,0 +1,341 @@
+------------------------------------------------------------
+Set Variable Data Tests using doubles; define_missing = 0
+------------------------------------------------------------
+
+Default Fill Values:
+byte   [-127]
+short  [-32767]
+int    [-2147483647]
+float  [9.96921e+36]
+double [9.96920996838687e+36]
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Variables:
+
+        byte_var(time) : byte
+
+        short_var(time) : short
+
+        int_var(time) : int
+
+        float_var(time) : float
+
+        double_var(time) : double
+
+    Data:
+
+        byte_var = -128, -128, -128, -127, -128, -32, 0, -127, 32, 127, 127,
+    127, 127
+
+        short_var = -32768, -32768, -32768, -32767, -129, -32, 0, -32767, 32,
+    129, 32767, 32767, 32767
+
+        int_var = -2147483648, -2147483648, -32768, -2147483647, -129, -32, 0,
+    -2147483647, 32, 129, 32768, 2147483647, 2147483647
+
+        float_var = -3.402823e+38, -2.2e+09, -32768, 9.96921e+36, -128.5,
+    -32.4, 0, 9.96921e+36, 32.4, 128.5, 32768, 2.2e+09, 3.402823e+38
+
+        double_var = -4e+38, -2200000000, -32768, 9.96920996838687e+36, -128.5,
+    -32.4, 0, 9.96920996838687e+36, 32.4, 128.5, 32768, 2200000000, 4e+38
+
+------------------------------------------------------------
+Set Variable Data Tests using shorts; define_missing = 0
+------------------------------------------------------------
+
+Default Fill Values:
+byte   [-127]
+short  [-32767]
+int    [-2147483647]
+float  [9.96921e+36]
+double [9.96920996838687e+36]
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Variables:
+
+        byte_var(time) : byte
+
+        short_var(time) : short
+
+        int_var(time) : int
+
+        float_var(time) : float
+
+        double_var(time) : double
+
+    Data:
+
+        byte_var = -128, -64, -32, -127, -16, -8, 0, -127, 8, 16, 32, 64, 127
+
+        short_var = -128, -64, -32, -32767, -16, -8, 0, -32767, 8, 16, 32, 64,
+    128
+
+        int_var = -128, -64, -32, -2147483647, -16, -8, 0, -2147483647, 8, 16,
+    32, 64, 128
+
+        float_var = -128, -64, -32, 9.96921e+36, -16, -8, 0, 9.96921e+36, 8,
+    16, 32, 64, 128
+
+        double_var = -128, -64, -32, 9.96920996838687e+36, -16, -8, 0,
+    9.96920996838687e+36, 8, 16, 32, 64, 128
+------------------------------------------------------------
+Set Variable Data Tests using doubles; define_missing = 1
+------------------------------------------------------------
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Variables:
+
+        byte_var(time) : byte
+            missing_value = [-99] : byte
+
+        short_var(time) : short
+            missing_value = [-9999] : short
+
+        int_var(time) : int
+            missing_value = [-9999] : int
+
+        float_var(time) : float
+            missing_value = [-9999] : float
+
+        double_var(time) : double
+            missing_value = [-9999] : double
+
+    Data:
+
+        byte_var = -128, -128, -128, -99, -128, -32, 0, -99, 32, 127, 127, 127,
+    127
+
+        short_var = -32768, -32768, -32768, -9999, -129, -32, 0, -9999, 32,
+    129, 32767, 32767, 32767
+
+        int_var = -2147483648, -2147483648, -32768, -9999, -129, -32, 0, -9999,
+    32, 129, 32768, 2147483647, 2147483647
+
+        float_var = -3.402823e+38, -2.2e+09, -32768, -9999, -128.5, -32.4, 0,
+    -9999, 32.4, 128.5, 32768, 2.2e+09, 3.402823e+38
+
+        double_var = -4e+38, -2200000000, -32768, -9999, -128.5, -32.4, 0,
+    -9999, 32.4, 128.5, 32768, 2200000000, 4e+38
+
+------------------------------------------------------------
+Set Variable Data Tests using shorts; define_missing = 1
+------------------------------------------------------------
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Variables:
+
+        byte_var(time) : byte
+            missing_value = [-99] : byte
+
+        short_var(time) : short
+            missing_value = [-9999] : short
+
+        int_var(time) : int
+            missing_value = [-9999] : int
+
+        float_var(time) : float
+            missing_value = [-9999] : float
+
+        double_var(time) : double
+            missing_value = [-9999] : double
+
+    Data:
+
+        byte_var = -128, -64, -32, -99, -16, -8, 0, -99, 8, 16, 32, 64, 127
+
+        short_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+
+        int_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64, 128
+
+        float_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+
+        double_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+------------------------------------------------------------
+Set Variable Data Tests using doubles; define_missing = 2
+------------------------------------------------------------
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : float
+
+    Variables:
+
+        byte_var(time) : byte
+
+        short_var(time) : short
+
+        int_var(time) : int
+
+        float_var(time) : float
+
+        double_var(time) : double
+
+    Data:
+
+        byte_var = -128, -128, -128, -127, -128, -32, 0, -127, 32, 127, 127,
+    127, 127
+
+        short_var = -32768, -32768, -32768, -9999, -129, -32, 0, -9999, 32,
+    129, 32767, 32767, 32767
+
+        int_var = -2147483648, -2147483648, -32768, -9999, -129, -32, 0, -9999,
+    32, 129, 32768, 2147483647, 2147483647
+
+        float_var = -3.402823e+38, -2.2e+09, -32768, -9999, -128.5, -32.4, 0,
+    -9999, 32.4, 128.5, 32768, 2.2e+09, 3.402823e+38
+
+        double_var = -4e+38, -2200000000, -32768, -9999, -128.5, -32.4, 0,
+    -9999, 32.4, 128.5, 32768, 2200000000, 4e+38
+
+------------------------------------------------------------
+Set Variable Data Tests using shorts; define_missing = 2
+------------------------------------------------------------
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : float
+
+    Variables:
+
+        byte_var(time) : byte
+
+        short_var(time) : short
+
+        int_var(time) : int
+
+        float_var(time) : float
+
+        double_var(time) : double
+
+    Data:
+
+        byte_var = -128, -64, -32, -127, -16, -8, 0, -127, 8, 16, 32, 64, 127
+
+        short_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+
+        int_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64, 128
+
+        float_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+
+        double_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+------------------------------------------------------------
+Set Variable Data Tests using doubles; define_missing = 3
+------------------------------------------------------------
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Attributes:
+
+        missing_value = "-9999"
+
+    Variables:
+
+        byte_var(time) : byte
+
+        short_var(time) : short
+
+        int_var(time) : int
+
+        float_var(time) : float
+
+        double_var(time) : double
+
+    Data:
+
+        byte_var = -128, -128, -128, -127, -128, -32, 0, -127, 32, 127, 127,
+    127, 127
+
+        short_var = -32768, -32768, -32768, -9999, -129, -32, 0, -9999, 32,
+    129, 32767, 32767, 32767
+
+        int_var = -2147483648, -2147483648, -32768, -9999, -129, -32, 0, -9999,
+    32, 129, 32768, 2147483647, 2147483647
+
+        float_var = -3.402823e+38, -2.2e+09, -32768, -9999, -128.5, -32.4, 0,
+    -9999, 32.4, 128.5, 32768, 2.2e+09, 3.402823e+38
+
+        double_var = -4e+38, -2200000000, -32768, -9999, -128.5, -32.4, 0,
+    -9999, 32.4, 128.5, 32768, 2200000000, 4e+38
+
+------------------------------------------------------------
+Set Variable Data Tests using shorts; define_missing = 3
+------------------------------------------------------------
+
+Group: /set_data_test_vars
+
+    Dimensions:
+
+        time = UNLIMITED (13 currently)
+
+    Attributes:
+
+        missing_value = "-9999"
+
+    Variables:
+
+        byte_var(time) : byte
+
+        short_var(time) : short
+
+        int_var(time) : int
+
+        float_var(time) : float
+
+        double_var(time) : double
+
+    Data:
+
+        byte_var = -128, -64, -32, -127, -16, -8, 0, -127, 8, 16, 32, 64, 127
+
+        short_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+
+        int_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64, 128
+
+        float_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128
+
+        double_var = -128, -64, -32, -9999, -16, -8, 0, -9999, 8, 16, 32, 64,
+    128

@@ -1,0 +1,906 @@
+------------------------------------------------------------
+double
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            missing_value = [-9999] : double
+            _FillValue    = [9.96920996838687e+36] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+------------------------------------------------------------
+double -> float
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : float
+            units         = "mm"
+            valid_min     = [-1000000] : float
+            valid_max     = [1000000] : float
+            valid_range   = [-1000, 1000] : float
+            valid_delta   = [1000] : float
+            missing_value = [-9999] : float
+            _FillValue    = [9.96921e+36] : float
+            convert_units = [3000, 6000] : float
+            convert_delta = [1000, 2000] : float
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999,
+    -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, 9.96921e+36, 3.402823e+38
+
+------------------------------------------------------------
+float -> int
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : int
+            units         = "mm"
+            valid_min     = [-1000000] : int
+            valid_max     = [1000000] : int
+            valid_range   = [-1000, 1000] : int
+            valid_delta   = [1000] : int
+            missing_value = [-9999] : int
+            _FillValue    = [-2147483647] : int
+            convert_units = [3000, 6000] : int
+            convert_delta = [1000, 2000] : int
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -2147483648, -2147483648, -2147483648, -33000, -32767, -9999,
+    -129, -127, -32, 0, 32, 128, 32768, 2147483647, -2147483647, 2147483647
+
+------------------------------------------------------------
+int -> short
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : short
+            units         = "mm"
+            valid_min     = [-32768] : short
+            valid_max     = [32767] : short
+            valid_range   = [-1000, 1000] : short
+            valid_delta   = [1000] : short
+            missing_value = [-9999] : short
+            _FillValue    = [-32767] : short
+            convert_units = [3000, 6000] : short
+            convert_delta = [1000, 2000] : short
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -32768, -32768, -32768, -32768, -32767, -9999, -129, -127,
+    -32, 0, 32, 128, 32767, 32767, -32767, 32767
+
+------------------------------------------------------------
+short -> byte
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : byte
+            units         = "mm"
+            valid_min     = [-128] : byte
+            valid_max     = [127] : byte
+            valid_range   = [-128, 127] : byte
+            valid_delta   = [127] : byte
+            missing_value = [-127] : byte
+            _FillValue    = [-127] : byte
+            convert_units = [127, 127] : byte
+            convert_delta = [127, 127] : byte
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -128, -128, -128, -128, -127, -127, -128, -127, -32, 0, 32,
+    127, 127, 127, -127, 127
+
+============================================================
+test temprature variable double
+============================================================
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Variables:
+
+        temperature(time) : double
+            long_name     = "Temperature variable"
+            units         = "degC"
+            valid_min     = [-10] : double
+            valid_max     = [110] : double
+            valid_delta   = [1] : double
+            missing_value = [-9999] : double
+            _FillValue    = [9.96920996838687e+36] : double
+
+    Data:
+
+        temperature = 9.96920996838687e+36, -9999, 11.1111111111111,
+    26.6666666666667, 42.2222222222222, 57.7777777777778, 73.3333333333333,
+    88.8888888888889, 104.444444444444, 120
+
+------------------------------------------------------------
+double -> float
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Variables:
+
+        temperature(time) : float
+            long_name     = "Temperature variable"
+            units         = "degC"
+            valid_min     = [-10] : float
+            valid_max     = [110] : float
+            valid_delta   = [1] : float
+            missing_value = [-9999] : float
+            _FillValue    = [9.96921e+36] : float
+
+    Data:
+
+        temperature = 9.96921e+36, -9999, 11.11111, 26.66667, 42.22222,
+    57.77778, 73.33334, 88.88889, 104.4444, 120
+
+------------------------------------------------------------
+double -> int
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Variables:
+
+        temperature(time) : int
+            long_name     = "Temperature variable"
+            units         = "degC"
+            valid_min     = [-10] : int
+            valid_max     = [110] : int
+            valid_delta   = [1] : int
+            missing_value = [-9999] : int
+            _FillValue    = [-2147483647] : int
+
+    Data:
+
+        temperature = -2147483647, -9999, 11, 27, 42, 58, 73, 89, 104, 120
+
+------------------------------------------------------------
+double -> short
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Variables:
+
+        temperature(time) : short
+            long_name     = "Temperature variable"
+            units         = "degC"
+            valid_min     = [-10] : short
+            valid_max     = [110] : short
+            valid_delta   = [1] : short
+            missing_value = [-9999] : short
+            _FillValue    = [-32767] : short
+
+    Data:
+
+        temperature = -32767, -9999, 11, 27, 42, 58, 73, 89, 104, 120
+
+------------------------------------------------------------
+double -> byte
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Variables:
+
+        temperature(time) : byte
+            long_name     = "Temperature variable"
+            units         = "degC"
+            valid_min     = [-10] : byte
+            valid_max     = [110] : byte
+            valid_delta   = [1] : byte
+            missing_value = [-99] : byte
+            _FillValue    = [-127] : byte
+
+    Data:
+
+        temperature = -127, -99, 11, 27, 42, 58, 73, 89, 104, 120
+------------------------------------------------------------
+double
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+------------------------------------------------------------
+double -> float
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        length(time) : float
+            units         = "mm"
+            valid_min     = [-1000000] : float
+            valid_max     = [1000000] : float
+            valid_range   = [-1000, 1000] : float
+            valid_delta   = [1000] : float
+            convert_units = [3000, 6000] : float
+            convert_delta = [1000, 2000] : float
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999,
+    -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, 9.96921e+36, 3.402823e+38
+
+------------------------------------------------------------
+float -> int
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        length(time) : int
+            units         = "mm"
+            valid_min     = [-1000000] : int
+            valid_max     = [1000000] : int
+            valid_range   = [-1000, 1000] : int
+            valid_delta   = [1000] : int
+            convert_units = [3000, 6000] : int
+            convert_delta = [1000, 2000] : int
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -2147483648, -2147483648, -2147483648, -33000, -32767, -9999,
+    -129, -127, -32, 0, 32, 128, 32768, 2147483647, -2147483647, 2147483647
+
+------------------------------------------------------------
+int -> short
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        length(time) : short
+            units         = "mm"
+            valid_min     = [-32768] : short
+            valid_max     = [32767] : short
+            valid_range   = [-1000, 1000] : short
+            valid_delta   = [1000] : short
+            convert_units = [3000, 6000] : short
+            convert_delta = [1000, 2000] : short
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -32768, -32768, -32768, -32768, -32767, -9999, -129, -127,
+    -32, 0, 32, 128, 32767, 32767, -32767, 32767
+
+------------------------------------------------------------
+short -> byte
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        length(time) : byte
+            units         = "mm"
+            valid_min     = [-128] : byte
+            valid_max     = [127] : byte
+            valid_range   = [-128, 127] : byte
+            valid_delta   = [127] : byte
+            convert_units = [127, 127] : byte
+            convert_delta = [127, 127] : byte
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -128, -128, -128, -128, -127, -127, -128, -127, -32, 0, 32,
+    127, 127, 127, -127, 127
+
+============================================================
+test temprature variable double
+============================================================
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        temperature(time) : double
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : double
+            valid_max   = [110] : double
+            valid_delta = [1] : double
+
+    Data:
+
+        temperature = 9.96920996838687e+36, -9999, 11.1111111111111,
+    26.6666666666667, 42.2222222222222, 57.7777777777778, 73.3333333333333,
+    88.8888888888889, 104.444444444444, 120
+
+------------------------------------------------------------
+double -> float
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        temperature(time) : float
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : float
+            valid_max   = [110] : float
+            valid_delta = [1] : float
+
+    Data:
+
+        temperature = 9.96921e+36, -9999, 11.11111, 26.66667, 42.22222,
+    57.77778, 73.33334, 88.88889, 104.4444, 120
+
+------------------------------------------------------------
+double -> int
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        temperature(time) : int
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : int
+            valid_max   = [110] : int
+            valid_delta = [1] : int
+
+    Data:
+
+        temperature = -2147483647, -9999, 11, 27, 42, 58, 73, 89, 104, 120
+
+------------------------------------------------------------
+double -> short
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = [-9999] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        temperature(time) : short
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : short
+            valid_max   = [110] : short
+            valid_delta = [1] : short
+
+    Data:
+
+        temperature = -32767, -9999, 11, 27, 42, 58, 73, 89, 104, 120
+
+------------------------------------------------------------
+double -> byte
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = [-99] : double
+        _FillValue    = [9.96920996838687e+36] : double
+
+    Variables:
+
+        temperature(time) : byte
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : byte
+            valid_max   = [110] : byte
+            valid_delta = [1] : byte
+
+    Data:
+
+        temperature = -127, -99, 11, 27, 42, 58, 73, 89, 104, 120
+------------------------------------------------------------
+double
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+------------------------------------------------------------
+double -> float
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        length(time) : float
+            units         = "mm"
+            valid_min     = [-1000000] : float
+            valid_max     = [1000000] : float
+            valid_range   = [-1000, 1000] : float
+            valid_delta   = [1000] : float
+            convert_units = [3000, 6000] : float
+            convert_delta = [1000, 2000] : float
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -3.402823e+38, -2.2e+09, -2.147484e+09, -33000, -32767, -9999,
+    -129, -127, -32, 0, 32, 128, 32768, 2.2e+09, 9.96921e+36, 3.402823e+38
+
+------------------------------------------------------------
+float -> int
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        length(time) : int
+            units         = "mm"
+            valid_min     = [-1000000] : int
+            valid_max     = [1000000] : int
+            valid_range   = [-1000, 1000] : int
+            valid_delta   = [1000] : int
+            convert_units = [3000, 6000] : int
+            convert_delta = [1000, 2000] : int
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -2147483648, -2147483648, -2147483648, -33000, -32767, -9999,
+    -129, -127, -32, 0, 32, 128, 32768, 2147483647, -2147483647, 2147483647
+
+------------------------------------------------------------
+int -> short
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        length(time) : short
+            units         = "mm"
+            valid_min     = [-32768] : short
+            valid_max     = [32767] : short
+            valid_range   = [-1000, 1000] : short
+            valid_delta   = [1000] : short
+            convert_units = [3000, 6000] : short
+            convert_delta = [1000, 2000] : short
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -32768, -32768, -32768, -32768, -32767, -9999, -129, -127,
+    -32, 0, 32, 128, 32767, 32767, -32767, 32767
+
+------------------------------------------------------------
+short -> byte
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        length(time) : byte
+            units         = "mm"
+            valid_min     = [-128] : byte
+            valid_max     = [127] : byte
+            valid_range   = [-128, 127] : byte
+            valid_delta   = [127] : byte
+            convert_units = [127, 127] : byte
+            convert_delta = [127, 127] : byte
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -128, -128, -128, -128, -127, -127, -128, -127, -32, 0, 32,
+    127, 127, 127, -127, 127
+
+============================================================
+test temprature variable double
+============================================================
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        temperature(time) : double
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : double
+            valid_max   = [110] : double
+            valid_delta = [1] : double
+
+    Data:
+
+        temperature = 9.96920996838687e+36, -9999, 11.1111111111111,
+    26.6666666666667, 42.2222222222222, 57.7777777777778, 73.3333333333333,
+    88.8888888888889, 104.444444444444, 120
+
+------------------------------------------------------------
+double -> float
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        temperature(time) : float
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : float
+            valid_max   = [110] : float
+            valid_delta = [1] : float
+
+    Data:
+
+        temperature = 9.96921e+36, -9999, 11.11111, 26.66667, 42.22222,
+    57.77778, 73.33334, 88.88889, 104.4444, 120
+
+------------------------------------------------------------
+double -> int
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        temperature(time) : int
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : int
+            valid_max   = [110] : int
+            valid_delta = [1] : int
+
+    Data:
+
+        temperature = -2147483647, -9999, 11, 27, 42, 58, 73, 89, 104, 120
+
+------------------------------------------------------------
+double -> short
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = "-9999.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        temperature(time) : short
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : short
+            valid_max   = [110] : short
+            valid_delta = [1] : short
+
+    Data:
+
+        temperature = -32767, -9999, 11, 27, 42, 58, 73, 89, 104, 120
+
+------------------------------------------------------------
+double -> byte
+------------------------------------------------------------
+
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (10 currently)
+
+    Attributes:
+
+        missing_value = "-99.000000"
+        _FillValue    = "9969209968386869046778552952102584320.000000"
+
+    Variables:
+
+        temperature(time) : byte
+            long_name   = "Temperature variable"
+            units       = "degC"
+            valid_min   = [-10] : byte
+            valid_max   = [110] : byte
+            valid_delta = [1] : byte
+
+    Data:
+
+        temperature = -127, -99, 11, 27, 42, 58, 73, 89, 104, 120

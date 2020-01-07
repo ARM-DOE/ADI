@@ -1,0 +1,50 @@
+# Set ADI installation directory
+
+if [ -z "$ADI_PREFIX" ]; then
+    export ADI_PREFIX="@ADI_PREFIX@"
+fi
+
+if [ -z "$ADI_HOME" ]; then
+    export ADI_HOME="$ADI_PREFIX"
+fi
+
+# Set environment variables used by applications
+
+export DSUTIL_HOME="$ADI_PREFIX"
+export DB_CONNECT_PATH="$ADI_PREFIX/etc"
+
+# Function to strip a path from a "PATH" environment variable
+
+function strip_path () {
+    echo `echo $1 | tr ":" "\n" | grep -v ^$2$ | tr "\n" ":" | sed ''s/:\$//''`
+}
+
+# Function to prepend a path to a "PATH" environment variable
+
+function prepend_path() {
+    local path=$1
+    local elem=$2
+
+    if [ ! -z "$path" ]; then
+        path=$(strip_path "$path" "$elem")
+    fi
+
+    if [ -z "$path" ]; then
+        path="$elem"
+    else
+        path="${elem}:$path"
+    fi
+
+    echo $path
+}
+
+# Add ADI pkgconfig path to PKG_CONFIG_PATH
+
+ADI_PKGCONFIG="$ADI_PREFIX/@LIBDIR@/pkgconfig"
+export PKG_CONFIG_PATH=$(prepend_path "$PKG_CONFIG_PATH" "$ADI_PKGCONFIG")
+
+# Add ADI perl modules path to PERLLIB
+
+ADI_PERLLIB="$ADI_PREFIX/lib"
+export PERLLIB=$(prepend_path "$PERLLIB" "$ADI_PERLLIB")
+

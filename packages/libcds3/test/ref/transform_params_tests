@@ -1,0 +1,81 @@
+
+============================================================
+Transformation Parameters Tests
+============================================================
+
+
+------------------------------------------------------------
+Loading file: transform_params.cfg
+------------------------------------------------------------
+
+time:old_bin_position = trailing edge;
+time:old_bin_width    = 60;
+time:from_include     = this parameter is from the include file;
+time:new_bin_position = center;
+time:new_bin_width    = 300;
+
+range:old_bin_position = center;
+range:old_bin_width    = 15;
+range:new_bin_position = center;
+range:new_bin_width    = 30;
+range:test_values      = 316, 347.83, 379.66, 424.66, 469.66, 514.66, 559.66,
+	604.66, 649.66, 694.66, 739.66, 784.66, 829.66, 874.66, 919.66, 34000,
+	36000, 38000, 40000, 42000, 44000, 46000, 48000, 52000, 56000, 58000,
+	60000, 64000, 68000;
+
+var_2D:transformation = TRANS_SUBSAMPLE, TRANS_INTERP;
+var_2D:weight         = 1.25;
+var_2D:missing_value  = -9999;
+var_2D:qc_mask        = 1;
+
+var_1_2:transformation = TRANS_SUBSAMPLE;
+var_1_2:weight         = 1.0;
+var_1_2:test_values    = 0.0007272054, 0.0007763844, 0.0007733152, 0.0007247427,
+	0.0008719579, 0.0009025983, 0.0008887816, 0.0010062036,
+	0.0010224549, 0.0010498146, 0.0000000000, 0.0000000000,
+	0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000;
+
+------------------------------------------------------------
+cds_get_transform_param tests
+------------------------------------------------------------
+
+string var_2D:transformation = "TRANS_SUBSAMPLE, TRANS_INTERP"
+double var_2D:weight         = [1.25]
+int    var_2D:missing_value  = [-9999]
+double var_1_2:test_values   = [0.0007272054, 0.0007763844, 0.0007733152, 0.0007247427, 0.0008719579, 0.0009025983, 0.0008887816, 0.0010062036, 0.0010224549, 0.0010498146, 0, 0, 0, 0, 0, 0]
+
+------------------------------------------------------------
+cds_set_transform_param tests
+------------------------------------------------------------
+
+time:old_bin_position = trailing edge;
+time:old_bin_width    = 60;
+time:from_include     = this parameter is from the include file;
+time:new_bin_position = center;
+time:new_bin_width    = 300;
+
+range:old_bin_position = center;
+range:old_bin_width    = 15;
+range:new_bin_position = center;
+range:new_bin_width    = 30;
+range:test_values      = 316, 347.83, 379.66, 424.66, 469.66, 514.66, 559.66,
+	604.66, 649.66, 694.66, 739.66, 784.66, 829.66, 874.66, 919.66, 34000,
+	36000, 38000, 40000, 42000, 44000, 46000, 48000, 52000, 56000, 58000,
+	60000, 64000, 68000;
+
+var_2D:transformation = TRANS_SUBSAMPLE, TRANS_INTERP;
+var_2D:weight         = 1.25;
+var_2D:missing_value  = -9999;
+var_2D:qc_mask        = 1;
+var_2D:dbl_array      = 0.0007272054, 0.0007763844, 0.0007733152, 0.0007247427,
+    0.0008719579, 0.0009025983, 0.0008887816, 0.0010062036, 0.0010224549,
+    0.0010498146, 0, 0, 0, 0, 0, 0;
+var_2D:dbl_value      = 1.25;
+var_2D:int_value      = -9999;
+
+var_1_2:transformation = TRANS_SUBSAMPLE;
+var_1_2:weight         = 1.0;
+var_1_2:test_values    = 0.0007272054, 0.0007763844, 0.0007733152, 0.0007247427,
+	0.0008719579, 0.0009025983, 0.0008887816, 0.0010062036,
+	0.0010224549, 0.0010498146, 0.0000000000, 0.0000000000,
+	0.0000000000, 0.0000000000, 0.0000000000, 0.0000000000;

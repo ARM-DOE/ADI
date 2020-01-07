@@ -1,0 +1,1174 @@
+################################################################################
+#
+#  COPYRIGHT (C) 2000 Battelle Memorial Institute.  All Rights Reserved.
+#
+################################################################################
+#
+#  Author:
+#     name:  Brian Ermold
+#     phone: (509) 375-2277
+#     email: brian.ermold@arm.gov
+#
+################################################################################
+
+################################################################################
+#
+# Private Variable Declarations Used For Convenience
+#
+
+my $_GLOS_TERM  = 'term_name';
+my $_GLOS_TYPE  = 'object_type';
+my $_GLOS_NAME  = 'object_name';
+
+my $_DESC       = 'description';
+
+my $_SITE       = 'site';
+my $_FAC        = 'facility';
+my $_LOC        = 'location';
+my $_LAT        = 'latitude';
+my $_LON        = 'longitude';
+my $_ALT        = 'altitude';
+
+my $_LATTEXT    = 'latitude_text';
+my $_LONTEXT    = 'longitude_text';
+my $_ALTTEXT    = 'altitude_text';
+
+my $_DSCN       = 'dsc_name';
+my $_DSCL       = 'dsc_level';
+
+my $_PROCN      = 'proc_name';
+my $_PROCT      = 'proc_type';
+
+my $_CAT        = 'category';
+my $_CLASS      = 'class';
+
+my $_NEW_CAT    = 'new_category';
+my $_NEW_CLASS  = 'new_class';
+
+my $_UPDATETM   = 'updated_time';
+my $_STARTTM    = 'start_time';
+my $_ENDTM      = 'end_time';
+
+my $_STATEN     = 'state_name';
+my $_STATET     = 'state_text';
+my $_STATETM    = 'state_time';
+my $_ENABLED    = 'is_enabled';
+
+my $_STATUSN    = 'status_name';
+my $_STATUST    = 'status_text';
+my $_STARTEDTM  = 'started_time';
+my $_COMPLETETM = 'completed_time';
+my $_SUCCESSTM  = 'successful_time';
+my $_SUCCESS    = 'is_successful';
+
+my $_FIRSTTM    = 'first_time';
+my $_LASTTM     = 'last_time';
+
+my $_CONFKEY    = 'config_key';
+my $_CONFVAL    = 'config_value';
+
+my $_PROCVIEW   = 'processes_view';
+my $_DSVIEW     = 'datastreams_view';
+
+my $_REQUIRED   = 'required';
+
+################################################################################
+#
+# The Stored Procedure Argument Types
+#
+
+%DBArgTypes = (
+
+    $_GLOS_TERM  => 'text',
+    $_GLOS_TYPE  => 'text',
+    $_GLOS_NAME  => 'text',
+
+    $_DESC       => 'text',
+
+    $_SITE       => 'text',
+    $_FAC        => 'text',
+    $_LOC        => 'text',
+    $_LAT        => 'real',
+    $_LON        => 'real',
+    $_ALT        => 'real',
+
+    $_LATTEXT    => 'text',
+    $_LONTEXT    => 'text',
+    $_ALTTEXT    => 'text',
+
+    $_DSCN       => 'text',
+    $_DSCL       => 'text',
+
+    $_PROCN      => 'text',
+    $_PROCT      => 'text',
+
+    $_CAT        => 'text',
+    $_CLASS      => 'text',
+
+    $_NEW_CAT    => 'text',
+    $_NEW_CLASS  => 'text',
+
+    $_UPDATETM   => 'timestamp',
+    $_STARTTM    => 'timestamp',
+    $_ENDTM      => 'timestamp',
+
+    $_STATEN     => 'text',
+    $_STATET     => 'text',
+    $_STATETM    => 'timestamp',
+    $_ENABLED    => 'boolean',
+
+    $_STATUSN    => 'text',
+    $_STATUST    => 'text',
+    $_STARTEDTM  => 'timestamp',
+    $_COMPLETETM => 'timestamp',
+    $_SUCCESS    => 'boolean',
+
+    $_FIRSTTM    => 'timestamp',
+    $_LASTTM     => 'timestamp',
+
+    $_CONFKEY    => 'text',
+    $_CONFVAL    => 'text',
+
+    $_PROCVIEW   => 'boolean',
+    $_DSVIEW     => 'boolean',
+
+    $_REQUIRED   => 'boolean',
+);
+
+################################################################################
+#
+# The Order In Which Data Must Be Loaded Into The Tables
+#
+
+@DBLoadOrder = (
+    'dsdb_glossary_terms',
+    'sites',
+    'locations',
+    'facilities',
+    'datastream_classes',
+    'datastream_config_keys',
+    'datastream_config_values',
+    'process_types',
+    'process_states',
+    'process_statuses',
+    'processes',
+    'process_family_categories',
+    'process_family_classes',
+    'process_families',
+    'family_processes',
+    'family_process_states',
+    'family_process_statuses',
+    'process_input_ds_classes',
+    'process_output_ds_classes',
+    'process_output_datastreams',
+    'process_config_keys',
+    'process_config_values',
+    'dsview_process_families',
+    'local_facilities',
+    'local_process_family_categories'
+);
+
+################################################################################
+#
+# The Stored Procedure Definitions
+#
+
+%DBSPDefs = (
+
+    ##### Documentation Tables #################################################
+
+    'dsdb_glossary_terms' => {
+        'define' => {
+            'proc' => 'update_dsdbog_glossary_term',
+            'args' => [$_GLOS_TERM, $_GLOS_TYPE, $_GLOS_NAME],
+            'api'  => 'Documentation',
+        },
+        'delete' => {
+            'proc' => 'delete_dsdbog_glossary_term',
+            'args' => [$_GLOS_TERM],
+            'api'  => 'Documentation',
+        },
+        'get_definition' => {
+            'proc' => 'get_dsdbog_glossary_definition',
+            'args' => [$_GLOS_TERM],
+            'api'  => 'Documentation',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dsdbog_glossary_terms',
+            'args' => [$_GLOS_TERM],
+            'rets' => [$_GLOS_TERM, $_GLOS_TYPE, $_GLOS_NAME],
+            'api'  => 'Documentation',
+        },
+        'update' => {
+            'proc' => 'update_dsdbog_glossary_term',
+            'args' => [$_GLOS_TERM, $_GLOS_TYPE, $_GLOS_NAME],
+            'api'  => 'Documentation',
+        },
+    },
+
+    ##### Location Tables ######################################################
+
+    'sites' => {
+        'define' => {
+            'proc' => 'define_site',
+            'args' => [$_SITE, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_site',
+            'args' => [$_SITE],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_sites',
+            'args' => [$_SITE],
+            'rets' => [$_SITE, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'locations' => {
+        'define' => {
+            'proc' => 'define_location',
+            'args' => [$_LAT, $_LON, $_ALT, $_LOC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_location',
+            'args' => [$_LAT, $_LON, $_ALT],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_locations',
+            'args' => [$_LATTEXT, $_LONTEXT, $_ALTTEXT],
+            'rets' => [$_LAT, $_LON, $_ALT, $_LOC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'facilities' => {
+        'define' => {
+            'proc' => 'define_facility',
+            'args' => [$_SITE, $_FAC, $_LAT, $_LON, $_ALT],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_facility',
+            'args' => [$_SITE, $_FAC],
+            'api'  => 'NaturalKey',
+        },
+        'get_location' => {
+            'proc' => 'get_facility_location',
+            'args' => [$_SITE, $_FAC],
+            'rets' => [$_LAT, $_LON, $_ALT, $_LOC],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_facilities',
+            'args' => [$_SITE, $_FAC],
+            'rets' => [$_SITE, $_FAC, $_LOC, $_LAT, $_LON, $_ALT],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Datastream Class Table ###############################################
+
+    'datastream_classes' => {
+        'define' => {
+            'proc' => 'define_datastream_class',
+            'args' => [$_DSCN, $_DSCL, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_datastream_class',
+            'args' => [$_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_datastream_classes',
+            'args' => [$_DSCN, $_DSCL],
+            'rets' => [$_DSCN, $_DSCL, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Datastream Procedures ################################################
+
+    'input_datastreams' => {
+        'get' => {
+            'proc' => 'get_input_datastreams',
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_input_datastreams',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'output_datastreams' => {
+        'get' => {
+            'proc' => 'get_output_datastreams',
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_output_datastreams',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'is_valid' => {
+            'proc' => 'is_valid_datastream',
+            'args' => [$_SITE, $_FAC, $_DSCN, $_DSCL, $_REQUIRED],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'local_input_datastreams' => {
+        'get' => {
+            'proc' => 'get_local_input_datastreams',
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_local_input_datastreams',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'local_output_datastreams' => {
+        'get' => {
+            'proc' => 'get_local_output_datastreams',
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_local_output_datastreams',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Datastream Config Tables ################################################
+
+    'datastream_config_keys' => {
+        'define' => {
+            'proc' => 'define_datastream_config_key',
+            'args' => [$_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_datastream_config_key',
+            'args' => [$_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_datastream_config_keys',
+            'args' => [$_CONFKEY],
+            'rets' => [$_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'datastream_config_values' => {
+        'define' => {
+            'proc' => 'update_datastream_config_value',
+            'args' => [$_DSCN, $_DSCL, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_datastream_config_value',
+            'args' => [$_DSCN, $_DSCL, $_SITE, $_FAC, $_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_datastream_config_values',
+            'args' => [$_DSCN, $_DSCL, $_SITE, $_FAC, $_CONFKEY],
+            'rets' => [$_DSCN, $_DSCL, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_datastream_config_values',
+            'args' => [$_DSCN, $_DSCL, $_SITE, $_FAC, $_CONFKEY],
+            'rets' => [$_DSCN, $_DSCL, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_datastream_config_value',
+            'args' => [$_DSCN, $_DSCL, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Process Tables #######################################################
+
+    'process_types' => {
+        'define' => {
+            'proc' => 'define_process_type',
+            'args' => [$_PROCT, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_type',
+            'args' => [$_PROCT],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_types',
+            'args' => [$_PROCT],
+            'rets' => [$_PROCT, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'process_states' => {
+        'define' => {
+            'proc' => 'define_process_state',
+            'args' => [$_STATEN, $_DESC, $_ENABLED],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_state',
+            'args' => [$_STATEN],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_states',
+            'args' => [$_STATEN],
+            'rets' => [$_STATEN, $_DESC, $_ENABLED],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'process_statuses' => {
+        'define' => {
+            'proc' => 'define_process_status',
+            'args' => [$_STATUSN, $_DESC, $_SUCCESS],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_status',
+            'args' => [$_STATUSN],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_statuses',
+            'args' => [$_STATUSN],
+            'rets' => [$_STATUSN, $_DESC, $_SUCCESS],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'processes' => {
+        'define' => {
+            'proc' => 'define_process',
+            'args' => [$_PROCT, $_PROCN, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process',
+            'args' => [$_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_processes',
+            'args' => [$_PROCT, $_PROCN],
+            'rets' => [$_PROCT, $_PROCN, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Process Family Tables ################################################
+
+    'process_family_categories' => {
+        'define' => {
+            'proc' => 'define_process_family_category',
+            'args' => [$_CAT, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_family_category',
+            'args' => [$_CAT],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_family_categories',
+            'args' => [$_CAT],
+            'rets' => [$_CAT, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'process_family_classes' => {
+        'define' => {
+            'proc' => 'define_process_family_class',
+            'args' => [$_CAT, $_CLASS, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_family_class',
+            'args' => [$_CAT, $_CLASS],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_family_classes',
+            'args' => [$_CAT, $_CLASS],
+            'rets' => [$_CAT, $_CLASS, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'process_families' => {
+        'define' => {
+            'proc' => 'define_process_family',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_LAT, $_LON, $_ALT],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_family',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_families',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC,
+                       $_LOC, $_LAT, $_LON, $_ALT],
+            'api'  => 'NaturalKey',
+        },
+        'update_class' => {
+            'proc' => 'update_process_family_class',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_NEW_CAT, $_NEW_CLASS],
+            'api'  => 'NaturalKey',
+        },
+        'update_location' => {
+            'proc' => 'update_process_family_location',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_LAT, $_LON, $_ALT],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'process_family_output_ds_classes' => {
+        'get' => {
+            'proc' => 'get_process_family_output_ds_classes',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC],
+            'rets' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_family_output_ds_classes',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC,
+                       $_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC,
+                       $_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Family Process Tables ################################################
+
+    'family_processes' => {
+        'define' => {
+            'proc' => 'define_family_process',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_family_process',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_family_process',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+        'get_location' => {
+            'proc' => 'get_family_process_location',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_LAT, $_LON, $_ALT, $_LOC],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_family_processes',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'family_process_states' => {
+        'delete' => {
+            'proc' => 'delete_family_process_state',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_family_process_state',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATEN, $_ENABLED, $_STATET, $_STATETM],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_family_process_states',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATEN, $_ENABLED, $_STATET, $_STATETM],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_family_process_state',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATEN, $_STATET, $_STATETM],
+            'api'  => 'NaturalKey',
+        },
+        'is_enabled' => {
+            'proc' => 'is_family_process_enabled',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'Extended',
+        },
+    },
+
+    'family_process_statuses' => {
+        'delete' => {
+            'proc' => 'delete_family_process_status',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_family_process_status',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATUSN, $_SUCCESS, $_STATUST,
+                       $_STARTEDTM, $_COMPLETETM, $_SUCCESSTM],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_family_process_statuses',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATUSN, $_SUCCESS, $_STATUST,
+                       $_STARTEDTM, $_COMPLETETM, $_SUCCESSTM],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_family_process_status',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATUSN, $_STATUST, $_COMPLETETM],
+            'api'  => 'NaturalKey',
+        },
+        'update_last_started' => {
+            'proc' => 'update_family_process_started',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN, $_STARTEDTM],
+            'api'  => 'NaturalKey',
+        },
+        'update_last_completed' => {
+            'proc' => 'update_family_process_completed',
+            'args' => [$_SITE, $_FAC, $_PROCT, $_PROCN, $_COMPLETETM],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'family_process_states_history' => {
+        'inquire' => {
+            'proc' => 'inquire_family_process_states_history',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STARTTM, $_ENDTM],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATEN, $_ENABLED, $_STATET, $_STATETM, $_UPDATETM],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'family_process_statuses_history' => {
+        'inquire' => {
+            'proc' => 'inquire_family_process_statuses_history',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STARTTM, $_ENDTM],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATUSN, $_SUCCESS, $_STATUST,
+                       $_STARTEDTM, $_COMPLETETM, $_SUCCESSTM, $_UPDATETM],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Process Input Tables ################################################
+
+    'process_input_ds_classes' => {
+        'define' => {
+            'proc' => 'define_process_input_ds_class',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_input_ds_class',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_process_input_ds_classes',
+            'args' => [$_PROCT, $_PROCN],
+            'rets' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_input_ds_classes',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'rets' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Process Output Tables ################################################
+
+    'process_output_ds_classes' => {
+        'define' => {
+            'proc' => 'define_process_output_ds_class',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_output_ds_class',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_process_output_ds_classes',
+            'args' => [$_PROCT, $_PROCN],
+            'rets' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_output_ds_classes',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'rets' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'process_output_datastreams' => {
+        'define' => {
+            'proc' => 'update_process_output_datastream',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL, $_SITE, $_FAC,
+                       $_FIRSTTM, $_LASTTM],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_output_datastream',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL, $_SITE, $_FAC],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_process_output_datastream',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL, $_SITE, $_FAC],
+            'rets' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL, $_SITE, $_FAC,
+                       $_FIRSTTM, $_LASTTM],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_output_datastreams',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL, $_SITE, $_FAC],
+            'rets' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL, $_SITE, $_FAC,
+                       $_FIRSTTM, $_LASTTM],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_process_output_datastream',
+            'args' => [$_PROCT, $_PROCN, $_DSCN, $_DSCL, $_SITE, $_FAC,
+                       $_FIRSTTM, $_LASTTM],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Process Config Tables ################################################
+
+    'process_config_keys' => {
+        'define' => {
+            'proc' => 'define_process_config_key',
+            'args' => [$_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_config_key',
+            'args' => [$_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_config_keys',
+            'args' => [$_CONFKEY],
+            'rets' => [$_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'process_config_values' => {
+        'define' => {
+            'proc' => 'update_process_config_value',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_process_config_value',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_CONFKEY],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_process_config_values',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_CONFKEY],
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_process_config_values',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_CONFKEY],
+            'rets' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_process_config_value',
+            'args' => [$_PROCT, $_PROCN, $_SITE, $_FAC, $_CONFKEY, $_CONFVAL],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### DSView Tables ################################################
+
+    'dsview_process_families' => {
+        'define' => {
+            'proc' => 'update_dsview_process_family',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCVIEW, $_DSVIEW],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_dsview_process_family',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_dsview_process_families',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCVIEW, $_DSVIEW],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_dsview_process_family',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCVIEW, $_DSVIEW],
+            'api'  => 'NaturalKey',
+        },
+        'get_process_states' => {
+            'proc' => 'get_dsview_process_states',
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_LOC, $_LAT, $_LON,
+                       $_ALT, $_PROCN, $_PROCT, $_STATEN, $_ENABLED, $_STATET,
+                       $_STATETM, $_STATUSN, $_SUCCESS, $_STATUST, $_STARTEDTM,
+                       $_COMPLETETM, $_SUCCESSTM],
+            'api'  => 'Extended',
+        },
+        'get_datastream_families' => {
+            'proc' => 'get_dsview_datastream_families',
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC,
+                       $_LOC, $_LAT, $_LON, $_ALT],
+            'api'  => 'Extended',
+        },
+        'get_datastreams' => {
+            'proc' => 'get_dsview_datastreams',
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_DSCN, $_DSCL],
+            'api'  => 'Extended',
+        },
+    },
+
+    'local_facilities' => {
+        'define' => {
+            'proc' => 'define_local_facility',
+            'args' => [$_SITE, $_FAC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_local_facility',
+            'args' => [$_SITE, $_FAC],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_local_facilities',
+            'args' => [$_SITE, $_FAC],
+            'rets' => [$_SITE, $_FAC, $_LOC, $_LAT, $_LON, $_ALT],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'local_process_family_categories' => {
+        'define' => {
+            'proc' => 'define_local_process_family_category',
+            'args' => [$_CAT],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_local_process_family_category',
+            'args' => [$_CAT],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_local_process_family_categories',
+            'args' => [$_CAT],
+            'rets' => [$_CAT, $_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    ##### Local Process Procedures #################################
+
+    'local_process_families' => {
+        'get' => {
+            'proc' => 'get_local_process_families',
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC,
+                       $_LOC, $_LAT, $_LON, $_ALT,
+                       $_PROCVIEW, $_DSVIEW],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_local_process_families',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC,
+                       $_LOC, $_LAT, $_LON, $_ALT,
+                       $_PROCVIEW, $_DSVIEW],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'local_family_processes' => {
+        'get' => {
+            'proc' => 'get_local_family_processes',
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_local_family_processes',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'local_family_process_stats' => {
+        'get' => {
+            'proc' => 'get_local_family_process_stats',
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATEN, $_ENABLED, $_STATET, $_STATETM,
+                       $_STATUSN, $_SUCCESS, $_STATUST,
+                       $_STARTEDTM, $_COMPLETETM, $_SUCCESSTM],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_local_family_process_stats',
+            'args' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN],
+            'rets' => [$_CAT, $_CLASS, $_SITE, $_FAC, $_PROCT, $_PROCN,
+                       $_STATEN, $_ENABLED, $_STATET, $_STATETM,
+                       $_STATUSN, $_SUCCESS, $_STATUST,
+                       $_STARTEDTM, $_COMPLETETM, $_SUCCESSTM],
+            'api'  => 'NaturalKey',
+        },
+    },
+);
+
+################################################################################
+#
+# Information Needed To Build The Documentation Pages
+#
+
+%DBAutoDoc = (
+    'title'      => 'Datasystem Database Object Group',
+    'list_order' => [
+        'ServerAPI        => Server-Side API',
+        'TablesDiagram    => Tables Diagram',
+        'TypeDefinitions  => Data Type Definitions',
+        'TableDefinitions => Table Definitions',
+        'Glossary',
+#            'Foundation API',
+    ],
+    'ServerAPI' => {
+        'list_order' => [
+            'Location      => Location Functions',
+            'Datastream    => Datastream Functions',
+            'Process       => Process Functions',
+            'DSView        => DSView Functions',
+            'Documentation => Documentation Functions',
+        ],
+        'Location' => {
+            'list_order' => [
+                'sites      => Sites',
+                'locations  => Locations',
+                'facilities => Facilities'
+            ],
+        },
+        'Datastream' => {
+            'list_order' => [
+                'datastream_classes       => Datastream Classes',
+                'datastream_config_keys   => Datastream Config Keys',
+                'datastream_config_values => Datastream Config values',
+                'input_datastreams        => Input Datastreams',
+                'output_datastreams       => Output Datastreams',
+                'local_input_datastreams  => Local Input Datastreams',
+                'local_output_datastreams => Local Output Datastreams',
+            ],
+        },
+        'Process' => {
+            'list_order' => [
+                'process_family_categories        => Process Family Categories',
+                'process_family_classes           => Process Family Classes',
+                'process_families                 => Process Families',
+                'process_types                    => Process Types',
+                'processes                        => Processes',
+                'process_input_ds_classes         => Process Input Datastream Classes',
+                'process_output_ds_classes        => Process Output Datastream Classes',
+                'process_output_datastreams       => Process Output Datastreams',
+                'process_states                   => Process States',
+                'process_statuses                 => Process Statuses',
+                'process_config_keys              => Process Config Keys',
+                'process_config_values            => Process Config Values',
+                'family_processes                 => Family Processes',
+                'family_process_states            => Family Process States',
+                'family_process_states_history    => Family Process States History',
+                'family_process_statuses          => Family Process Statuses',
+                'family_process_statuses_history  => Family Process Statuses History',
+                'local_process_families           => Local Process Families',
+                'local_family_processes           => Local Family Processes',
+                'local_family_process_stats       => Local Family Process Stats',
+                'process_family_output_ds_classes => Process Family Output Datastream Classes',
+            ],
+        },
+        'DSView' => {
+            'list_order' => [
+                'dsview_process_families         => DSView Process Families',
+                'local_facilities                => Local Facilities',
+                'local_process_family_categories => Local Process Family Categories',
+            ],
+        },
+        'Documentation' => {
+            'list_order' => [
+                'dsdb_glossary_terms => DSDBOG Glossary',
+            ],
+        },
+    },
+    'TablesDiagram' => {
+    },
+    'TableDefinitions' => {
+        'list_order' => [
+            'Location      => Location Tables',
+            'Datastream    => Datastream Tables',
+            'Process       => Process Tables',
+            'DSView        => DSView Tables',
+            'Documentation => Documentation Tables',
+        ],
+        'Location' => {
+            'list_order' => [
+                'sites',
+                'locations',
+                'facilities'
+            ],
+        },
+        'Datastream' => {
+            'list_order' => [
+                'datastream_classes',
+                'datastream_config_keys',
+                'datastream_config_values',
+            ],
+        },
+        'Process' => {
+            'list_order' => [
+                'process_family_categories',
+                'process_family_classes',
+                'process_families',
+                'process_types',
+                'processes',
+                'process_input_ds_classes',
+                'process_output_ds_classes',
+                'process_output_datastreams',
+                'process_states',
+                'process_statuses',
+                'process_config_keys',
+                'process_config_values',
+                'family_processes',
+                'family_process_states',
+                'family_process_states_history',
+                'family_process_statuses',
+                'family_process_statuses_history',
+            ],
+        },
+        'DSView' => {
+            'list_order' => [
+                'dsview_process_families',
+                'local_facilities',
+                'local_process_family_categories'
+            ],
+        },
+        'Documentation' => {
+            'list_order' => [
+                'dsdbog_glossary_terms',
+            ],
+        },
+    },
+    'TypeDefinitions' => {
+        'list_order' => [
+            'Location   => Location Types',
+            'Datastream => Datastream Types',
+            'Process    => Process Types',
+            'DSView     => DSView Types'
+        ],
+        'Location' => {
+            'list_order' => [
+                'site',
+                'location',
+                'facility'
+            ],
+        },
+        'Datastream' => {
+            'list_order' => [
+                'datastream_class',
+                'datastream_config_key',
+                'datastream_config_value',
+                'process_datastream',
+            ],
+        },
+        'Process' => {
+            'list_order' => [
+                'process_family_category',
+                'process_family_class',
+                'process_family',
+                'process_type',
+                'process',
+                'process_input_ds_class',
+                'process_output_ds_class',
+                'process_output_datastream',
+                'process_state',
+                'process_status',
+                'process_config_key',
+                'process_config_value',
+                'family_process',
+                'family_process_state',
+                'family_process_state_history',
+                'family_process_status',
+                'family_process_status_history',
+                'family_process_stats',
+                'local_process_family',
+                'process_family_output_ds_class',
+            ],
+        },
+        'DSView' => {
+            'list_order' => [
+                'dsview_process_family',
+                'dsview_process_state',
+            ],
+        },
+    },
+    'Glossary' => {
+    },
+);
+
+1;

@@ -1,0 +1,142 @@
+################################################################################
+#
+#  COPYRIGHT (C) 2006 Battelle Memorial Institute.  All Rights Reserved.
+#
+################################################################################
+#
+#  Author:
+#     name:  Brian Ermold
+#     phone: (509) 375-2277
+#     email: brian.ermold@arm.gov
+#
+################################################################################
+
+################################################################################
+#
+# Private Variable Declarations Used For Convenience
+#
+
+my $_TDB_NAME  = 'tdb_name';
+my $_TDB_DESC  = 'tdb_desc';
+my $_TDB_KEY   = 'tdb_key';
+my $_TDB_VALUE = 'tdb_value';
+
+################################################################################
+#
+# The Stored Procedure Argument Types
+#
+
+%DBArgTypes = (
+    $_TDB_NAME  => 'text',
+    $_TDB_DESC  => 'text',
+    $_TDB_KEY   => 'text',
+    $_TDB_VALUE => 'text',
+);
+
+################################################################################
+#
+# The Order In Which Data Must Be Loaded Into The Tables
+#
+
+@DBLoadOrder = (
+    'tdb_names',
+    'tdb_keys',
+);
+
+################################################################################
+#
+# The Stored Procedure Definitions
+#
+
+%DBSPDefs = (
+
+    ##### TDB Tables #################################################
+
+    'tdb_names' => {
+        'define' => {
+            'proc' => 'define_tdb_name',
+            'args' => [$_TDB_NAME, $_TDB_DESC],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_tdb_name',
+            'args' => [$_TDB_NAME],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_tdb_names',
+            'args' => [$_TDB_NAME],
+            'rets' => [$_TDB_NAME, $_TDB_DESC],
+            'api'  => 'NaturalKey',
+        },
+    },
+
+    'tdb_keys' => {
+        'define' => {
+            'proc' => 'update_tdb_key',
+            'args' => [$_TDB_NAME, $_TDB_KEY, $_TDB_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'delete' => {
+            'proc' => 'delete_tdb_key',
+            'args' => [$_TDB_NAME, $_TDB_KEY],
+            'api'  => 'NaturalKey',
+        },
+        'get' => {
+            'proc' => 'get_tdb_key',
+            'args' => [$_TDB_NAME, $_TDB_KEY],
+            'api'  => 'NaturalKey',
+        },
+        'inquire' => {
+            'proc' => 'inquire_tdb_keys',
+            'args' => [$_TDB_NAME, $_TDB_KEY],
+            'rets' => [$_TDB_NAME, $_TDB_KEY, $_TDB_VALUE],
+            'api'  => 'NaturalKey',
+        },
+        'update' => {
+            'proc' => 'update_tdb_key',
+            'args' => [$_TDB_NAME, $_TDB_KEY, $_TDB_VALUE],
+            'api'  => 'NaturalKey',
+        },
+    },
+);
+
+################################################################################
+#
+# Information Needed To Build The Documentation Pages
+#
+
+%DBAutoDoc = (
+    'title'      => 'TDB Object Group',
+    'list_order' => [
+        'ServerAPI        => Server-Side API',
+        'TablesDiagram    => Tables Diagram',
+        'TableDefinitions => Table Definitions',
+    ],
+    'ServerAPI' => {
+        'list_order' => [
+            'TDB => TDB Functions',
+        ],
+        'TDB' => {
+            'list_order' => [
+                'tdb_names => TDB Names',
+                'tdb_keys  => TDB Keys',
+            ],
+        },
+    },
+    'TablesDiagram' => {
+    },
+    'TableDefinitions' => {
+        'list_order' => [
+            'TDB => TDB Tables',
+        ],
+        'TDB' => {
+            'list_order' => [
+                'tdb_names',
+                'tdb_keys',
+            ],
+        },
+    },
+);
+
+1;

@@ -1,0 +1,15 @@
+------------------------------------------------------------
+Get var_2D coordinate variables:
+------------------------------------------------------------
+
+var: /root/_vars_/var_2D
+  - dim 0: /root/_vars_/time
+  - dim 1: /root/_vars_/range
+
+------------------------------------------------------------
+Get group_1/_vars_/var_1_2 coordinate variables:
+------------------------------------------------------------
+
+var: /root/group_1/_vars_/var_1_2
+  - dim 0: /root/_vars_/time
+  - dim 1: not found

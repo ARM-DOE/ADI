@@ -1,0 +1,165 @@
+
+============================================================
+Time Tests
+============================================================
+
+Time variables before base time change:
+
+    base_time(time) : int
+
+    data = NULL
+
+    time_offset(time) : double
+
+    data = NULL
+
+    time(time) : double
+        long_name = "Time offset from midnight"
+        units     = "seconds since 2009-02-13 00:00:00 0:00"
+
+    data = 84690.999995, 84690.999996, 84690.999997, 84690.999998,
+    84690.999999, 84691, 84691.000001, 84691.000002, 84691.000003,
+    84691.000004
+
+    timevals =
+
+        1234567890.999995
+        1234567890.999996
+        1234567890.999997
+        1234567890.999998
+        1234567890.999999
+        1234567891.000000
+        1234567891.000001
+        1234567891.000002
+        1234567891.000003
+        1234567891.000004
+
+
+Changing base time value:
+  - from: 1234483200 = 'seconds since 2009-02-13 00:00:00 0:00'
+  - to:   1234567890 = 'seconds since 2009-02-13 23:31:30 0:00'
+
+Time variables after base time change:
+
+    base_time(time) : int
+        string    = "2009-02-13 23:31:30 0:00"
+        long_name = "Base time in Epoch"
+        units     = "seconds since 1970-1-1 0:00:00 0:00"
+
+    data = 1234567890
+
+    time_offset(time) : double
+        long_name = "Time offset from base_time"
+        units     = "seconds since 2009-02-13 23:31:30 0:00"
+
+    data = NULL
+
+    time(time) : double
+        long_name = "Sample times"
+        units     = "seconds since 2009-02-13 23:31:30 0:00"
+
+    data = 0.999995000005583, 0.999995999998646, 0.99999700000626,
+    0.999997999999323, 0.999999000006937, 1, 1.00000099999306,
+    1.00000200000068, 1.00000299999374, 1.00000400000135
+
+    timevals =
+
+        1234567890.999995
+        1234567890.999996
+        1234567890.999997
+        1234567890.999998
+        1234567890.999999
+        1234567891.000000
+        1234567891.000001
+        1234567891.000002
+        1234567891.000003
+        1234567891.000004
+
+
+Get time range using time_var and group_1:
+
+
+ntimes:     10
+start time: 1234567890.999995
+end time:   1234567891.000004
+
+Get base_time and sample times using time_var and group_1:
+
+
+base_time = 1234567890
+
+sample_times =
+
+    1234567890.999995
+    1234567890.999996
+    1234567890.999997
+    1234567890.999998
+    1234567890.999999
+    1234567891.000000
+    1234567891.000001
+    1234567891.000002
+    1234567891.000003
+    1234567891.000004
+
+Setting new sample times using: /root/group_1
+
+Time variables after set new sample times:
+
+    base_time(time) : int
+        string    = "2010-02-13 00:00:00 0:00"
+        long_name = "Base time in Epoch"
+        units     = "seconds since 1970-1-1 0:00:00 0:00"
+
+    data = 1266019200
+
+    time_offset(time) : double
+        long_name = "Time offset from base_time"
+        units     = "seconds since 2010-02-13 00:00:00 0:00"
+
+    data = 0.05, 0.06, 0.07, 0.08, 0.09, 1, 1.01, 1.02, 1.03, 1.04
+
+    time(time) : double
+        long_name = "Time offset from midnight"
+        units     = "seconds since 2010-02-13 00:00:00 0:00"
+
+    data = 0.05, 0.06, 0.07, 0.08, 0.09, 1, 1.01, 1.02, 1.03, 1.04
+
+    timevals =
+
+        1266019200.050000
+        1266019200.060000
+        1266019200.070000
+        1266019200.080000
+        1266019200.090000
+        1266019201.000000
+        1266019201.010000
+        1266019201.020000
+        1266019201.030000
+        1266019201.040000
+
+
+Get time range using time_var and group_1:
+
+
+ntimes:     10
+start time: 1266019200.050000
+end time:   1266019201.040000
+
+Get base_time and sample times using time_var and group_1:
+
+
+base_time = 1266019200
+
+sample_times =
+
+    1266019200.050000
+    1266019200.060000
+    1266019200.070000
+    1266019200.080000
+    1266019200.090000
+    1266019201.000000
+    1266019201.010000
+    1266019201.020000
+    1266019201.030000
+    1266019201.040000
+

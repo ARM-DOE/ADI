@@ -1,0 +1,6 @@
+suppress UMR ...;__mktime_internal
+suppress UMR ...;regcomp
+suppress IPR ...;ut_parse
+suppress UMR ...;PQconnectStart
+suppress UMR ...;getaddrinfo
+suppress UMR ...;compress2
