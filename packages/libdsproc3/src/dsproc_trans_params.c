@@ -1269,7 +1269,7 @@ int dsproc_load_ret_transform_params(
 {
     Retriever *ret = _DSProc->retriever;
     RetTransParams *trans_params;
-    char  coordsys[128];
+    char  coordsys[PATH_MAX];
     char *params;
     int   index;
     int   check;
