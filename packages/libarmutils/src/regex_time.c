@@ -27,6 +27,7 @@
  */
 
 #include "armutils.h"
+#include <math.h>
 
 /*******************************************************************************
  *  Private Data and Functions
@@ -62,7 +63,8 @@ static DateTimeCode _DateTimeCodes[] = {
     { 'e', "([[:digit:]]{1,2})"  }, // day number in the month (1-31).
     { 'h', "([[:digit:]]{1,4})"  }, // hour and minute (0-2359)
     { 'H', "([[:digit:]]{1,2})"  }, // hour (0-23)
-    { 'j', "([[:digit:]]{1,3})"  }, // day number in the year (1-366).
+    // day number in the year (1-366) with optional fractional days.
+    { 'j', "([[:digit:]]{1,3}\\.[[:digit:]]+|[[:digit:]]{1,3})" },
     { 'm', "([[:digit:]]{1,2})"  }, // month number (1-12)
     { 'M', "([[:digit:]]{1,2})"  }, // minute (0-59)
     { 'n', "[[:space:]]+"        }, // arbitrary whitespace
@@ -407,6 +409,8 @@ int retime_execute(RETime *retime, const char *string, RETimeRes *res)
     char       *chrp;
     size_t      mi;
     char        am_pm[8];
+    double      frac;
+    double      iptr;
 
     /* Clear previous result */
 
@@ -475,6 +479,23 @@ int retime_execute(RETime *retime, const char *string, RETimeRes *res)
                 break;
             case 'j': // day number in the year (1-366).
                 res->yday = atoi(substr);
+
+                chrp = strchr(substr, '.');
+                if (chrp) {
+                    frac = atof(chrp);
+
+                    frac = modf(frac * 24, &iptr);
+                    res->hour = (int)iptr;
+
+                    frac = modf(frac * 60, &iptr);
+                    res->min = (int)iptr;
+
+                    frac = modf(frac * 60, &iptr);
+                    res->sec = (int)iptr;
+
+                    res->usec = (int)(frac * 1E6 + 0.5);
+                }
+
                 break;
             case 'm': // month number (1-12)
                 res->month = atoi(substr);
