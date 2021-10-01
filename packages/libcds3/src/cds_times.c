@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 54296 $
-*    $Author: ermold $
-*    $Date: 2014-05-13 01:32:50 +0000 (Tue, 13 May 2014) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -100,7 +90,7 @@ time_t *_cds_get_sample_times(
     /* Get the base time for this variable */
 
     base_time = cds_get_base_time(var);
-    if (!base_time) {
+    if (base_time < 0) {
         if (sample_count) *sample_count = (size_t)-1;
         return((time_t *)NULL);
     }
@@ -192,7 +182,7 @@ timeval_t *_cds_get_sample_timevals(
     /* Get the base time for this variable */
 
     base_time = cds_get_base_time(var);
-    if (!base_time) {
+    if (base_time < 0) {
         if (sample_count) *sample_count = (size_t)-1;
         return((timeval_t *)NULL);
     }
@@ -224,7 +214,7 @@ timeval_t *_cds_get_sample_timevals(
  *  PRIVATE: Set the data values for a time variable.
  *
  *  Note: The data type of the time variable must be CDS_SHORT,
- *  CDS_INT, CDS_FLOAT or CDS_DOUBLE.
+ *  CDS_INT, CDS_INT64, CDS_FLOAT or CDS_DOUBLE.
  *
  *  Error messages from this function are sent to the message
  *  handler (see msngr_init_log() and msngr_init_mail()).
@@ -289,6 +279,10 @@ int _cds_set_sample_times(
         case CDS_DOUBLE:
             while (--nelems) *data.dp++ = (double)(*timep++ - base_time);
             break;
+       /* NetCDF4 extended data types */
+        case CDS_INT64:
+            while (--nelems) *data.i64p++ = (long long)(*timep++ - base_time);
+            break;
         default:
 
             ERROR( CDS_LIB_NAME,
@@ -305,9 +299,9 @@ int _cds_set_sample_times(
 /**
  *  PRIVATE: Set the data values for a time variable.
  *
- *  The data type of the time variable must be CDS_SHORT, CDS_INT, CDS_FLOAT,
- *  or CDS_DOUBLE. However, if the variable data type is CDS_SHORT or CDS_INT,
- *  any fractional seconds will be lost in the conversion.
+ *  The data type of the time variable must be CDS_SHORT, CDS_INT, CDS_INT64,
+ *  CDS_FLOAT, or CDS_DOUBLE. If the variable data type is CDS_SHORT, CDS_INT,
+ *  or CDS_INT64 any fractional seconds will be rounded in the conversion.
  *
  *  Error messages from this function are sent to the message handler
  *  (see msngr_init_log() and msngr_init_mail()).
@@ -401,6 +395,19 @@ int _cds_set_sample_timevals(
 
                 *data.dp++ = (double)(timevalp->tv_sec - base_time)
                            + (double)timevalp->tv_usec * 1E-6;
+
+                ++timevalp;
+            }
+            break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:
+            while (--nelems) {
+
+                dbl_val = (double)(timevalp->tv_sec - base_time)
+                        + (double)timevalp->tv_usec * 1E-6;
+
+                if (dbl_val < 0) *data.i64p++ = (long long)(dbl_val - 0.5);
+                else             *data.i64p++ = (long long)(dbl_val + 0.5);
 
                 ++timevalp;
             }
@@ -611,9 +618,9 @@ int cds_units_string_to_base_time(char *units_string, time_t *base_time)
 {
     *base_time = cds_validate_time_units(units_string);
 
-    if (*base_time <= 0) {
+    if (*base_time < 0) {
 
-        if (*base_time == 0) {
+        if (*base_time == -1) {
 
             ERROR( CDS_LIB_NAME,
                 "Could not convert units string to base time.\n"
@@ -932,7 +939,7 @@ CDSVar *cds_find_time_var(void *object)
  *
  *  @return
  *    - base time in seconds since 1970 UTC
- *    - 0 if a base time was not found
+ *    - -1 if a base time was not found
  */
 time_t cds_get_base_time(void *object)
 {
@@ -946,20 +953,20 @@ time_t cds_get_base_time(void *object)
     }
     else {
         var = cds_find_time_var(object);
-        if (!var) return(0);
+        if (!var) return(-1);
     }
 
     att = cds_get_att(var, "units");
 
     if (!att || !att->length || !att->value.vp) {
-        return(0);
+        return(-1);
     }
     else if (att->type != CDS_CHAR) {
-        return(0);
+        return(-1);
     }
 
     if (!cds_units_string_to_base_time(att->value.cp, &base_time)) {
-        return(0);
+        return(-1);
     }
 
     return(base_time);
@@ -1376,8 +1383,8 @@ int cds_set_base_time(void *object, const char *long_name, time_t base_time)
  *  set, the cds_set_base_time() function will be called using the time of
  *  midnight just prior to the first sample time.
  *
- *  The data type of the time variable(s) must be CDS_SHORT, CDS_INT, CDS_FLOAT
- *  or CDS_DOUBLE. However, CDS_DOUBLE is usually recommended.
+ *  The data type of the time variable(s) must be CDS_SHORT, CDS_INT, CDS_INT64,
+ *  CDS_FLOAT or CDS_DOUBLE. However, CDS_DOUBLE is usually recommended.
  *
  *  Error messages from this function are sent to the message handler
  *  (see msngr_init_log() and msngr_init_mail()).
@@ -1407,7 +1414,7 @@ int cds_set_sample_times(
     /* Check if we need to set the base time value */
 
     base_time = cds_get_base_time(object);
-    if (!base_time && sample_start == 0) {
+    if ((base_time < 0) && sample_start == 0) {
         base_time = cds_get_midnight(sample_times[0]);
         if (!cds_set_base_time(object, long_name, base_time)) {
             return(0);
@@ -1502,8 +1509,9 @@ int cds_set_sample_times(
  *  set, the cds_set_base_time() function will be called using the time of
  *  midnight just prior to the first sample time.
  *
- *  The data type of the time variable(s) must be either CDS_FLOAT or
- *  CDS_DOUBLE. However, CDS_DOUBLE is usually recommended.
+ *  The data type of the time variable must be CDS_SHORT, CDS_INT, CDS_INT64,
+ *  CDS_FLOAT, or CDS_DOUBLE. If the variable data type is CDS_SHORT, CDS_INT,
+ *  or CDS_INT64 any fractional seconds will be rounded in the conversion.
  *
  *  Error messages from this function are sent to the message handler
  *  (see msngr_init_log() and msngr_init_mail()).
@@ -1533,7 +1541,7 @@ int cds_set_sample_timevals(
     /* Check if we need to set the base time value */
 
     base_time = cds_get_base_time(object);
-    if (!base_time && sample_start == 0) {
+    if ((base_time < 0) && sample_start == 0) {
         base_time = cds_get_midnight(sample_times[0].tv_sec);
         if (!cds_set_base_time(object, long_name, base_time)) {
             return(0);

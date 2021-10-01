@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2011 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 68010 $
-*    $Author: ermold $
-*    $Date: 2016-03-11 20:27:44 +0000 (Fri, 11 Mar 2016) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -209,7 +199,7 @@ int _cds_init_param_list(
  *
  *  @return
  *    - 1 if successful
- *    - 0 if a memory allocation error occurred
+ *    - 0 if an error occurs
  */
 int _cds_set_param(
     CDSParamList *list,
@@ -223,6 +213,14 @@ int _cds_set_param(
     int       new_nalloced;
     size_t    type_size;
     void     *new_value;
+
+    if (type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Could not set transformation parameter for: %s\n"
+            " -> unsupported data type: %s\n",
+            name, cds_data_type_name(type));
+        return(0);
+    }
 
     /* Get the parameter from the list or create it if it doesn't exist */
 
@@ -450,10 +448,10 @@ int _cds_print_param_list(
 
                 switch (param->type) {
                     case CDS_BYTE:
-                        str_length = sprintf(str_value, "%d", param->value.bp[vi]);
+                        str_length = sprintf(str_value, "%hhd", param->value.bp[vi]);
                         break;
                     case CDS_SHORT:
-                        str_length = sprintf(str_value, "%d", param->value.sp[vi]);
+                        str_length = sprintf(str_value, "%hd", param->value.sp[vi]);
                         break;
                     case CDS_INT:
                         str_length = sprintf(str_value, "%d", param->value.ip[vi]);
@@ -463,6 +461,22 @@ int _cds_print_param_list(
                         break;
                     case CDS_DOUBLE:
                         str_length = sprintf(str_value, "%.15g", param->value.dp[vi]);
+                        break;
+                    /* NetCDF4 extended data types */
+                    case CDS_INT64:
+                        str_length = sprintf(str_value, "%lld", param->value.i64p[vi]);
+                        break;
+                    case CDS_UBYTE:
+                        str_length = sprintf(str_value, "%hhu", param->value.ubp[vi]);
+                        break;
+                    case CDS_USHORT:
+                        str_length = sprintf(str_value, "%hu", param->value.usp[vi]);
+                        break;
+                    case CDS_UINT:
+                        str_length = sprintf(str_value, "%u", param->value.uip[vi]);
+                        break;
+                    case CDS_UINT64:
+                        str_length = sprintf(str_value, "%llu", param->value.ui64p[vi]);
                         break;
                     default:
                         str_length = sprintf(str_value, "NaT");
@@ -574,7 +588,7 @@ int cds_copy_transform_params(
  *
  *  @return
  *    - 1 if successful
- *    - 0 if a memory allocation error occurred
+ *    - 0 if an error occurs
  */
 int cds_set_transform_param(
     CDSGroup    *group,
@@ -589,6 +603,14 @@ int cds_set_transform_param(
     CDSParamList       *new_lists;
     int                 new_nalloced;
     int                 status;
+
+    if (type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Could not set transformation parameter for: %s:%s\n"
+            " -> unsupported data type: %s\n",
+            obj_name, param_name, cds_data_type_name(type));
+        return(0);
+    }
 
     /* Create the transformation parameters structure if
      * it does not already exist */
@@ -710,6 +732,14 @@ void *cds_get_transform_param(
     CDSGroup   *group;
     void       *valuep;
 
+    if (type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Could not get transformation parameter for: %s:%s\n"
+            " -> unsupported data type: %s\n",
+            obj_name, param_name, cds_data_type_name(type));
+        return(0);
+    }
+
     /* Find the first parent group for the specified object */
 
     while (obj && obj->obj_type != CDS_GROUP) {
@@ -783,6 +813,14 @@ void *cds_get_transform_param_from_group(
     CDSParamList       *list;
     CDSParam           *param;
     size_t              out_length;
+
+    if (type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Could not get transformation parameter for: %s:%s\n"
+            " -> unsupported data type: %s\n",
+            obj_name, param_name, cds_data_type_name(type));
+        return(0);
+    }
 
     if (!group || !obj_name || !param_name ||
         !group->transform_params) {

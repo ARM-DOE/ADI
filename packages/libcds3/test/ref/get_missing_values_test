@@ -1,0 +1,252 @@
+------------------------------------------------------------
+Get missing values test
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = (null)
+
+------------------------------------------------------------
+Call cds_create_missing_value_att() with flags == 1
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = (null)
+
+------------------------------------------------------------
+Call cds_create_missing_value_att() with flags == 0
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+            missing_value = [9.96920996838687e+36] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = [ 9.96921e+36 ]
+
+------------------------------------------------------------
+Change missing_value to -9999
+Add 'missing-value = -8888' as char type
+Add 'missing_data = -7777' as char type
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+            missing_value = [-9999] : double
+            missing-value = "-8888"
+            missing_data  = "-7777"
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = [ -9999, -8888, -7777 ]
+
+------------------------------------------------------------
+Set default fill value
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+            missing_value = [-9999] : double
+            missing-value = "-8888"
+            missing_data  = "-7777"
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = [ -9999, -8888, -7777, 9.96921e+36 ]
+
+------------------------------------------------------------
+Change 'missing_data = -9999'
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+            missing_value = [-9999] : double
+            missing-value = "-8888"
+            missing_data  = "-9999"
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = [ -9999, -8888, 9.96921e+36 ]
+
+------------------------------------------------------------
+Remove 'missing_value' and 
+call cds_create_missing_value_att() with flags == 0
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+            missing-value = "-8888"
+            missing_data  = "-9999"
+            missing_value = [-8888, -9999, 9.96920996838687e+36] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = [ -8888, -9999, 9.96921e+36 ]
+
+------------------------------------------------------------
+Remove 'missing_value' and 
+call cds_create_missing_value_att() with flags == 1
+------------------------------------------------------------
+
+Group: /root
+
+    Dimensions:
+
+        time = UNLIMITED (16 currently)
+
+    Variables:
+
+        length(time) : double
+            units         = "mm"
+            valid_min     = [-1000000] : double
+            valid_max     = [1000000] : double
+            valid_range   = [-1000, 1000] : double
+            valid_delta   = [1000] : double
+            convert_units = [3000, 6000] : double
+            convert_delta = [1000, 2000] : double
+            no_conversion = [10, 20] : double
+            missing-value = "-8888"
+            missing_data  = "-9999"
+            missing_value = [-8888, -9999] : double
+
+    Data:
+
+        length = -4e+38, -2200000000, -2147483647, -33000, -32767, -9999, -129,
+    -127, -32, 0, 32, 128, 32768, 2200000000, 9.96920996838687e+36, 4e+38
+
+missing values = [ -8888, -9999, 9.96921e+36 ]
+

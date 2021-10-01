@@ -29,7 +29,7 @@ Rename variable test:
 
 - Renaming a variable to an existing name should fail.
 
-ERROR: Could not rename variable: /root/_vars_/var_2D to var_string
+ERROR: Could not rename variable: /root/_vars_/var_2D to var_char_2D
  -> variable exists
 
  - Before rename:

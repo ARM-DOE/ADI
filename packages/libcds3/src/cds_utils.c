@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 63557 $
-*    $Author: ermold $
-*    $Date: 2015-09-02 02:40:13 +0000 (Wed, 02 Sep 2015) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -34,12 +24,12 @@
 #include <ctype.h>
 
 /*******************************************************************************
- *  Private Functions
+ *  Private Functions Visible Only To This File
  */
 /** @privatesection */
 
 /**
- *  PRIVATE: Recursion function used by cds_create_data_index().
+ *  STATIC: Recursion function used by cds_create_data_index().
  *
  *  @param  data       - pointer to the data array
  *  @param  type_size  - size (in bytes) of the data type
@@ -114,7 +104,7 @@ static void *_cds_create_data_index(
 }
 
 /**
- *  PRIVATE: recursion function used by cds_free_index_array()
+ *  STATIC: recursion function used by cds_free_index_array()
  *
  *  @param  index   - pointer to the data index
  *  @param  ndims   - number of dimensions in the data array
@@ -143,7 +133,7 @@ static void _cds_free_data_index(
 }
 
 /**
- *  Get the open and close brackets to use when printing a data array.
+ *  STATIC: Get the open and close brackets to use when printing a data array.
  *
  *  @param  type  - data type of the array
  *  @param  flags - control flags:
@@ -169,11 +159,18 @@ static void _cds_get_array_brackets(
     }
     else if (flags & 0x04) {
         switch (type) {
-            case CDS_BYTE:   *close = "]:byte"; break;
-            case CDS_SHORT:  *close = "]:short"; break;
-            case CDS_INT:    *close = "]:int"; break;
-            case CDS_FLOAT:  *close = "]:float"; break;
+            case CDS_BYTE:   *close = "]:byte";   break;
+            case CDS_SHORT:  *close = "]:short";  break;
+            case CDS_INT:    *close = "]:int";    break;
+            case CDS_FLOAT:  *close = "]:float";  break;
             case CDS_DOUBLE: *close = "]:double"; break;
+            /* NetCDF4 extended data types */
+            case CDS_UBYTE:  *close = "]:ubyte";  break;
+            case CDS_USHORT: *close = "]:ushort"; break;
+            case CDS_UINT:   *close = "]:uint";   break;
+            case CDS_INT64:  *close = "]:int64";  break;
+            case CDS_UINT64: *close = "]:uint64"; break;
+            case CDS_STRING: *close = "]:string"; break;
             default: return;
         }
         *open = "[";
@@ -185,6 +182,13 @@ static void _cds_get_array_brackets(
             case CDS_INT:    *open = "int:   ["; break;
             case CDS_FLOAT:  *open = "float: ["; break;
             case CDS_DOUBLE: *open = "double:["; break;
+            /* NetCDF4 extended data types */
+            case CDS_UBYTE:  *open = "ubyte: ["; break;
+            case CDS_USHORT: *open = "ushort:["; break;
+            case CDS_UINT:   *open = "uint:  ["; break;
+            case CDS_INT64:  *open = "int64: ["; break;
+            case CDS_UINT64: *open = "uint64:["; break;
+            case CDS_STRING: *open = "string:["; break;
             default: return;
         }
         *close = "]";
@@ -196,6 +200,13 @@ static void _cds_get_array_brackets(
             case CDS_INT:    *open = "int:["; break;
             case CDS_FLOAT:  *open = "float:["; break;
             case CDS_DOUBLE: *open = "double:["; break;
+            /* NetCDF4 extended data types */
+            case CDS_UBYTE:  *open = "ubyte:[";  break;
+            case CDS_USHORT: *open = "ushort:["; break;
+            case CDS_UINT:   *open = "uint:[";   break;
+            case CDS_INT64:  *open = "int64:[";  break;
+            case CDS_UINT64: *open = "uint64:["; break;
+            case CDS_STRING: *open = "string:["; break;
             default: return;
         }
         *close = "]";
@@ -207,7 +218,7 @@ static void _cds_get_array_brackets(
 }
 
 /**
- *  Print an array of values to the specified buffer.
+ *  STATIC: Print an array of values to the specified buffer.
  *
  *  Note: bufsize must be greater than 31 for numeric data,
  *  and greater than maxline + 3 for character data.
@@ -241,6 +252,7 @@ static size_t _cds_print_array_to_buffer(
     CDSData data;
     size_t  index;
     size_t  linepos;
+    const char *strp;
 
     if (*indexp >= length) {
         return(0);
@@ -397,6 +409,104 @@ static size_t _cds_print_array_to_buffer(
         case CDS_INT:     CDS_PRINT_TO_BUFFER(index, length, "%d",    data.ip, bufp, bufsize, maxline, linepos, indent); break;
         case CDS_FLOAT:   CDS_PRINT_TO_BUFFER(index, length, "%.7g",  data.fp, bufp, bufsize, maxline, linepos, indent); break;
         case CDS_DOUBLE:  CDS_PRINT_TO_BUFFER(index, length, "%.15g", data.dp, bufp, bufsize, maxline, linepos, indent); break;
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:   CDS_PRINT_TO_BUFFER(index, length, "%hhu",  data.ubp,   bufp, bufsize, maxline, linepos, indent); break;
+        case CDS_USHORT:  CDS_PRINT_TO_BUFFER(index, length, "%hu",   data.usp,   bufp, bufsize, maxline, linepos, indent); break;
+        case CDS_UINT:    CDS_PRINT_TO_BUFFER(index, length, "%u",    data.uip,   bufp, bufsize, maxline, linepos, indent); break;
+        case CDS_INT64:   CDS_PRINT_TO_BUFFER(index, length, "%lld",  data.i64p,  bufp, bufsize, maxline, linepos, indent); break;
+        case CDS_UINT64:  CDS_PRINT_TO_BUFFER(index, length, "%llu",  data.ui64p, bufp, bufsize, maxline, linepos, indent); break;
+        case CDS_STRING:
+        {
+            size_t  count  = length - index;
+            size_t  indlen = (indent) ? strlen(indent) : 0 ;
+            char   *bufend = bufp + bufsize - 8;
+            size_t  nbytes;
+
+            if (maxline) {
+
+                if (maxline < indlen + 3) maxline += indlen + 2;
+                else maxline -= 1;
+
+                if (index) { 
+                    data.strp += index;
+                    count     += 1;
+                }
+                else {
+// BDE - Need to add logic to check for strings with quotes and escape them.
+                    strp = (*data.strp) ? *data.strp : "(null)";
+                    nbytes = strlen(strp) + 3;
+                    linepos += nbytes;
+
+                    if (linepos > maxline) {
+                        *bufp++ = '\n';
+                        if (indlen) {
+                            memcpy(bufp, indent, indlen);
+                            bufp += indlen;
+                        }
+                        linepos = indlen + nbytes;
+                    }
+
+                    bufp += sprintf(bufp, "\"%s\",", strp);
+                    data.strp++;
+                }
+
+                maxline -= 1;
+                while (--count) {
+
+                    strp = (*data.strp) ? *data.strp : "(null)";
+                    nbytes = strlen(strp) + 3;
+                    linepos += nbytes;
+
+                    if (bufp + nbytes > bufend) {
+                        break;
+                    }
+
+                    if (linepos > maxline) {
+                        *bufp++ = '\n';
+                        if (indlen) {
+                            memcpy(bufp, indent, indlen);
+                            bufp += indlen;
+                        }
+                        linepos = indlen + nbytes;
+                    }
+                    else {
+                        *bufp++ = ' ';
+                        linepos += 1;
+                    }
+
+                    bufp += sprintf(bufp, "\"%s\",", strp);
+                    data.strp++;
+                }
+            }
+            else {
+                if (index) {
+                    data.strp += index;
+                    count += 1;
+                }
+                else {
+                    strp = (*data.strp) ? *data.strp : "(null)";
+                    bufp += sprintf(bufp, "\"%s\",", strp);
+                    data.strp++;
+                }
+
+                while (--count) {
+
+                    strp = (*data.strp) ? *data.strp : "(null)";
+                    nbytes = strlen(strp) + 4;
+                    if (bufp + nbytes > bufend) {
+                        break;
+                    }
+                    
+                    bufp += sprintf(bufp, " \"%s\",", strp);
+                    data.strp++;
+                }
+            }
+
+            index = length - count;
+            if (!count) bufp -= 1;
+            *bufp = '\0';
+        }
+            break;
         default:
             return(0);
     }
@@ -405,6 +515,406 @@ static size_t _cds_print_array_to_buffer(
     if (lineposp) *lineposp = linepos;
 
     return(bufp - buffer);
+}
+
+/**
+ *  STATIC: Convert a text string to an array of values.
+ *
+ *  This function will convert a text string containing an array of
+ *  values into an array of values with the specified data type.
+ *  Values that are less than the minimum value for the data type
+ *  will be converted to the minimum value, and values that are
+ *  greater than the maximum value for the data type will be converted
+ *  to the maximum value.
+ *
+ *  Memory will be allocated for the returned array if the output array
+ *  is NULL. In this case the calling process is responsible for freeing
+ *  the allocated memory.
+ *
+ *  @param  string  - pointer to the input string
+ *  @param  type    - data type of the output array
+ *  @param  length  - pointer to the length of the output array
+ *                      - input:
+ *                          - maximum length of the output array
+ *                          - ignored if the output array is NULL
+ *                      - output:
+ *                          - number of values written to the output array
+ *                          - 0 if the string did not contain any numeric values
+ *                          - (size_t)-1 if a memory allocation error occurs
+ *  @param  array   - pointer to the output array
+ *                    or NULL to dynamically allocate the memory needed.
+ *  @param  orv_min - pointer to the value to use for values less than
+ *                    the minimum value of the output data type.
+ *  @param  orv_max - pointer to the value to use for values greater than
+ *                    the maximum value of the output data type.
+ *
+ *  @return
+ *    - pointer to the output array
+ *    - NULL if:
+ *        - the string did not contain any numeric values (length == 0)
+ *        - a memory allocation error occured (length == (size_t)-1)
+ */
+static void *_cds_string_to_array(
+    const char  *string,
+    CDSDataType  type,
+    size_t      *length,
+    void        *array,
+    void        *orv_min,
+    void        *orv_max)
+{
+    size_t  type_size = cds_data_type_size(type);
+    char   *strp;
+    char   *endp;
+    size_t  nvals;
+    size_t  nalloced;
+    void   *new_data;
+    CDSData data;
+    double  dval;
+    CDSData ormin;
+    CDSData ormax;
+
+    long double ldval;
+
+    if (!string) {
+        if (length) *length = 0;
+        return((void *)NULL);
+    }
+
+    data.vp  = array;
+    nvals    = 0;
+    nalloced = 0;
+    ormin.vp = orv_min;
+    ormax.vp = orv_max;
+
+    /* Check for CDS_STRING type */
+
+    if (type == CDS_STRING) {
+
+// BDE - Need to update this logic so it
+// reverses what cds_array_to_string does.
+// Will need utility function for split_string
+// similar to what I did in libdsproc3.
+
+        if (!data.vp) {
+            data.vp = malloc(1 * type_size);
+            if (!data.vp) {
+                if (length) *length = -1;
+                return((void *)NULL);
+            }
+        }
+
+        data.strp[0] = strdup(string);
+        if (!data.strp[0]) {
+            if (!array) free(data.vp);
+            if (length) *length = -1;
+            return((void *)NULL);
+        }
+
+        if (length) *length = 1;
+        return(data.vp);
+    }
+
+    for (strp = (char *)string; *strp != '\0'; strp++) {
+
+        /* Skip white-space */
+
+        while (isspace(*strp)) strp++;
+
+        if (*strp == '\0') break;
+
+        /* Allocate more memory if necessary */
+
+        if (!array && (nvals == nalloced)) {
+
+            if (nalloced) {
+                nalloced *= 2;
+            }
+            else {
+                nalloced = 1;
+            }
+
+            new_data = realloc(data.vp, nalloced * type_size);
+            if (!new_data) {
+                if (length) *length = -1;
+                free(data.vp);
+                return((void *)NULL);
+            }
+
+            data.vp = new_data;
+        }
+
+        /* Get the next array element from the string */
+
+        switch (type) {
+
+            case CDS_BYTE:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_BYTE) {
+                    data.bp[nvals] = *ormin.bp;
+                }
+                else if (dval > CDS_MAX_BYTE) {
+                    data.bp[nvals] = *ormax.bp;
+                }
+                else if (dval < 0) {
+                    data.bp[nvals] = (signed char)(dval - 0.5);
+                }
+                else {
+                    data.bp[nvals] = (signed char)(dval + 0.5);
+                }
+
+                break;
+
+            case CDS_SHORT:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_SHORT) {
+                    data.sp[nvals] = *ormin.sp;
+                }
+                else if (dval > CDS_MAX_SHORT) {
+                    data.sp[nvals] = *ormax.sp;
+                }
+                else if (dval < 0) {
+                    data.sp[nvals] = (short)(dval - 0.5);
+                }
+                else {
+                    data.sp[nvals] = (short)(dval + 0.5);
+                }
+
+                break;
+
+            case CDS_INT:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_INT) {
+                    data.ip[nvals] = *ormin.ip;
+                }
+                else if (dval > CDS_MAX_INT) {
+                    data.ip[nvals] = *ormax.ip;
+                }
+                else if (dval < 0) {
+                    data.ip[nvals] = (int)(dval - 0.5);
+                }
+                else {
+                    data.ip[nvals] = (int)(dval + 0.5);
+                }
+
+                break;
+
+            case CDS_FLOAT:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_FLOAT) {
+                    data.fp[nvals] = *ormin.fp;
+                }
+                else if (dval > CDS_MAX_FLOAT) {
+                    data.fp[nvals] = *ormax.fp;
+                }
+                else {
+                    data.fp[nvals] = (float)dval;
+                }
+
+                break;
+
+            case CDS_DOUBLE:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_DOUBLE) {
+                    data.dp[nvals] = *ormin.dp;
+                }
+                else if (dval > CDS_MAX_DOUBLE) {
+                    data.dp[nvals] = *ormax.dp;
+                }
+                else {
+                    data.dp[nvals] = dval;
+                }
+
+                break;
+
+            case CDS_CHAR:
+                data.cp[nvals] = *strp;
+                endp = strp + 1;
+                break;
+
+            /* NetCDF4 extended data types */
+            case CDS_INT64:
+
+                ldval = strtold(strp, &endp);
+
+                if (ldval < CDS_MIN_INT64) {
+                    data.i64p[nvals] = *ormin.i64p;
+                }
+                else if (ldval > CDS_MAX_INT64) {
+                    data.i64p[nvals] = *ormax.i64p;
+                }
+                else if (ldval < 0) {
+                    data.i64p[nvals] = (long long)(ldval - 0.5);
+                }
+                else {
+                    data.i64p[nvals] = (long long)(ldval + 0.5);
+                }
+
+                break;
+
+            case CDS_UBYTE:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_UBYTE) {
+                    data.ubp[nvals] = *ormin.ubp;
+                }
+                else if (dval > CDS_MAX_UBYTE) {
+                    data.ubp[nvals] = *ormax.ubp;
+                }
+                else {
+                    data.ubp[nvals] = (unsigned char)(dval + 0.5);
+                }
+
+                break;
+
+            case CDS_USHORT:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_USHORT) {
+                    data.usp[nvals] = *ormin.usp;
+                }
+                else if (dval > CDS_MAX_USHORT) {
+                    data.usp[nvals] = *ormax.usp;
+                }
+                else {
+                    data.usp[nvals] = (unsigned short)(dval + 0.5);
+                }
+
+                break;
+
+            case CDS_UINT:
+
+                dval = strtod(strp, &endp);
+
+                if (dval < CDS_MIN_UINT) {
+                    data.uip[nvals] = *ormin.uip;
+                }
+                else if (dval > CDS_MAX_UINT) {
+                    data.uip[nvals] = *ormax.uip;
+                }
+                else {
+                    data.uip[nvals] = (unsigned int)(dval + 0.5);
+                }
+
+                break;
+
+            case CDS_UINT64:
+
+                ldval = strtold(strp, &endp);
+
+                if (ldval < CDS_MIN_UINT64) {
+                    data.ui64p[nvals] = *ormin.ui64p;
+                }
+                else if (ldval > CDS_MAX_UINT64) {
+                    data.ui64p[nvals] = *ormax.ui64p;
+                }
+                else if (ldval == CDS_MAX_UINT64) {
+                    data.ui64p[nvals] = CDS_MAX_UINT64;
+                }
+                else {
+                    data.ui64p[nvals] = (unsigned long long)(ldval + 0.5);
+                }
+
+                break;
+
+            default:
+
+                if (length) *length = 0;
+                if (!array) {
+                    free(data.vp);
+                    return((void *)NULL);
+                }
+
+                break;
+        }
+
+        if (endp != strp) {
+
+            nvals++;
+            strp = endp;
+
+            if (*strp == '\0') break;
+
+            if (length) {
+                if (array && (nvals == *length)) break;
+            }
+        }
+    }
+
+    if (length) *length = nvals;
+
+    if (!array && !nvals) {
+        free(data.vp);
+        return((void *)NULL);
+    }
+
+    return(data.vp);
+}
+
+/*******************************************************************************
+ *  Private Functions Visible Only To This Library
+ */
+
+/**
+ *  PRIVATE: Get maximum length of a string in an array of strings.
+ *
+ *  @param  length - length of the string array
+ *  @param  strpp  - pointer to the string array
+ *
+ *  @return
+ *    - length of the longest string in the array
+ */
+size_t _cds_max_strlen(size_t length, char **strpp)
+{
+    size_t max = 0;
+    size_t len, si;
+
+    for (si = 0; si < length; ++si) {
+        if (*strpp) {
+            len = strlen(*strpp);
+            if (max < len) {
+                max = len;
+            }
+        }
+        strpp++;
+    }
+
+    return(max);
+}
+
+/**
+ *  PRIVATE: Get total length of all strings in an array of strings.
+ *
+ *  @param  length - length of the string array
+ *  @param  strpp  - pointer to the string array
+ *
+ *  @return
+ *    - total length of all strings in the array
+ */
+size_t _cds_total_strlen(size_t length, char **strpp)
+{
+    size_t total = 0;
+    size_t si;
+
+    for (si = 0; si < length; ++si) {
+        if (*strpp) {
+            total += strlen(*strpp);
+            strpp++;
+        }
+    }
+
+    return(total);
 }
 
 /*******************************************************************************
@@ -451,16 +961,58 @@ int cds_compare_arrays(
     int     result;
     size_t  count;
 
-    if (array1_type == array2_type && !threshold) {
-        length *= cds_data_type_size(array1_type);
-        return(memcmp(array1, array2, length));
-    }
-
     a1.vp     = array1;
     a2.vp     = array2;
     thresh.vp = threshold;
     count     = length;
     result    = 0;
+
+    /* Check for CDS_STRING types */
+
+    if (array1_type == CDS_STRING) {
+
+        if (array2_type != CDS_STRING) {
+            if (diff_index) *diff_index = 0;
+            return(1);
+        }
+
+        /* Compare arrays of strings */
+
+        count++;
+        while (--count) {
+            if (*a1.strp) {
+                if (*a2.strp) {
+                    result = strcmp(*a1.strp, *a2.strp);
+                    if (result != 0) {
+                        if (diff_index) {
+                            *diff_index = length - count;
+                        }
+                        return(result);
+                    }
+                }
+                else {
+                    if (diff_index) {
+                        *diff_index = length - count;
+                    }
+                    return(1);
+                }
+            }
+            else if (*a2.strp) {
+                if (diff_index) {
+                    *diff_index = length - count;
+                }
+                return(-1);
+            }
+            a1.strp++;
+            a2.strp++;
+        }
+
+        return(0);
+    }
+    else if (array2_type == CDS_STRING) {
+        if (diff_index) *diff_index = 0;
+        return(-1);
+    }
 
     switch (array1_type) {
       case CDS_BYTE:
@@ -471,6 +1023,12 @@ int cds_compare_arrays(
           case CDS_INT:    CDS_COMPARE_ARRAYS(result, count, a1.bp, a2.ip, thresh.ip); break;
           case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.bp, a2.fp, thresh.fp); break;
           case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.bp, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS(result, count, a1.bp, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS_SU(result, count, a1.bp, unsigned char,  a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS_SU(result, count, a1.bp, unsigned short, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS_SU(result, count, a1.bp, unsigned int,   a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS_SU(result, count, a1.bp, unsigned long long, a2.ui64p, thresh.ui64p); break;
           default:
             break;
         }
@@ -483,6 +1041,12 @@ int cds_compare_arrays(
           case CDS_INT:    CDS_COMPARE_ARRAYS(result, count, a1.cp, a2.ip, thresh.ip); break;
           case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.cp, a2.fp, thresh.fp); break;
           case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.cp, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS(result, count, a1.cp, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS_SU(result, count, a1.cp, unsigned char,  a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS_SU(result, count, a1.cp, unsigned short, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS_SU(result, count, a1.cp, unsigned int,   a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS_SU(result, count, a1.cp, unsigned long long, a2.ui64p, thresh.ui64p); break;
           default:
             break;
         }
@@ -495,6 +1059,12 @@ int cds_compare_arrays(
           case CDS_INT:    CDS_COMPARE_ARRAYS(result, count, a1.sp, a2.ip, thresh.ip); break;
           case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.sp, a2.fp, thresh.fp); break;
           case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.sp, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS(result, count, a1.sp, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS_SU(result, count, a1.sp, unsigned char,  a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS_SU(result, count, a1.sp, unsigned short, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS_SU(result, count, a1.sp, unsigned int,   a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS_SU(result, count, a1.sp, unsigned long long, a2.ui64p, thresh.ui64p); break;
           default:
             break;
         }
@@ -507,6 +1077,12 @@ int cds_compare_arrays(
           case CDS_INT:    CDS_COMPARE_ARRAYS(result, count, a1.ip, a2.ip, thresh.ip); break;
           case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.ip, a2.fp, thresh.fp); break;
           case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.ip, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS(result, count, a1.ip, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS_SU(result, count, a1.ip, unsigned char,  a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS_SU(result, count, a1.ip, unsigned short, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS_SU(result, count, a1.ip, unsigned int,   a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS_SU(result, count, a1.ip, unsigned long long, a2.ui64p, thresh.ui64p); break;
           default:
             break;
         }
@@ -519,6 +1095,12 @@ int cds_compare_arrays(
           case CDS_INT:    CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.ip, thresh.ip); break;
           case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.fp, thresh.fp); break;
           case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.i64p,  thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.ubp,   thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.usp,   thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.uip,   thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS(result, count, a1.fp, a2.ui64p, thresh.ui64p); break;
           default:
             break;
         }
@@ -531,6 +1113,103 @@ int cds_compare_arrays(
           case CDS_INT:    CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.ip, thresh.ip); break;
           case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.fp, thresh.fp); break;
           case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.i64p,  thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.ubp,   thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.usp,   thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.uip,   thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS(result, count, a1.dp, a2.ui64p, thresh.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      /* NetCDF4 extended data types */
+      case CDS_INT64:
+        switch (array2_type) {
+          case CDS_BYTE:   CDS_COMPARE_ARRAYS(result, count, a1.i64p, a2.bp, thresh.bp); break;
+          case CDS_CHAR:   CDS_COMPARE_ARRAYS(result, count, a1.i64p, a2.cp, thresh.cp); break;
+          case CDS_SHORT:  CDS_COMPARE_ARRAYS(result, count, a1.i64p, a2.sp, thresh.sp); break;
+          case CDS_INT:    CDS_COMPARE_ARRAYS(result, count, a1.i64p, a2.ip, thresh.ip); break;
+          case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.i64p, a2.fp, thresh.fp); break;
+          case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.i64p, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS(result, count, a1.i64p, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS_SU(result, count, a1.i64p, unsigned char,  a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS_SU(result, count, a1.i64p, unsigned short, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS_SU(result, count, a1.i64p, unsigned int,   a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS_SU(result, count, a1.i64p, unsigned long long, a2.ui64p, thresh.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UBYTE:
+        switch (array2_type) {
+          case CDS_BYTE:   CDS_COMPARE_ARRAYS_US(result, count, unsigned char, a1.ubp, a2.bp, thresh.bp); break;
+          case CDS_CHAR:   CDS_COMPARE_ARRAYS_US(result, count, unsigned char, a1.ubp, a2.cp, thresh.cp); break;
+          case CDS_SHORT:  CDS_COMPARE_ARRAYS_US(result, count, unsigned char, a1.ubp, a2.sp, thresh.sp); break;
+          case CDS_INT:    CDS_COMPARE_ARRAYS_US(result, count, unsigned char, a1.ubp, a2.ip, thresh.ip); break;
+          case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.ubp, a2.fp, thresh.fp); break;
+          case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.ubp, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS_US(result, count, unsigned char, a1.ubp, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS(result, count, a1.ubp, a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS(result, count, a1.ubp, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS(result, count, a1.ubp, a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS(result, count, a1.ubp, a2.ui64p, thresh.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_USHORT:
+        switch (array2_type) {
+          case CDS_BYTE:   CDS_COMPARE_ARRAYS_US(result, count, unsigned short, a1.usp, a2.bp, thresh.bp); break;
+          case CDS_CHAR:   CDS_COMPARE_ARRAYS_US(result, count, unsigned short, a1.usp, a2.cp, thresh.cp); break;
+          case CDS_SHORT:  CDS_COMPARE_ARRAYS_US(result, count, unsigned short, a1.usp, a2.sp, thresh.sp); break;
+          case CDS_INT:    CDS_COMPARE_ARRAYS_US(result, count, unsigned short, a1.usp, a2.ip, thresh.ip); break;
+          case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.usp, a2.fp, thresh.fp); break;
+          case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.usp, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS_US(result, count, unsigned short, a1.usp, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS(result, count, a1.usp, a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS(result, count, a1.usp, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS(result, count, a1.usp, a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS(result, count, a1.usp, a2.ui64p, thresh.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT:
+        switch (array2_type) {
+          case CDS_BYTE:   CDS_COMPARE_ARRAYS_US(result, count, unsigned int, a1.uip, a2.bp, thresh.bp); break;
+          case CDS_CHAR:   CDS_COMPARE_ARRAYS_US(result, count, unsigned int, a1.uip, a2.cp, thresh.cp); break;
+          case CDS_SHORT:  CDS_COMPARE_ARRAYS_US(result, count, unsigned int, a1.uip, a2.sp, thresh.sp); break;
+          case CDS_INT:    CDS_COMPARE_ARRAYS_US(result, count, unsigned int, a1.uip, a2.ip, thresh.ip); break;
+          case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.uip, a2.fp, thresh.fp); break;
+          case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.uip, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS_US(result, count, unsigned int, a1.uip, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS(result, count, a1.uip, a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS(result, count, a1.uip, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS(result, count, a1.uip, a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS(result, count, a1.uip, a2.ui64p, thresh.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT64:
+        switch (array2_type) {
+          case CDS_BYTE:   CDS_COMPARE_ARRAYS_US(result, count, unsigned long long, a1.ui64p, a2.bp, thresh.bp); break;
+          case CDS_CHAR:   CDS_COMPARE_ARRAYS_US(result, count, unsigned long long, a1.ui64p, a2.cp, thresh.cp); break;
+          case CDS_SHORT:  CDS_COMPARE_ARRAYS_US(result, count, unsigned long long, a1.ui64p, a2.sp, thresh.sp); break;
+          case CDS_INT:    CDS_COMPARE_ARRAYS_US(result, count, unsigned long long, a1.ui64p, a2.ip, thresh.ip); break;
+          case CDS_FLOAT:  CDS_COMPARE_ARRAYS(result, count, a1.ui64p, a2.fp, thresh.fp); break;
+          case CDS_DOUBLE: CDS_COMPARE_ARRAYS(result, count, a1.ui64p, a2.dp, thresh.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COMPARE_ARRAYS_US(result, count, unsigned long long, a1.ui64p, a2.i64p, thresh.i64p); break;
+          case CDS_UBYTE:  CDS_COMPARE_ARRAYS(result, count, a1.ui64p, a2.ubp, thresh.ubp); break;
+          case CDS_USHORT: CDS_COMPARE_ARRAYS(result, count, a1.ui64p, a2.usp, thresh.usp); break;
+          case CDS_UINT:   CDS_COMPARE_ARRAYS(result, count, a1.ui64p, a2.uip, thresh.uip); break;
+          case CDS_UINT64: CDS_COMPARE_ARRAYS(result, count, a1.ui64p, a2.ui64p, thresh.ui64p); break;
           default:
             break;
         }
@@ -595,8 +1274,9 @@ int cds_compare_arrays(
  *
  *  @return
  *    - pointer to the output data array
- *    - NULL if a memory allocation error occurs
- *      (this can only happen if the specified out_data argument is NULL)
+ *    - NULL if attempting to convert between string and numbers,
+ *      or a memory allocation error occurs (which can only happen
+ *      if the specified out_data argument is NULL)
  */
 void *cds_copy_array(
     CDSDataType  in_type,
@@ -621,6 +1301,9 @@ void *cds_copy_array(
     CDSData ormin;
     CDSData ormax;
     size_t  out_size;
+    size_t  count;
+    size_t  mi;
+    int     alloced_data = 0;
 
     /* Allocate memory for the output array if one was not specified */
 
@@ -628,8 +1311,12 @@ void *cds_copy_array(
         out_size = cds_data_type_size(out_type);
         out_data = malloc(length * out_size);
         if (!out_data) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error copying '%s' array of length %lu\n",
+                cds_data_type_name(in_type), length);
             return((void *)NULL);
         }
+        alloced_data = 1;
     }
 
     /* Set CDSData pointers */
@@ -643,10 +1330,115 @@ void *cds_copy_array(
     max.vp   = out_max;
     ormax.vp = orv_max;
 
+    /* Check for CDS_STRING types */
+
+    if (in_type == CDS_STRING) {
+
+        if (out_type != CDS_STRING) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert between '%s' and '%s' in cds_copy_array\n",
+                cds_data_type_name(in_type), cds_data_type_name(out_type));
+            if (alloced_data) free(out_data);
+            return((void *)NULL);
+        }
+
+        /* Copy array of strings */
+
+        count = length + 1;
+        while (--count) {
+
+            if (*in.strp) {
+
+                if (nmap) {
+                    for (mi = 0; mi < nmap; ++mi) {
+                        if (imap.strp[mi] &&
+                            strcmp(*in.strp, imap.strp[mi]) == 0) {
+
+                            if (in_data == out_data && *out.strp) {
+                                free(*out.strp);
+                            }
+
+                            if (omap.strp[mi]) {
+
+                                *out.strp = strdup(omap.strp[mi]);
+                                if (!*out.strp) {
+                                    ERROR( CDS_LIB_NAME,
+                                        "Memory allocation error copying string array value\n");
+                                    if (alloced_data)
+                                        cds_free_string_array(length - count, out_data);
+                                    return((void *)NULL);
+                                }
+                            }
+                            else {
+                                *out.strp = (char *)NULL;
+                            }
+                            in.strp++;
+                            out.strp++;
+                            break;
+                        }
+                    }
+                    if (mi != nmap) continue;
+                }
+
+                if (in_data != out_data) {
+                    *out.strp = strdup(*in.strp);
+                    if (!*out.strp) {
+                        ERROR( CDS_LIB_NAME,
+                            "Memory allocation error copying string array value\n");
+                        if (alloced_data)
+                            cds_free_string_array(length - count, out_data);
+                        return((void *)NULL);
+                    }
+                }
+            }
+            else {
+
+                if (nmap) {
+                    for (mi = 0; mi < nmap; ++mi) {
+                        if (!imap.strp[mi]) {
+                            if (omap.strp[mi]) {
+                                *out.strp = strdup(omap.strp[mi]);
+                                if (!*out.strp) {
+                                    ERROR( CDS_LIB_NAME,
+                                        "Memory allocation error copying string array value\n");
+                                    if (alloced_data)
+                                        cds_free_string_array(length - count, out_data);
+                                    return((void *)NULL);
+                                }
+                            }
+                            else {
+                                *out.strp = (char *)NULL;
+                            }
+                            in.strp++;
+                            out.strp++;
+                            break;
+                        }
+                    }
+                    if (mi != nmap) continue;
+                }
+
+                *out.strp = (char *)NULL;
+            }
+
+            in.strp++;
+            out.strp++;
+        }
+
+        return(out_data);
+    }
+    else if (out_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to convert between '%s' and '%s' in cds_copy_array\n",
+            cds_data_type_name(in_type), cds_data_type_name(out_type));
+        if (alloced_data) free(out_data);
+        return((void *)NULL);
+    }
+
     /* Adjust range checking values */
 
     if (orv_min && !out_min) {
-        if (out_type < in_type) {
+
+        if (_cds_data_type_mincmp(in_type, out_type) < 0) {
             min.vp = _cds_data_type_min(out_type);
         }
         else {
@@ -655,7 +1447,8 @@ void *cds_copy_array(
     }
 
     if (orv_max && !out_max) {
-        if (out_type < in_type) {
+
+        if (_cds_data_type_maxcmp(in_type, out_type) > 0) {
             max.vp = _cds_data_type_max(out_type);
         }
         else {
@@ -685,6 +1478,12 @@ void *cds_copy_array(
           case CDS_INT:    CDS_COPY_ARRAY(length, in.bp, nmap, imap.bp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 0); break;
           case CDS_FLOAT:  CDS_COPY_ARRAY(length, in.bp, nmap, imap.bp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_COPY_ARRAY(length, in.bp, nmap, imap.bp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY(   length, in.bp, nmap, imap.bp, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p, 0); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_SU(length, in.bp, nmap, imap.bp, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_SU(length, in.bp, nmap, imap.bp, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_SU(length, in.bp, nmap, imap.bp, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_SU(length, in.bp, nmap, imap.bp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
           default:
             break;
         }
@@ -697,6 +1496,12 @@ void *cds_copy_array(
           case CDS_INT:    CDS_COPY_ARRAY(length, in.cp, nmap, imap.cp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 0); break;
           case CDS_FLOAT:  CDS_COPY_ARRAY(length, in.cp, nmap, imap.cp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_COPY_ARRAY(length, in.cp, nmap, imap.cp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY(   length, in.cp, nmap, imap.cp, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p, 0); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_SU(length, in.cp, nmap, imap.cp, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_SU(length, in.cp, nmap, imap.cp, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_SU(length, in.cp, nmap, imap.cp, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_SU(length, in.cp, nmap, imap.cp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
           default:
             break;
         }
@@ -709,6 +1514,12 @@ void *cds_copy_array(
           case CDS_INT:    CDS_COPY_ARRAY(length, in.sp, nmap, imap.sp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 0); break;
           case CDS_FLOAT:  CDS_COPY_ARRAY(length, in.sp, nmap, imap.sp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_COPY_ARRAY(length, in.sp, nmap, imap.sp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY(   length, in.sp, nmap, imap.sp, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p, 0); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_SU(length, in.sp, nmap, imap.sp, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_SU(length, in.sp, nmap, imap.sp, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_SU(length, in.sp, nmap, imap.sp, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_SU(length, in.sp, nmap, imap.sp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
           default:
             break;
         }
@@ -721,6 +1532,12 @@ void *cds_copy_array(
           case CDS_INT:    CDS_COPY_ARRAY(length, in.ip, nmap, imap.ip, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 0); break;
           case CDS_FLOAT:  CDS_COPY_ARRAY(length, in.ip, nmap, imap.ip, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_COPY_ARRAY(length, in.ip, nmap, imap.ip, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY(   length, in.ip, nmap, imap.ip, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p, 0); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_SU(length, in.ip, nmap, imap.ip, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_SU(length, in.ip, nmap, imap.ip, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_SU(length, in.ip, nmap, imap.ip, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_SU(length, in.ip, nmap, imap.ip, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
           default:
             break;
         }
@@ -733,6 +1550,12 @@ void *cds_copy_array(
           case CDS_INT:    CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p,  1); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp,   1); break;
+          case CDS_USHORT: CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp,   1); break;
+          case CDS_UINT:   CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip,   1); break;
+          case CDS_UINT64: CDS_COPY_ARRAY(length, in.fp, nmap, imap.fp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
           default:
             break;
         }
@@ -745,6 +1568,103 @@ void *cds_copy_array(
           case CDS_INT:    CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p,  1); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp,   1); break;
+          case CDS_USHORT: CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp,   1); break;
+          case CDS_UINT:   CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip,   1); break;
+          case CDS_UINT64: CDS_COPY_ARRAY(length, in.dp, nmap, imap.dp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      /* NetCDF4 extended data types */
+      case CDS_UBYTE:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_COPY_ARRAY_US(unsigned char, length, in.ubp, nmap, imap.ubp, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp); break;
+          case CDS_CHAR:   CDS_COPY_ARRAY_US(unsigned char, length, in.ubp, nmap, imap.ubp, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp); break;
+          case CDS_SHORT:  CDS_COPY_ARRAY_US(unsigned char, length, in.ubp, nmap, imap.ubp, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp); break;
+          case CDS_INT:    CDS_COPY_ARRAY_US(unsigned char, length, in.ubp, nmap, imap.ubp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip); break;
+          case CDS_FLOAT:  CDS_COPY_ARRAY_U(length, in.ubp, nmap, imap.ubp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp); break;
+          case CDS_DOUBLE: CDS_COPY_ARRAY_U(length, in.ubp, nmap, imap.ubp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY_US(unsigned char, length, in.ubp, nmap, imap.ubp, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_U(length, in.ubp, nmap, imap.ubp, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_U(length, in.ubp, nmap, imap.ubp, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_U(length, in.ubp, nmap, imap.ubp, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_U(length, in.ubp, nmap, imap.ubp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_USHORT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_COPY_ARRAY_US(unsigned short, length, in.usp, nmap, imap.usp, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp); break;
+          case CDS_CHAR:   CDS_COPY_ARRAY_US(unsigned short, length, in.usp, nmap, imap.usp, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp); break;
+          case CDS_SHORT:  CDS_COPY_ARRAY_US(unsigned short, length, in.usp, nmap, imap.usp, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp); break;
+          case CDS_INT:    CDS_COPY_ARRAY_US(unsigned short, length, in.usp, nmap, imap.usp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip); break;
+          case CDS_FLOAT:  CDS_COPY_ARRAY_U(length, in.usp, nmap, imap.usp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp); break;
+          case CDS_DOUBLE: CDS_COPY_ARRAY_U(length, in.usp, nmap, imap.usp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY_US(unsigned short, length, in.usp, nmap, imap.usp, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_U(length, in.usp, nmap, imap.usp, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_U(length, in.usp, nmap, imap.usp, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_U(length, in.usp, nmap, imap.usp, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_U(length, in.usp, nmap, imap.usp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_COPY_ARRAY_US(unsigned int, length, in.uip, nmap, imap.uip, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp); break;
+          case CDS_CHAR:   CDS_COPY_ARRAY_US(unsigned int, length, in.uip, nmap, imap.uip, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp); break;
+          case CDS_SHORT:  CDS_COPY_ARRAY_US(unsigned int, length, in.uip, nmap, imap.uip, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp); break;
+          case CDS_INT:    CDS_COPY_ARRAY_US(unsigned int, length, in.uip, nmap, imap.uip, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip); break;
+          case CDS_FLOAT:  CDS_COPY_ARRAY_U(length, in.uip, nmap, imap.uip, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp); break;
+          case CDS_DOUBLE: CDS_COPY_ARRAY_U(length, in.uip, nmap, imap.uip, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY_US(unsigned int, length, in.uip, nmap, imap.uip, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_U(length, in.uip, nmap, imap.uip, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_U(length, in.uip, nmap, imap.uip, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_U(length, in.uip, nmap, imap.uip, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_U(length, in.uip, nmap, imap.uip, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_INT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_COPY_ARRAY(length, in.i64p, nmap, imap.i64p, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp, 0); break;
+          case CDS_CHAR:   CDS_COPY_ARRAY(length, in.i64p, nmap, imap.i64p, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp, 0); break;
+          case CDS_SHORT:  CDS_COPY_ARRAY(length, in.i64p, nmap, imap.i64p, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp, 0); break;
+          case CDS_INT:    CDS_COPY_ARRAY(length, in.i64p, nmap, imap.i64p, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 0); break;
+          case CDS_FLOAT:  CDS_COPY_ARRAY(length, in.i64p, nmap, imap.i64p, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
+          case CDS_DOUBLE: CDS_COPY_ARRAY(length, in.i64p, nmap, imap.i64p, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY(   length, in.i64p, nmap, imap.i64p, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p, 0); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_SU(length, in.i64p, nmap, imap.i64p, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_SU(length, in.i64p, nmap, imap.i64p, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_SU(length, in.i64p, nmap, imap.i64p, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_SU(length, in.i64p, nmap, imap.i64p, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_COPY_ARRAY_US(unsigned long long, length, in.ui64p, nmap, imap.ui64p, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp); break;
+          case CDS_CHAR:   CDS_COPY_ARRAY_US(unsigned long long, length, in.ui64p, nmap, imap.ui64p, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp); break;
+          case CDS_SHORT:  CDS_COPY_ARRAY_US(unsigned long long, length, in.ui64p, nmap, imap.ui64p, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp); break;
+          case CDS_INT:    CDS_COPY_ARRAY_US(unsigned long long, length, in.ui64p, nmap, imap.ui64p, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip); break;
+          case CDS_FLOAT:  CDS_COPY_ARRAY_U(length, in.ui64p, nmap, imap.ui64p, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp); break;
+          case CDS_DOUBLE: CDS_COPY_ARRAY_U(length, in.ui64p, nmap, imap.ui64p, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_COPY_ARRAY_US(unsigned long long, length, in.ui64p, nmap, imap.ui64p, long long,          out.i64p,  omap.i64p,  min.i64p,  ormin.i64p,  max.i64p,  ormax.i64p); break;
+          case CDS_UBYTE:  CDS_COPY_ARRAY_U(length, in.ui64p, nmap, imap.ui64p, unsigned char,      out.ubp,   omap.ubp,   min.ubp,   ormin.ubp,   max.ubp,   ormax.ubp); break;
+          case CDS_USHORT: CDS_COPY_ARRAY_U(length, in.ui64p, nmap, imap.ui64p, unsigned short,     out.usp,   omap.usp,   min.usp,   ormin.usp,   max.usp,   ormax.usp); break;
+          case CDS_UINT:   CDS_COPY_ARRAY_U(length, in.ui64p, nmap, imap.ui64p, unsigned int,       out.uip,   omap.uip,   min.uip,   ormin.uip,   max.uip,   ormax.uip); break;
+          case CDS_UINT64: CDS_COPY_ARRAY_U(length, in.ui64p, nmap, imap.ui64p, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p); break;
           default:
             break;
         }
@@ -754,6 +1674,105 @@ void *cds_copy_array(
     }
 
     return(out_data);
+}
+
+/**
+ *  Free memory used by an array of data.
+ *
+ *  @param  type   - data type of the array
+ *  @param  length - length of the array
+ *  @param  array  - pointer to the array
+ */
+void cds_free_array(CDSDataType type, size_t length, void *array)
+{
+    if (type == CDS_STRING) {
+        cds_free_string_array(length, array);
+    }
+    else {
+        free(array);
+    }
+}
+
+/**
+ *  Create a dynamically allocated copy of an array of strings.
+ *
+ *  Memory will be allocated for the output array if the out_strpp argument
+ *  is NULL.
+ *
+ *  @param  length    - length of the string array
+ *  @param  in_strpp  - pointer to the input string array
+ *  @param  out_strpp - pointer to the output string array
+ *
+ *  @return
+ *    - pointer to the output string array
+ *    - NULL if a memory allocation error occurs
+ */
+char **cds_copy_string_array(size_t length, char **in_strpp, char **out_strpp)
+{
+    size_t i;
+    int    alloced_out_strpp = 0;
+
+    if (!out_strpp) {
+        out_strpp = (char **)calloc(length, sizeof(char *));
+        if (!out_strpp) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error copying 'string' array of length %lu\n",
+                length);
+            return((char **)NULL);
+        }
+        alloced_out_strpp = 1;
+    }
+
+    for (i = 0; i < length; ++i) {
+
+        if (in_strpp[i]) {
+            out_strpp[i] = strdup(in_strpp[i]);
+            if (!out_strpp[i]) {
+
+                ERROR( CDS_LIB_NAME,
+                    "Memory allocation error copying 'string' array of length %lu\n",
+                    length);
+
+                length = i;
+                for (i = 0; i < length; ++i) {
+                    if (out_strpp[i]) {
+                        free(out_strpp[i]);
+                        out_strpp[i] = (char *)NULL;
+                    }
+                }
+
+                if (alloced_out_strpp) {
+                    free(out_strpp);
+                }
+
+                return((char **)NULL);
+            }
+        }
+        else {
+            out_strpp[i] = (char *)NULL;
+        }
+    }
+
+    return(out_strpp);
+}
+
+/**
+ *  Free a dynamically allocated array of strings.
+ *
+ *  @param  length - length of the string array
+ *  @param  array  - pointer to the string array
+ *
+ */
+void cds_free_string_array(size_t length, char **array)
+{
+    size_t i;
+
+    if (array) {
+        for (i = 0; i < length; ++i) {
+            if (array[i]) free(array[i]);
+        }
+        free(array);
+    }
 }
 
 /**
@@ -890,8 +1909,9 @@ void cds_free_data_index(
  *
  *  @return
  *    - pointer to the out_missing array
- *    - NULL if a memory allocation error occurs
- *      (this can only happen if the specified out_missing argument is NULL)
+ *    - NULL if attempting to convert between string and numbers,
+ *      or a memory allocation error occurs (which can only happen
+ *      if the specified out_data argument is NULL)
  */
 void *cds_get_missing_values_map(
     CDSDataType  in_type,
@@ -916,6 +1936,32 @@ void *cds_get_missing_values_map(
     ifill.vp = _cds_default_fill_value(in_type);
     ofill.vp = _cds_default_fill_value(out_type);
 
+    /* Check for CDS_STRING types */
+
+    if (in_type == CDS_STRING) {
+
+        if (out_type != CDS_STRING) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert between '%s' and '%s' in cds_get_missing_values_map\n",
+                cds_data_type_name(in_type), cds_data_type_name(out_type));
+            return((void *)NULL);
+        }
+
+        /* Copy array of strings */
+
+        out_missing = cds_copy_array(
+            in_type, nmissing, in_missing, out_type, out_missing,
+            0, NULL, NULL, NULL, NULL, NULL, NULL);
+
+        return(out_missing);
+    }
+    else if (out_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to convert between '%s' and '%s' in cds_get_missing_values_map\n",
+            cds_data_type_name(in_type), cds_data_type_name(out_type));
+        return((void *)NULL);
+    }
+
     /* Get the out-of-range value to use */
 
     switch (in_type) {
@@ -927,6 +1973,12 @@ void *cds_get_missing_values_map(
           case CDS_INT:    CDS_FIND_ORV(nmissing, imv.bp, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
           case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.bp, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
           case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.bp, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV(nmissing, imv.bp, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV_SU(nmissing, imv.bp, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV_SU(nmissing, imv.bp, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV_SU(nmissing, imv.bp, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV_SU(nmissing, imv.bp, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
           default:
             break;
         }
@@ -939,6 +1991,12 @@ void *cds_get_missing_values_map(
           case CDS_INT:    CDS_FIND_ORV(nmissing, imv.cp, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
           case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.cp, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
           case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.cp, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV(nmissing, imv.cp, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV_SU(nmissing, imv.cp, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV_SU(nmissing, imv.cp, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV_SU(nmissing, imv.cp, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV_SU(nmissing, imv.cp, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
           default:
             break;
         }
@@ -951,6 +2009,12 @@ void *cds_get_missing_values_map(
           case CDS_INT:    CDS_FIND_ORV(nmissing, imv.sp, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
           case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.sp, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
           case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.sp, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV(nmissing, imv.sp, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV_SU(nmissing, imv.sp, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV_SU(nmissing, imv.sp, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV_SU(nmissing, imv.sp, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV_SU(nmissing, imv.sp, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
           default:
             break;
         }
@@ -963,6 +2027,12 @@ void *cds_get_missing_values_map(
           case CDS_INT:    CDS_FIND_ORV(nmissing, imv.ip, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
           case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.ip, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
           case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.ip, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV(nmissing, imv.ip, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV_SU(nmissing, imv.ip, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV_SU(nmissing, imv.ip, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV_SU(nmissing, imv.ip, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV_SU(nmissing, imv.ip, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
           default:
             break;
         }
@@ -975,6 +2045,12 @@ void *cds_get_missing_values_map(
           case CDS_INT:    CDS_FIND_ORV(nmissing, imv.fp, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
           case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.fp, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
           case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.fp, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV(nmissing, imv.fp, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV_SU(nmissing, imv.fp, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV_SU(nmissing, imv.fp, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV_SU(nmissing, imv.fp, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV_SU(nmissing, imv.fp, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
           default:
             break;
         }
@@ -987,6 +2063,103 @@ void *cds_get_missing_values_map(
           case CDS_INT:    CDS_FIND_ORV(nmissing, imv.dp, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
           case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.dp, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
           case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.dp, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV(nmissing, imv.dp, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV_SU(nmissing, imv.dp, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV_SU(nmissing, imv.dp, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV_SU(nmissing, imv.dp, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV_SU(nmissing, imv.dp, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      /* NetCDF4 extended data types */
+      case CDS_INT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_FIND_ORV(nmissing, imv.i64p, signed char, omin.bp, omax.bp, orv.bp, ofill.bp); break;
+          case CDS_CHAR:   CDS_FIND_ORV(nmissing, imv.i64p, char,        omin.cp, omax.cp, orv.cp, ofill.cp); break;
+          case CDS_SHORT:  CDS_FIND_ORV(nmissing, imv.i64p, short,       omin.sp, omax.sp, orv.sp, ofill.sp); break;
+          case CDS_INT:    CDS_FIND_ORV(nmissing, imv.i64p, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
+          case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.i64p, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
+          case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.i64p, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV(nmissing, imv.i64p, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV_SU(nmissing, imv.i64p, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV_SU(nmissing, imv.i64p, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV_SU(nmissing, imv.i64p, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV_SU(nmissing, imv.i64p, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UBYTE:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_FIND_ORV_US(unsigned char, nmissing, imv.ubp, signed char, omin.bp, omax.bp, orv.bp, ofill.bp); break;
+          case CDS_CHAR:   CDS_FIND_ORV_US(unsigned char, nmissing, imv.ubp, char,        omin.cp, omax.cp, orv.cp, ofill.cp); break;
+          case CDS_SHORT:  CDS_FIND_ORV_US(unsigned char, nmissing, imv.ubp, short,       omin.sp, omax.sp, orv.sp, ofill.sp); break;
+          case CDS_INT:    CDS_FIND_ORV_US(unsigned char, nmissing, imv.ubp, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
+          case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.ubp, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
+          case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.ubp, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV_US(unsigned char, nmissing, imv.ubp, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV(nmissing, imv.ubp, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV(nmissing, imv.ubp, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV(nmissing, imv.ubp, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV(nmissing, imv.ubp, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_USHORT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_FIND_ORV_US(unsigned short, nmissing, imv.usp, signed char, omin.bp, omax.bp, orv.bp, ofill.bp); break;
+          case CDS_CHAR:   CDS_FIND_ORV_US(unsigned short, nmissing, imv.usp, char,        omin.cp, omax.cp, orv.cp, ofill.cp); break;
+          case CDS_SHORT:  CDS_FIND_ORV_US(unsigned short, nmissing, imv.usp, short,       omin.sp, omax.sp, orv.sp, ofill.sp); break;
+          case CDS_INT:    CDS_FIND_ORV_US(unsigned short, nmissing, imv.usp, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
+          case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.usp, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
+          case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.usp, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV_US(unsigned short, nmissing, imv.usp, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV(nmissing, imv.usp, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV(nmissing, imv.usp, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV(nmissing, imv.usp, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV(nmissing, imv.usp, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_FIND_ORV_US(unsigned int, nmissing, imv.uip, signed char, omin.bp, omax.bp, orv.bp, ofill.bp); break;
+          case CDS_CHAR:   CDS_FIND_ORV_US(unsigned int, nmissing, imv.uip, char,        omin.cp, omax.cp, orv.cp, ofill.cp); break;
+          case CDS_SHORT:  CDS_FIND_ORV_US(unsigned int, nmissing, imv.uip, short,       omin.sp, omax.sp, orv.sp, ofill.sp); break;
+          case CDS_INT:    CDS_FIND_ORV_US(unsigned int, nmissing, imv.uip, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
+          case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.uip, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
+          case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.uip, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV_US(unsigned int, nmissing, imv.uip, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV(nmissing, imv.uip, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV(nmissing, imv.uip, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV(nmissing, imv.uip, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV(nmissing, imv.uip, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_FIND_ORV_US(unsigned long long, nmissing, imv.ui64p, signed char, omin.bp, omax.bp, orv.bp, ofill.bp); break;
+          case CDS_CHAR:   CDS_FIND_ORV_US(unsigned long long, nmissing, imv.ui64p, char,        omin.cp, omax.cp, orv.cp, ofill.cp); break;
+          case CDS_SHORT:  CDS_FIND_ORV_US(unsigned long long, nmissing, imv.ui64p, short,       omin.sp, omax.sp, orv.sp, ofill.sp); break;
+          case CDS_INT:    CDS_FIND_ORV_US(unsigned long long, nmissing, imv.ui64p, int,         omin.ip, omax.ip, orv.ip, ofill.ip); break;
+          case CDS_FLOAT:  CDS_FIND_ORV(nmissing, imv.ui64p, float,       omin.fp, omax.fp, orv.fp, ofill.fp); break;
+          case CDS_DOUBLE: CDS_FIND_ORV(nmissing, imv.ui64p, double,      omin.dp, omax.dp, orv.dp, ofill.dp); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:   CDS_FIND_ORV_US(unsigned long long, nmissing, imv.ui64p, long long,  omin.i64p, omax.i64p, orv.i64p, ofill.i64p); break;
+          case CDS_UBYTE:   CDS_FIND_ORV(nmissing, imv.ui64p, unsigned char,  omin.ubp, omax.ubp, orv.ubp, ofill.ubp); break;
+          case CDS_USHORT:  CDS_FIND_ORV(nmissing, imv.ui64p, unsigned short, omin.usp, omax.usp, orv.usp, ofill.usp); break;
+          case CDS_UINT:    CDS_FIND_ORV(nmissing, imv.ui64p, unsigned int,   omin.uip, omax.uip, orv.uip, ofill.uip); break;
+          case CDS_UINT64:  CDS_FIND_ORV(nmissing, imv.ui64p, unsigned long long, omin.ui64p, omax.ui64p, orv.ui64p, ofill.ui64p); break;
           default:
             break;
         }
@@ -1014,6 +2187,9 @@ void *cds_get_missing_values_map(
  *  is NULL. In this case the calling process is responsible for freeing the
  *  allocated memory.
  *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
+ *
  *  @param  type       - data type of the fill value and data array
  *  @param  length     - number of values
  *  @param  fill_value - pointer to the fill value
@@ -1031,6 +2207,8 @@ void *cds_init_array(
     void        *array)
 {
     size_t  type_size;
+    size_t  count;
+    int     alloced_array = 0;
     CDSData da;
     CDSData fv;
 
@@ -1040,23 +2218,54 @@ void *cds_init_array(
 
     if (!array) {
         type_size = cds_data_type_size(type);
-        array     = malloc(length * type_size);
+        array = malloc(length * type_size);
         if (!array) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating '%s' array of length %lu\n",
+                cds_data_type_name(type), length);
             return((void *)NULL);
         }
+        alloced_array = 1;
     }
 
-    length++;
+    count = length + 1;
     da.vp = array;
     fv.vp = fill_value;
 
     switch (type) {
-      case CDS_BYTE:   while (--length) *da.bp++ = *fv.bp; break;
-      case CDS_CHAR:   while (--length) *da.cp++ = *fv.cp; break;
-      case CDS_SHORT:  while (--length) *da.sp++ = *fv.sp; break;
-      case CDS_INT:    while (--length) *da.ip++ = *fv.ip; break;
-      case CDS_FLOAT:  while (--length) *da.fp++ = *fv.fp; break;
-      case CDS_DOUBLE: while (--length) *da.dp++ = *fv.dp; break;
+      case CDS_BYTE:   while (--count) *da.bp++ = *fv.bp; break;
+      case CDS_CHAR:   while (--count) *da.cp++ = *fv.cp; break;
+      case CDS_SHORT:  while (--count) *da.sp++ = *fv.sp; break;
+      case CDS_INT:    while (--count) *da.ip++ = *fv.ip; break;
+      case CDS_FLOAT:  while (--count) *da.fp++ = *fv.fp; break;
+      case CDS_DOUBLE: while (--count) *da.dp++ = *fv.dp; break;
+      /* NetCDF4 extended data types */
+      case CDS_UBYTE:  while (--count) *da.ubp++ = *fv.ubp; break;
+      case CDS_USHORT: while (--count) *da.usp++ = *fv.usp; break;
+      case CDS_UINT:   while (--count) *da.uip++ = *fv.uip; break;
+      case CDS_INT64:  while (--count) *da.i64p++ = *fv.i64p; break;
+      case CDS_UINT64: while (--count) *da.ui64p++ = *fv.ui64p; break;
+      case CDS_STRING:
+        if (*fv.strp) {
+            while (--count) {
+                *da.strp = strdup(*fv.strp);
+                if (!*da.strp) {
+                    ERROR( CDS_LIB_NAME,
+                        "Memory allocation error creating '%s' array of length %lu\n",
+                        cds_data_type_name(type), length);
+                    if (alloced_array) cds_free_string_array(length - count, array);
+                    return((void *)NULL);
+                }
+                da.strp++;
+            }
+        }
+        else {
+            while (--count) {
+                *da.strp++ = (char *)NULL;
+            }
+        }
+
+        break;
       default:
         break;
     }
@@ -1072,7 +2281,7 @@ void *cds_init_array(
  *
  *  @return
  *    - pointer to the dynamically alloced copy
- *    - NULL if a memory allocation error occurred
+ *    - NULL if a memory allocation error occurs
  */
 void *cds_memdup(size_t nbytes, void *memp)
 {
@@ -1092,6 +2301,9 @@ void *cds_memdup(size_t nbytes, void *memp)
  *  output array is NULL. In this case the calling process is responsible
  *  for freeing the allocated memory.
  *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
+ *
  *  @param  type      - data type of the offsets array
  *  @param  ntimes    - number of times in the offsets array
  *  @param  base_time - base time value in seconds since 1970
@@ -1101,7 +2313,8 @@ void *cds_memdup(size_t nbytes, void *memp)
  *
  *  @return
  *    - pointer to the array of times in seconds since 1970
- *    - NULL if a memory allocation error occurred
+ *    - NULL if attempting to convert between string and numbers,
+ *      or a memory allocation error occurs
  */
 time_t *cds_offsets_to_times(
     CDSDataType  type,
@@ -1115,12 +2328,24 @@ time_t *cds_offsets_to_times(
     time_t    *tp;
     CDSData    off;
 
+    /* Check for CDS_STRING type */
+
+    if (type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to convert string values to time offsets in cds_offsets_to_times\n",
+            cds_data_type_name(type));
+        return((time_t *)NULL);
+    }
+
     /* Allocate memory for the output array if necessary */
 
     if (!times) {
         times = (time_t *)malloc(ntimes * sizeof(time_t));
         if (!times) {
-            return(NULL);
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating time array of length %lu\n",
+                ntimes);
+            return((time_t *)NULL);
         }
     }
 
@@ -1157,6 +2382,22 @@ time_t *cds_offsets_to_times(
       case CDS_CHAR:
         while (--count) *tp++ = base_time + (time_t)(*off.cp++);
         break;
+      /* NetCDF4 extended data types */
+      case CDS_UBYTE:
+        while (--count) *tp++ = base_time + (time_t)(*off.ubp++);
+        break;
+      case CDS_USHORT:
+        while (--count) *tp++ = base_time + (time_t)(*off.usp++);
+        break;
+      case CDS_UINT:
+        while (--count) *tp++ = base_time + (time_t)(*off.uip++);
+        break;
+      case CDS_INT64:
+        while (--count) *tp++ = base_time + (time_t)(*off.i64p++);
+        break;
+      case CDS_UINT64:
+        while (--count) *tp++ = base_time + (time_t)(*off.ui64p++);
+        break;
       default:
         while (--count) *tp++ = 0;
     }
@@ -1171,6 +2412,9 @@ time_t *cds_offsets_to_times(
  *  output array is NULL. In this case the calling process is responsible
  *  for freeing the allocated memory.
  *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
+ *
  *  @param  type      - data type of the offsets array
  *  @param  ntimes    - number of times in the offsets array
  *  @param  base_time - base time value in seconds since 1970
@@ -1180,7 +2424,8 @@ time_t *cds_offsets_to_times(
  *
  *  @return
  *    - pointer to the array of timeval_t values in seconds since 1970
- *    - NULL if a memory allocation error occurred
+ *    - NULL if attempting to convert between string and numbers,
+ *      or a memory allocation error occurs
  */
 timeval_t *cds_offsets_to_timevals(
     CDSDataType  type,
@@ -1194,12 +2439,24 @@ timeval_t *cds_offsets_to_timevals(
     timeval_t *tvp;
     CDSData    off;
 
+    /* Check for CDS_STRING type */
+
+    if (type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to convert string values to time offsets in cds_offsets_to_timevals\n",
+            cds_data_type_name(type));
+        return((timeval_t *)NULL);
+    }
+
     /* Allocate memory for the output array if necessary */
 
     if (!timevals) {
         timevals = (timeval_t *)calloc(ntimes, sizeof(timeval_t));
         if (!timevals) {
-            return(NULL);
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating timeval array of length %lu\n",
+                ntimes);
+            return((timeval_t *)NULL);
         }
     }
 
@@ -1289,6 +2546,42 @@ timeval_t *cds_offsets_to_timevals(
             ++tvp;
         }
         break;
+      /* NetCDF4 extended data types */
+      case CDS_UBYTE:
+        while (--count) {
+            tvp->tv_sec  = base_time + (time_t)(*off.ubp++);
+            tvp->tv_usec = 0;
+            ++tvp;
+        }
+        break;
+      case CDS_USHORT:
+        while (--count) {
+            tvp->tv_sec  = base_time + (time_t)(*off.usp++);
+            tvp->tv_usec = 0;
+            ++tvp;
+        }
+        break;
+      case CDS_UINT:
+        while (--count) {
+            tvp->tv_sec  = base_time + (time_t)(*off.uip++);
+            tvp->tv_usec = 0;
+            ++tvp;
+        }
+        break;
+      case CDS_INT64:
+        while (--count) {
+            tvp->tv_sec  = base_time + (time_t)(*off.i64p++);
+            tvp->tv_usec = 0;
+            ++tvp;
+        }
+        break;
+      case CDS_UINT64:
+        while (--count) {
+            tvp->tv_sec  = base_time + (time_t)(*off.ui64p++);
+            tvp->tv_usec = 0;
+            ++tvp;
+        }
+        break;
       default:
         while (--count) {
             tvp->tv_sec  = 0;
@@ -1306,6 +2599,9 @@ timeval_t *cds_offsets_to_timevals(
  *  Memory will be allocated for the returned array of qc_flags if the output
  *  array is NULL. In this case the calling process is responsible for freeing
  *  the allocated memory.
+ *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
  *
  *  @param  data_type      - data type of the data values
  *  @param  ndims          - number of dimensions
@@ -1335,7 +2631,8 @@ timeval_t *cds_offsets_to_timevals(
  *
  *  @return
  *    - pointer to the array of qc_flags
- *    - NULL if a memory allocation error occurred
+ *    - NULL if attempting to perform delta checks on CDS_STRING data type,
+ *      or if a memory allocation error occurs
  */
 int *cds_qc_delta_checks(
     CDSDataType  data_type,
@@ -1357,6 +2654,14 @@ int *cds_qc_delta_checks(
     size_t *strides      = (size_t *)NULL;
     size_t  di;
 
+    /* Check for CDS_STRING type */
+
+    if (data_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to perform delta checks on string values in cds_qc_delta_checks\n");
+        return((int *)NULL);
+    }
+
     /* Determine the sample size and count. */
 
     if (ndims && dim_lengths) {
@@ -1373,6 +2678,9 @@ int *cds_qc_delta_checks(
     if (!qc_flags) {
         qc_flags = (int *)calloc(nvalues, sizeof(int));
         if (!qc_flags) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating qc_flags array of length %lu\n",
+                nvalues);
             return((int *)NULL);
         }
     }
@@ -1382,12 +2690,18 @@ int *cds_qc_delta_checks(
     if (sample_size == 1) {
 
         switch (data_type) {
-            case CDS_DOUBLE: CDS_QC_DELTA_CHECKS_1D_1(double,        double,  fabs);  break;
-            case CDS_FLOAT:  CDS_QC_DELTA_CHECKS_1D_1(float,         float,   fabsf); break;
-            case CDS_INT:    CDS_QC_DELTA_CHECKS_1D_1(int,           int,     abs);   break;
-            case CDS_SHORT:  CDS_QC_DELTA_CHECKS_1D_1(short,         int,     abs);   break;
-            case CDS_BYTE:   CDS_QC_DELTA_CHECKS_1D_1(signed char,   int,     abs);   break;
-            case CDS_CHAR:   CDS_QC_DELTA_CHECKS_1D_1(unsigned char, int,     abs);   break;
+            case CDS_DOUBLE: CDS_QC_DELTA_CHECKS_1D_1(double);        break;
+            case CDS_FLOAT:  CDS_QC_DELTA_CHECKS_1D_1(float);         break;
+            case CDS_INT:    CDS_QC_DELTA_CHECKS_1D_1(int);           break;
+            case CDS_SHORT:  CDS_QC_DELTA_CHECKS_1D_1(short);         break;
+            case CDS_BYTE:   CDS_QC_DELTA_CHECKS_1D_1(signed char);   break;
+            case CDS_CHAR:   CDS_QC_DELTA_CHECKS_1D_1(unsigned char); break;
+            /* NetCDF4 extended data types */
+            case CDS_INT64:  CDS_QC_DELTA_CHECKS_1D_1(long long);      break;
+            case CDS_UBYTE:  CDS_QC_DELTA_CHECKS_1D_1(unsigned char);  break;
+            case CDS_USHORT: CDS_QC_DELTA_CHECKS_1D_1(unsigned short); break;
+            case CDS_UINT:   CDS_QC_DELTA_CHECKS_1D_1(unsigned int);   break;
+            case CDS_UINT64: CDS_QC_DELTA_CHECKS_1D_1(unsigned long long); break;
             default:
                 break;
         }
@@ -1395,12 +2709,18 @@ int *cds_qc_delta_checks(
     else { /* sample_size > 1 */
 
         switch (data_type) {
-            case CDS_DOUBLE: CDS_QC_DELTA_CHECKS_1D_N(double,        double,  fabs);  break;
-            case CDS_FLOAT:  CDS_QC_DELTA_CHECKS_1D_N(float,         float,   fabsf); break;
-            case CDS_INT:    CDS_QC_DELTA_CHECKS_1D_N(int,           int,     abs);   break;
-            case CDS_SHORT:  CDS_QC_DELTA_CHECKS_1D_N(short,         int,     abs);   break;
-            case CDS_BYTE:   CDS_QC_DELTA_CHECKS_1D_N(signed char,   int,     abs);   break;
-            case CDS_CHAR:   CDS_QC_DELTA_CHECKS_1D_N(unsigned char, int,     abs);   break;
+            case CDS_DOUBLE: CDS_QC_DELTA_CHECKS_1D_N(double);        break;
+            case CDS_FLOAT:  CDS_QC_DELTA_CHECKS_1D_N(float);         break;
+            case CDS_INT:    CDS_QC_DELTA_CHECKS_1D_N(int);           break;
+            case CDS_SHORT:  CDS_QC_DELTA_CHECKS_1D_N(short);         break;
+            case CDS_BYTE:   CDS_QC_DELTA_CHECKS_1D_N(signed char);   break;
+            case CDS_CHAR:   CDS_QC_DELTA_CHECKS_1D_N(unsigned char); break;
+            /* NetCDF4 extended data types */
+            case CDS_INT64:  CDS_QC_DELTA_CHECKS_1D_N(long long);      break;
+            case CDS_UBYTE:  CDS_QC_DELTA_CHECKS_1D_N(unsigned char);  break;
+            case CDS_USHORT: CDS_QC_DELTA_CHECKS_1D_N(unsigned short); break;
+            case CDS_UINT:   CDS_QC_DELTA_CHECKS_1D_N(unsigned int);   break;
+            case CDS_UINT64: CDS_QC_DELTA_CHECKS_1D_N(unsigned long long); break;
             default:
                 break;
         }
@@ -1415,11 +2735,17 @@ int *cds_qc_delta_checks(
 
         strides = malloc(ndims * sizeof(size_t));
         if (!strides) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating strides array of length %lu\n",
+                ndims);
             return((int *)NULL);
         }
 
         index = malloc(ndims * sizeof(size_t));
         if (!index) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating index array of length %lu\n",
+                ndims);
             free(strides);
             return((int *)NULL);
         }
@@ -1427,12 +2753,18 @@ int *cds_qc_delta_checks(
         /* Do the QC checks */
 
         switch (data_type) {
-            case CDS_DOUBLE: CDS_QC_DELTA_CHECKS_ND(double,        double,  fabs);  break;
-            case CDS_FLOAT:  CDS_QC_DELTA_CHECKS_ND(float,         float,   fabsf); break;
-            case CDS_INT:    CDS_QC_DELTA_CHECKS_ND(int,           int,     abs);   break;
-            case CDS_SHORT:  CDS_QC_DELTA_CHECKS_ND(short,         int,     abs);   break;
-            case CDS_BYTE:   CDS_QC_DELTA_CHECKS_ND(signed char,   int,     abs);   break;
-            case CDS_CHAR:   CDS_QC_DELTA_CHECKS_ND(unsigned char, int,     abs);   break;
+            case CDS_DOUBLE: CDS_QC_DELTA_CHECKS_ND(double);        break;
+            case CDS_FLOAT:  CDS_QC_DELTA_CHECKS_ND(float);         break;
+            case CDS_INT:    CDS_QC_DELTA_CHECKS_ND(int);           break;
+            case CDS_SHORT:  CDS_QC_DELTA_CHECKS_ND(short);         break;
+            case CDS_BYTE:   CDS_QC_DELTA_CHECKS_ND(signed char);   break;
+            case CDS_CHAR:   CDS_QC_DELTA_CHECKS_ND(unsigned char); break;
+            /* NetCDF4 extended data types */
+            case CDS_INT64:  CDS_QC_DELTA_CHECKS_ND(long long);      break;
+            case CDS_UBYTE:  CDS_QC_DELTA_CHECKS_ND(unsigned char);  break;
+            case CDS_USHORT: CDS_QC_DELTA_CHECKS_ND(unsigned short); break;
+            case CDS_UINT:   CDS_QC_DELTA_CHECKS_ND(unsigned int);   break;
+            case CDS_UINT64: CDS_QC_DELTA_CHECKS_ND(unsigned long long); break;
             default:
                 break;
         }
@@ -1450,6 +2782,9 @@ int *cds_qc_delta_checks(
  *  Memory will be allocated for the returned array of qc_flags if the output
  *  array is NULL. In this case the calling process is responsible for freeing
  *  the allocated memory.
+ *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
  *
  *  @param  data_type     - data type of the data values
  *  @param  nvalues       - number of data values
@@ -1475,7 +2810,8 @@ int *cds_qc_delta_checks(
  *
  *  @return
  *    - pointer to the array of qc_flags
- *    - NULL if a memory allocation error occurred
+ *    - NULL if attempting to perform limit checks on CDS_STRING data type,
+ *      or if a memory allocation error occurs
  */
 int *cds_qc_limit_checks(
     CDSDataType  data_type,
@@ -1493,11 +2829,22 @@ int *cds_qc_limit_checks(
     size_t  mi;
     int    *flagsp;
 
+    /* Check for CDS_STRING type */
+
+    if (data_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to perform limit checks on string values in cds_qc_limit_checks\n");
+        return((int *)NULL);
+    }
+
     /* Allocate memory for the qc_flags array if necessary */
 
     if (!qc_flags) {
         qc_flags = (int *)calloc(nvalues, sizeof(int));
         if (!qc_flags) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating qc_flags array of length %lu\n",
+                nvalues);
             return((int *)NULL);
         }
     }
@@ -1513,6 +2860,12 @@ int *cds_qc_limit_checks(
         case CDS_SHORT:  CDS_QC_LIMITS_CHECK(short);         break;
         case CDS_BYTE:   CDS_QC_LIMITS_CHECK(signed char);   break;
         case CDS_CHAR:   CDS_QC_LIMITS_CHECK(unsigned char); break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:  CDS_QC_LIMITS_CHECK(long long);      break;
+        case CDS_UBYTE:  CDS_QC_LIMITS_CHECK(unsigned char);  break;
+        case CDS_USHORT: CDS_QC_LIMITS_CHECK(unsigned short); break;
+        case CDS_UINT:   CDS_QC_LIMITS_CHECK(unsigned int);   break;
+        case CDS_UINT64: CDS_QC_LIMITS_CHECK(unsigned long long); break;
         default:
             break;
     }
@@ -1526,6 +2879,9 @@ int *cds_qc_limit_checks(
  *  Memory will be allocated for the returned array of qc_flags if the output
  *  array is NULL. In this case the calling process is responsible for freeing
  *  the allocated memory.
+ *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
  *
  *  @param  data_type      - data type of the time offset values
  *  @param  noffsets       - number of time offset values
@@ -1549,7 +2905,8 @@ int *cds_qc_limit_checks(
  *
  *  @return
  *    - pointer to the array of qc_flags
- *    - NULL if a memory allocation error occurred
+ *    - NULL if attempting to perform time_offset checks on CDS_STRING data type,
+ *      or if a memory allocation error occurs
  */
 int *cds_qc_time_offset_checks(
     CDSDataType  data_type,
@@ -1565,11 +2922,22 @@ int *cds_qc_time_offset_checks(
 {
     int *flagsp;
 
+    /* Check for CDS_STRING type */
+
+    if (data_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to perform time_offset checks on string values in cds_qc_time_offset_checks\n");
+        return((int *)NULL);
+    }
+
     /* Allocate memory for the qc_flags array if necessary */
 
     if (!qc_flags) {
         qc_flags = (int *)calloc(noffsets, sizeof(int));
         if (!qc_flags) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating qc_flags array of length %lu\n",
+                noffsets);
             return((int *)NULL);
         }
     }
@@ -1585,6 +2953,12 @@ int *cds_qc_time_offset_checks(
         case CDS_SHORT:  CDS_QC_TIME_OFFSETS_CHECK(short);         break;
         case CDS_BYTE:   CDS_QC_TIME_OFFSETS_CHECK(signed char);   break;
         case CDS_CHAR:   CDS_QC_TIME_OFFSETS_CHECK(unsigned char); break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:  CDS_QC_TIME_OFFSETS_CHECK(long long);      break;
+        case CDS_UBYTE:  CDS_QC_TIME_OFFSETS_CHECK(unsigned char);  break;
+        case CDS_USHORT: CDS_QC_TIME_OFFSETS_CHECK(unsigned short); break;
+        case CDS_UINT:   CDS_QC_TIME_OFFSETS_CHECK(unsigned int);   break;
+        case CDS_UINT64: CDS_QC_TIME_OFFSETS_CHECK(unsigned long long); break;
         default:
             break;
     }
@@ -1613,7 +2987,7 @@ int *cds_qc_time_offset_checks(
  *                      - 0x02: Print padded data type name for numeric arrays.
  *                      - 0x04: Print data type name at end of numeric arrays.
  *                      - 0x08: Do not print brackets around numeric arrays.
- *                      - 0x10: Trim trailing NULLs from the end of strings.
+ *                      - 0x10: Trim trailing NULLs from the end of char arrays.
  *
  *  @return
  *    - number of bytes printed
@@ -1631,6 +3005,7 @@ size_t cds_print_array(
 {
     size_t      bufsize = 4096;
     char        buffer[bufsize];
+    char       *bufp = buffer;
     size_t      index;
     size_t      nbytes;
     size_t      tbytes;
@@ -1651,7 +3026,7 @@ size_t cds_print_array(
 
     tbytes = 0;
 
-    /* Trim trailing NULLs from character strings */
+    /* Trim trailing NULLs from character arrays */
 
     if ((type == CDS_CHAR) && (flags & 0x10)) {
         while (length && ((char *)array)[length-1] == '\0') --length;
@@ -1670,6 +3045,22 @@ size_t cds_print_array(
         linepos += nbytes;
     }
 
+    /* Make sure the buffer is large enough for CDS_STRING types */
+
+    if (type == CDS_STRING) {
+
+        size_t min_bufsize = _cds_max_strlen(length, (char **)array) + 16;
+        if (indent) min_bufsize += strlen(indent);
+
+        if (min_bufsize > bufsize) {
+            bufp = (char *)malloc(min_bufsize * sizeof(char));
+            if (!bufp) {
+                return((size_t)-1);
+            }
+            bufsize = min_bufsize;
+        }
+    }
+
     /* Print values */
 
     index = 0;
@@ -1677,19 +3068,24 @@ size_t cds_print_array(
     while (index < length) {
 
         nbytes = _cds_print_array_to_buffer(
-            bufsize, buffer, &index, type, length, array,
+            bufsize, bufp, &index, type, length, array,
             maxline, &linepos, indent);
 
         if (!nbytes) {
             break;
         }
 
-        if (fwrite(buffer, nbytes, 1, fp) != 1) {
+        if (fwrite(bufp, nbytes, 1, fp) != 1) {
+            if (bufp != buffer) free(bufp);
             return((size_t)-1);
         }
 
         tbytes += nbytes;
     }
+
+    /* Free buffer memory if we needed to dynamically allocat it */
+
+    if (bufp != buffer) free(bufp);
 
     /* Print close bracket or quote */
 
@@ -1739,7 +3135,7 @@ size_t cds_print_array(
  *                          - 0x02: Print padded data type name for numeric arrays.
  *                          - 0x04: Print data type name at end of numeric arrays.
  *                          - 0x08: Do not print brackets around numeric arrays.
- *                          - 0x10: Trim trailing NULLs from the end of strings.
+ *                          - 0x10: Trim trailing NULLs from the end of char arrays.
  *
  *  @return
  *    - pointer to the output string
@@ -1777,7 +3173,7 @@ char *cds_sprint_array(
         return((char *)NULL);
     }
 
-    /* Trim trailing NULLs from character strings */
+    /* Trim trailing NULLs from character arrays */
 
     if ((type == CDS_CHAR) && (flags & 0x10)) {
         while (array_length && ((char *)array)[array_length-1] == '\0') {
@@ -1802,8 +3198,12 @@ char *cds_sprint_array(
 
         max_length = *string_length;
     }
+    else if (type == CDS_STRING) {
+        max_length = _cds_total_strlen(array_length, (char **)array)
+                   + array_length * 4;
+    }
     else {
-        max_length = (type == CDS_CHAR) ? array_length : array_length * 3;
+        max_length = (type == CDS_CHAR) ? array_length : array_length * 6;
     }
 
     max_length += maxline + ob_len + cb_len + 32;
@@ -1938,183 +3338,11 @@ void *cds_string_to_array(
     size_t      *length,
     void        *array)
 {
-    size_t  type_size = cds_data_type_size(type);
-    char   *strp;
-    char   *endp;
-    size_t  nvals;
-    size_t  nalloced;
-    void   *new_data;
-    CDSData data;
-    double  dval;
+    void *data_type_min = _cds_data_type_min(type);
+    void *data_type_max = _cds_data_type_max(type);
 
-    if (!string) {
-        if (length) *length = 0;
-        return((void *)NULL);
-    }
-
-    data.vp  = array;
-    nvals    = 0;
-    nalloced = 0;
-
-    for (strp = (char *)string; *strp != '\0'; strp++) {
-
-        /* Skip white-space */
-
-        while (isspace(*strp)) strp++;
-
-        if (*strp == '\0') break;
-
-        /* Allocate more memory if necessary */
-
-        if (!array && (nvals == nalloced)) {
-
-            if (nalloced) {
-                nalloced *= 2;
-            }
-            else {
-                nalloced = 1;
-            }
-
-            new_data = realloc(data.vp, nalloced * type_size);
-            if (!new_data) {
-                if (length) *length = -1;
-                free(data.vp);
-                return((void *)NULL);
-            }
-
-            data.vp = new_data;
-        }
-
-        /* Get the next array element from the string */
-
-        switch (type) {
-
-            case CDS_BYTE:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_BYTE) {
-                    data.bp[nvals] = CDS_MIN_BYTE;
-                }
-                else if (dval > CDS_MAX_BYTE) {
-                    data.bp[nvals] = CDS_MAX_BYTE;
-                }
-                else if (dval < 0) {
-                    data.bp[nvals] = (signed char)(dval - 0.5);
-                }
-                else {
-                    data.bp[nvals] = (signed char)(dval + 0.5);
-                }
-
-                break;
-
-            case CDS_SHORT:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_SHORT) {
-                    data.sp[nvals] = CDS_MIN_SHORT;
-                }
-                else if (dval > CDS_MAX_SHORT) {
-                    data.sp[nvals] = CDS_MAX_SHORT;
-                }
-                else if (dval < 0) {
-                    data.sp[nvals] = (short)(dval - 0.5);
-                }
-                else {
-                    data.sp[nvals] = (short)(dval + 0.5);
-                }
-
-                break;
-
-            case CDS_INT:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_INT) {
-                    data.ip[nvals] = CDS_MIN_INT;
-                }
-                else if (dval > CDS_MAX_INT) {
-                    data.ip[nvals] = CDS_MAX_INT;
-                }
-                else if (dval < 0) {
-                    data.ip[nvals] = (int)(dval - 0.5);
-                }
-                else {
-                    data.ip[nvals] = (int)(dval + 0.5);
-                }
-
-                break;
-
-            case CDS_FLOAT:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_FLOAT) {
-                    data.fp[nvals] = CDS_MIN_FLOAT;
-                }
-                else if (dval > CDS_MAX_FLOAT) {
-                    data.fp[nvals] = CDS_MAX_FLOAT;
-                }
-                else {
-                    data.fp[nvals] = (float)dval;
-                }
-
-                break;
-
-            case CDS_DOUBLE:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_DOUBLE) {
-                    data.dp[nvals] = CDS_MIN_DOUBLE;
-                }
-                else if (dval > CDS_MAX_DOUBLE) {
-                    data.dp[nvals] = CDS_MAX_DOUBLE;
-                }
-                else {
-                    data.dp[nvals] = dval;
-                }
-
-                break;
-
-            case CDS_CHAR:
-                data.cp[nvals] = *strp;
-                endp = strp + 1;
-                break;
-
-            default:
-
-                if (length) *length = 0;
-                if (!array) {
-                    free(data.vp);
-                    return((void *)NULL);
-                }
-
-                break;
-        }
-
-        if (endp != strp) {
-
-            nvals++;
-            strp = endp;
-
-            if (*strp == '\0') break;
-
-            if (length) {
-                if (array && (nvals == *length)) break;
-            }
-        }
-    }
-
-    if (length) *length = nvals;
-
-    if (!array && !nvals) {
-        free(data.vp);
-        return((void *)NULL);
-    }
-
-    return(data.vp);
+    return(_cds_string_to_array(
+        string, type, length, array, data_type_min, data_type_max));
 }
 
 /**
@@ -2153,183 +3381,10 @@ void *cds_string_to_array_use_fill(
     size_t      *length,
     void        *array)
 {
-    size_t  type_size = cds_data_type_size(type);
-    char   *strp;
-    char   *endp;
-    size_t  nvals;
-    size_t  nalloced;
-    void   *new_data;
-    CDSData data;
-    double  dval;
+    void *default_fill = _cds_default_fill_value(type);
 
-    if (!string) {
-        if (length) *length = 0;
-        return((void *)NULL);
-    }
-
-    data.vp  = array;
-    nvals    = 0;
-    nalloced = 0;
-
-    for (strp = (char *)string; *strp != '\0'; strp++) {
-
-        /* Skip white-space */
-
-        while (isspace(*strp)) strp++;
-
-        if (*strp == '\0') break;
-
-        /* Allocate more memory if necessary */
-
-        if (!array && (nvals == nalloced)) {
-
-            if (nalloced) {
-                nalloced *= 2;
-            }
-            else {
-                nalloced = 1;
-            }
-
-            new_data = realloc(data.vp, nalloced * type_size);
-            if (!new_data) {
-                if (length) *length = -1;
-                free(data.vp);
-                return((void *)NULL);
-            }
-
-            data.vp = new_data;
-        }
-
-        /* Get the next array element from the string */
-
-        switch (type) {
-
-            case CDS_BYTE:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_BYTE) {
-                    data.bp[nvals] = CDS_FILL_BYTE;
-                }
-                else if (dval > CDS_MAX_BYTE) {
-                    data.bp[nvals] = CDS_FILL_BYTE;
-                }
-                else if (dval < 0) {
-                    data.bp[nvals] = (signed char)(dval - 0.5);
-                }
-                else {
-                    data.bp[nvals] = (signed char)(dval + 0.5);
-                }
-
-                break;
-
-            case CDS_SHORT:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_SHORT) {
-                    data.sp[nvals] = CDS_FILL_SHORT;
-                }
-                else if (dval > CDS_MAX_SHORT) {
-                    data.sp[nvals] = CDS_FILL_SHORT;
-                }
-                else if (dval < 0) {
-                    data.sp[nvals] = (short)(dval - 0.5);
-                }
-                else {
-                    data.sp[nvals] = (short)(dval + 0.5);
-                }
-
-                break;
-
-            case CDS_INT:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_INT) {
-                    data.ip[nvals] = CDS_FILL_INT;
-                }
-                else if (dval > CDS_MAX_INT) {
-                    data.ip[nvals] = CDS_FILL_INT;
-                }
-                else if (dval < 0) {
-                    data.ip[nvals] = (int)(dval - 0.5);
-                }
-                else {
-                    data.ip[nvals] = (int)(dval + 0.5);
-                }
-
-                break;
-
-            case CDS_FLOAT:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_FLOAT) {
-                    data.fp[nvals] = CDS_FILL_FLOAT;
-                }
-                else if (dval > CDS_MAX_FLOAT) {
-                    data.fp[nvals] = CDS_FILL_FLOAT;
-                }
-                else {
-                    data.fp[nvals] = (float)dval;
-                }
-
-                break;
-
-            case CDS_DOUBLE:
-
-                dval = strtod(strp, &endp);
-
-                if (dval < CDS_MIN_DOUBLE) {
-                    data.dp[nvals] = CDS_FILL_DOUBLE;
-                }
-                else if (dval > CDS_MAX_DOUBLE) {
-                    data.dp[nvals] = CDS_FILL_DOUBLE;
-                }
-                else {
-                    data.dp[nvals] = dval;
-                }
-
-                break;
-
-            case CDS_CHAR:
-                data.cp[nvals] = *strp;
-                endp = strp + 1;
-                break;
-
-            default:
-
-                if (length) *length = 0;
-                if (!array) {
-                    free(data.vp);
-                    return((void *)NULL);
-                }
-
-                break;
-        }
-
-        if (endp != strp) {
-
-            nvals++;
-            strp = endp;
-
-            if (*strp == '\0') break;
-
-            if (length) {
-                if (array && (nvals == *length)) break;
-            }
-        }
-    }
-
-    if (length) *length = nvals;
-
-    if (!array && !nvals) {
-        free(data.vp);
-        return((void *)NULL);
-    }
-
-    return(data.vp);
+    return(_cds_string_to_array(
+        string, type, length, array, default_fill, default_fill));
 }
 
 /**

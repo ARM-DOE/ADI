@@ -88,8 +88,7 @@ void _cds_destroy_var(CDSVar *var)
 
     if (var) {
 
-        if (var->default_fill)   free(var->default_fill);
-        if (var->dims)           free(var->dims);
+        cds_delete_var_data(var);
 
         if (var->atts) {
             for (ai = 0; ai < var->natts; ai++) {
@@ -98,7 +97,8 @@ void _cds_destroy_var(CDSVar *var)
             free(var->atts);
         }
 
-        cds_delete_var_data(var);
+        if (var->dims)           free(var->dims);
+        if (var->default_fill)   free(var->default_fill);
 
         _cds_free_object_members(var);
 

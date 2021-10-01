@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 60386 $
-*    $Author: ermold $
-*    $Date: 2015-02-19 20:43:41 +0000 (Thu, 19 Feb 2015) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -71,15 +61,21 @@ int _cds_change_att_value(
         }
 
         if (value) {
-            memcpy(new_value, value, length * type_size);
+            if (type == CDS_STRING) {
+                if (!cds_copy_string_array(length, value, new_value)) {
+                    free(new_value);
+                    return(0);
+                }
+            }
+            else {
+                memcpy(new_value, value, length * type_size);
+            }
         }
     }
 
     /* Set the value in the attribute structure */
 
-    if (att->value.vp) {
-        free(att->value.vp);
-    }
+    _cds_free_att_value(att);
 
     att->type     = type;
     att->length   = length;
@@ -260,13 +256,25 @@ CDSAtt *_cds_define_att(
 void _cds_destroy_att(CDSAtt *att)
 {
     if (att) {
-
-        if (att->value.vp) free(att->value.vp);
-
+        _cds_free_att_value(att);
         _cds_free_object_members(att);
-
         free(att);
     }
+}
+
+/**
+ *  PRIVATE: Free memory used by a CDS Attribute value.
+ *
+ *  @param  att - pointer to the attribute
+ */
+void _cds_free_att_value(CDSAtt *att)
+{
+    if (att->value.vp) {
+        cds_free_array(att->type, att->length, att->value.vp);
+        att->value.vp = (void *)NULL;
+    }
+
+    att->length = 0;
 }
 
 /**
@@ -325,24 +333,63 @@ int _cds_set_att_value(
                     (const char *)value, att->type, &length, NULL);
             }
         }
+        else if (type == CDS_STRING) {
+
+            if (att->type == CDS_STRING) {
+                new_value = cds_copy_string_array(length, value, NULL);
+                if (!new_value) length = (size_t)-1;
+            }
+            else if (att->type == CDS_CHAR) {
+                if (length == 1) {
+                    new_value = strdup(*(char **)value);
+                    if (new_value) {
+                        length = strlen(new_value) + 1;
+                    }
+                    else {
+                        length = (size_t)-1;
+                    }
+                }
+                else {
+                    new_value = cds_array_to_string(type, length, value, &length, NULL);
+                    if (new_value) {
+                        length = strlen(new_value) + 1;
+                    }
+                }
+            }
+            else {
+                ERROR( CDS_LIB_NAME,
+                    "Could not set attribute value for: %s\n"
+                    " -> attempt to convert between '%s' and '%s'\n",
+                    cds_get_object_path(att),
+                    cds_data_type_name(type), cds_data_type_name(att->type));
+                return(0);
+            }
+        }
         else if (att->type == CDS_CHAR) {
             new_value = cds_array_to_string(type, length, value, &length, NULL);
             if (new_value) {
                 length = strlen(new_value) + 1;
             }
         }
+        else if (att->type == CDS_STRING) {
+            ERROR( CDS_LIB_NAME,
+                "Could not set attribute value for: %s\n"
+                " -> attempt to convert between '%s' and '%s'\n",
+                cds_get_object_path(att),
+                cds_data_type_name(type), cds_data_type_name(att->type));
+            return(0);
+        }
         else {
             new_value = cds_copy_array(
                 type, length, value, att->type, NULL,
                 0, NULL, NULL, NULL, NULL, NULL, NULL);
-            if (!new_value) {
-                length = (size_t)-1;
-            }
+            if (!new_value) length = (size_t)-1;
         }
     }
     else if (length) {
         type_size = cds_data_type_size(att->type);
         new_value = calloc(length+1, type_size);
+        if (!new_value) length = (size_t)-1;
     }
     else {
         new_value = (void *)NULL;
@@ -360,9 +407,7 @@ int _cds_set_att_value(
 
     /* Set the value in the attribute structure */
 
-    if (att->value.vp) {
-        free(att->value.vp);
-    }
+    _cds_free_att_value(att);
 
     att->length   = length;
     att->value.vp = new_value;
@@ -548,13 +593,8 @@ int cds_change_att_text(
     /* Check if a format string was specified */
 
     if (!format) {
-
-        if (att->value.vp) free(att->value.vp);
-
-        att->type     = CDS_CHAR;
-        att->length   = 0;
-        att->value.vp = (void *)NULL;
-
+        _cds_free_att_value(att);
+        att->type = CDS_CHAR;
         return(1);
     }
 
@@ -608,13 +648,8 @@ int cds_change_att_va_list(
     /* Check if a format string was specified */
 
     if (!format) {
-
-        if (att->value.vp) free(att->value.vp);
-
-        att->type     = CDS_CHAR;
-        att->length   = 0;
-        att->value.vp = (void *)NULL;
-
+        _cds_free_att_value(att);
+        att->type = CDS_CHAR;
         return(1);
     }
 
@@ -633,7 +668,7 @@ int cds_change_att_va_list(
 
     /* Change the attribute value */
 
-    if (att->value.vp) free(att->value.vp);
+    _cds_free_att_value(att);
 
     att->type     = CDS_CHAR;
     att->length   = strlen(att_text) + 1;
@@ -643,33 +678,37 @@ int cds_change_att_va_list(
 }
 
 /**
- *  Create a missing value attribute if it does not already exist.
+ *  Create a missing value attribute if necessary.
  *
- *  This function will check if the variable already has either a
- *  missing_value or _FillValue attibute defined.  If it does not
- *  one will be created.
+ *  This function will create a missing_value attribute if a missing_value
+ *  or _FillValue attibute does not already exist.
  *
  *  The missing value used will be determined by first checking for
  *  non-standard missing value attributes defined at either the field
  *  or global level (see cds_is_missing_value_att_name()).  If no
- *  known missing value attributes are found the default value for
- *  the variables data type will be used.
+ *  known missing value attributes are found the default fill value
+ *  for the variables data type will be used.
  *
  *  @param var   - pointer to the variable
- *  @param flags - reserved for control flags
+ *  @param flags - control flags:
+ *                 0 = default behavior
+ *                 1 = filter out default fill values. Using this option
+ *                     will prevent the creation of the missing_value attribute
+ *                     if no other non-standard missing value attributes exist.
  *
- *  @retval  1  if the missing value attribute already existed or was created.
+ *  @retval  1  success
  *  @retval  0  if a fatal error occurred
  */
 int cds_create_missing_value_att(CDSVar *var, int flags)
 {
-    int   nmissings;
-    void *missings;
-    int   free_missings;
-
-    flags = flags;
-
-    free_missings = 0;
+    int     nmissings;
+    void   *missings;
+    int     free_missings = 0;
+    void   *default_fill  = _cds_default_fill_value(var->type);
+    size_t  type_size     = cds_data_type_size(var->type);
+    void   *mvp1, *mvp2;
+    int     mi1, mi2;
+    int     retval;
 
     if (cds_get_att(var, "missing_value") ||
         cds_get_att(var, "_FillValue")) {
@@ -684,6 +723,7 @@ int cds_create_missing_value_att(CDSVar *var, int flags)
     if (nmissings < 0) return(0);
 
     if (nmissings == 0) {
+        if (flags == 1) return(1);
         /* Use the default fill value for the variable data type */
         nmissings = 1;
         missings  = _cds_default_fill_value(var->type);
@@ -692,24 +732,46 @@ int cds_create_missing_value_att(CDSVar *var, int flags)
 
         free_missings = 1;
 
-        /* Remove the default fill value from the missing values
-         * array if more than 1 missing value was found. */
+        /* Remove the default fill value from the missing values array
+         * if flags == 1 or more than 1 missing value was found. */
 
-        if (var->default_fill && nmissings > 1) {
-            nmissings -= 1;
+        if (flags == 1) {
+
+            for (mi1 = 0, mi2 = 0; mi2 < nmissings; ++mi2) {
+
+                mvp2 = (char *)missings + (mi2 * type_size);
+
+                if (memcmp(mvp2, default_fill, type_size) == 0) {
+                    continue;
+                }
+
+                if (mi1 != mi2) {
+                    mvp1 = (char *)missings + (mi1 * type_size);
+                    memcpy(mvp1, mvp2, type_size);
+                }
+
+                mi1 += 1;
+            }
+
+            nmissings = mi1;
         }
     }
 
-    if (!cds_define_att(
-        var, "missing_value", var->type, nmissings, missings)) {
+    retval = 1;
 
-        if (free_missings) free(missings);
-        return(0);
+    if (nmissings > 0) {
+        if (!cds_define_att(
+            var, "missing_value", var->type, nmissings, missings)) {
+
+            retval = 0;
+        }
     }
 
-    if (free_missings) free(missings);
+    if (free_missings) {
+        cds_free_array(var->type, nmissings, missings);
+    }
 
-    return(1);
+    return(retval);
 }
 
 /**
@@ -745,7 +807,7 @@ CDSAtt *cds_define_att(
     void        *value)
 {
     CDSAtt *att;
-    size_t  type_size;
+    int     status;
 
     /* Check if an attribute with this name already exists */
 
@@ -763,9 +825,10 @@ CDSAtt *cds_define_att(
             }
             else {
 
-                type_size = cds_data_type_size(type);
+                status = cds_compare_arrays(
+                    length, type, value, att->type, att->value.vp, NULL, NULL);
 
-                if (memcmp(value, att->value.vp, length * type_size) == 0) {
+                if (status == 0) {
                     return(att);
                 }
             }
@@ -890,9 +953,13 @@ CDSAtt *cds_define_att_va_list(
  */
 int cds_delete_att(CDSAtt *att)
 {
-    CDSObject *parent = att->parent;
+    CDSObject *parent;
     CDSGroup  *group;
     CDSVar    *var;
+
+    if (!att) return(1);
+
+    parent = att->parent;
 
     /* Check if the attribute is locked */
 
@@ -1029,7 +1096,7 @@ CDSAtt *cds_get_att(void *parent, const char *name)
  *    - pointer to the output array
  *    - NULL if:
  *        - the attribute value has zero length (length == 0)
- *        - a memory allocation error occurs (length == (size_t)-1)
+ *        - if an error occurs (length == (size_t)-1)
  */
 void *cds_get_att_value(
     CDSAtt       *att,
@@ -1064,9 +1131,7 @@ void *cds_get_att_value(
         if (att->type == CDS_CHAR) {
 
             if (!value) {
-
                 value = calloc(out_length + 1, sizeof(char));
-
                 if (!value) {
                     out_length = (size_t)-1;
                 }
@@ -1076,9 +1141,46 @@ void *cds_get_att_value(
                 memcpy(value, att->value.vp, out_length * sizeof(char));
             }
         }
+        else if (att->type == CDS_STRING && att->length == 1) {
+
+            if (value) {
+                snprintf(value, *length, "%s", att->value.strp[0]);
+            }
+            else {
+                value = strdup(att->value.strp[0]);
+            }
+
+            if (value) {
+                out_length = strlen(value) + 1;
+            }
+            else {
+                out_length = (size_t)-1;
+            }
+        }
         else {
-            value = (void *)cds_array_to_string(
-                att->type, att->length, att->value.vp, &out_length, value);
+            value = cds_array_to_string(
+                att->type, att->length, att->value.vp, length, value);
+            out_length = (value) ? strlen(value) + 1 : (size_t)-1;
+        }
+    }
+    else if (type == CDS_STRING) {
+
+        if (att->type == CDS_STRING) {
+            value = cds_copy_string_array(out_length, att->value.vp, value);
+            if (!value) out_length = (size_t)-1;
+        }
+        else if (att->type == CDS_CHAR) {
+            value = cds_array_to_string(
+                att->type, att->length, att->value.vp, length, value);
+            out_length = (value) ? strlen(value) + 1 : (size_t)-1;
+        }
+        else {
+            ERROR( CDS_LIB_NAME,
+                "Could not get attribute value for: %s\n"
+                " -> attempt to convert between '%s' and '%s'\n",
+                cds_get_object_path(att),
+                cds_data_type_name(att->type), cds_data_type_name(type));
+            return((void *)NULL);
         }
     }
     else if (att->type == CDS_CHAR) {
@@ -1092,29 +1194,31 @@ void *cds_get_att_value(
                 att->value.cp, type, &out_length, value);
         }
     }
+    else if (att->type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Could not get attribute value for: %s\n"
+            " -> attempt to convert between '%s' and '%s'\n",
+            cds_get_object_path(att),
+            cds_data_type_name(att->type), cds_data_type_name(type));
+        return(0);
+    }
     else {
 
-        if (type < att->type) {
+        out_min  = _cds_data_type_min(type);
+        out_max  = _cds_data_type_max(type);
+        out_fill = _cds_default_fill_value(type);
 
-            out_fill = _cds_default_fill_value(type);
-            out_min  = _cds_data_type_min(type);
-            out_max  = _cds_data_type_max(type);
-
-            if (cds_is_missing_value_att_name(att->name)) {
-                value = cds_copy_array(
-                    att->type, out_length, att->value.vp, type, value,
-                    0, NULL, NULL, out_min, out_fill, out_max, out_fill);
-            }
-            else {
-                value = cds_copy_array(
-                    att->type, out_length, att->value.vp, type, value,
-                    0, NULL, NULL, out_min, out_min, out_max, out_max);
-            }
+        if (cds_is_missing_value_att_name(att->name)) {
+            value = cds_copy_array(
+                att->type, out_length, att->value.vp, type, value,
+                0, NULL, NULL,
+                NULL, out_fill, NULL, out_fill);
         }
         else {
             value = cds_copy_array(
                 att->type, out_length, att->value.vp, type, value,
-                0, NULL, NULL, NULL, NULL, NULL, NULL);
+                0, NULL, NULL,
+                NULL, out_min, NULL, out_max);
         }
 
         if (!value) {
@@ -1167,7 +1271,7 @@ void *cds_get_att_value(
  *    - pointer to the output string
  *    - NULL if:
  *        - the attribute value has zero length (length == 0)
- *        - a memory allocation error occurs (length == (size_t)-1)
+ *        - an error occurs (length == (size_t)-1)
  */
 char *cds_get_att_text(
     CDSAtt *att,
@@ -1422,14 +1526,7 @@ int cds_set_att_text(
     /* Check if a format string was specified */
 
     if (!format) {
-
-        if (att->value.vp) {
-            free(att->value.vp);
-        }
-
-        att->length   = 0;
-        att->value.vp = (void *)NULL;
-
+        _cds_free_att_value(att);
         return(1);
     }
 
@@ -1479,14 +1576,7 @@ int cds_set_att_va_list(
     /* Check if a format string was specified */
 
     if (!format) {
-
-        if (att->value.vp) {
-            free(att->value.vp);
-        }
-
-        att->length   = 0;
-        att->value.vp = (void *)NULL;
-
+        _cds_free_att_value(att);
         return(1);
     }
 

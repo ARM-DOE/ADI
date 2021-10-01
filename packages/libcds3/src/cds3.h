@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 68010 $
-*    $Author: ermold $
-*    $Date: 2016-03-11 20:27:44 +0000 (Fri, 11 Mar 2016) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -80,6 +70,13 @@ CDS_OVERWRITE_DIMS | CDS_OVERWRITE_ATTS | CDS_OVERWRITE_DATA
 #define CDS_FILL_INT     (-2147483647)
 #define CDS_FILL_FLOAT   (9.9692099683868690e+36f) /* near 15 * 2^119 */
 #define CDS_FILL_DOUBLE  (9.9692099683868690e+36)
+/* NetCDF4 extended data types */
+#define CDS_FILL_UBYTE   (255)
+#define CDS_FILL_USHORT  (65535)
+#define CDS_FILL_UINT    (4294967295U)
+#define CDS_FILL_INT64   ((long long)-9223372036854775806LL)
+#define CDS_FILL_UINT64  ((unsigned long long)18446744073709551614ULL)
+#define CDS_FILL_STRING  ((char *)"")
 
 /* data type ranges used by the NetCDF library (see netcdf.h) */
 
@@ -95,6 +92,17 @@ CDS_OVERWRITE_DIMS | CDS_OVERWRITE_ATTS | CDS_OVERWRITE_DATA
 #define CDS_MIN_FLOAT    (-CDS_MAX_FLOAT)
 #define CDS_MAX_DOUBLE   1.7976931348623157e+308
 #define CDS_MIN_DOUBLE   (-CDS_MAX_DOUBLE)
+/* NetCDF4 extended data types */
+#define CDS_MAX_UBYTE    CDS_MAX_CHAR
+#define CDS_MIN_UBYTE    CDS_MIN_CHAR
+#define CDS_MAX_USHORT   65535U
+#define CDS_MIN_USHORT   0U
+#define CDS_MAX_UINT     4294967295U
+#define CDS_MIN_UINT     0U
+#define CDS_MAX_INT64    9223372036854775807LL
+#define CDS_MIN_INT64    (-CDS_MAX_INT64 - 1)
+#define CDS_MAX_UINT64   18446744073709551615ULL
+#define CDS_MIN_UINT64   0ULL
 
 /* Maximum size of a data type */
 
@@ -176,6 +184,13 @@ typedef enum {
     CDS_INT     = 4,            /**< signed 4 byte integer                  */
     CDS_FLOAT   = 5,            /**< single precision floating point number */
     CDS_DOUBLE  = 6,            /**< double precision floating point number */
+    /* NetCDF4 extended data types */
+    CDS_UBYTE   = 7,            /**< unsigned 1 byte integer                */
+    CDS_USHORT  = 8,            /**< unsigned 2 byte integer                */
+    CDS_UINT    = 9,            /**< unsigned 4 byte integer                */
+    CDS_INT64   = 10,           /**< signed 8 byte integer                  */
+    CDS_UINT64  = 11,           /**< unsigned 8 byte integer                */
+    CDS_STRING  = 12            /**< char *                                 */
 } CDSDataType;
 
 /**
@@ -189,6 +204,13 @@ typedef union {
     int         *ip;            /**< int:    signed 4 byte integer           */
     float       *fp;            /**< float:  single precision floating point */
     double      *dp;            /**< double: double precision floating point */
+    /* NetCDF4 extended data types */
+    unsigned char  *ubp;        /**< unsigned 1 byte integer                */
+    unsigned short *usp;        /**< unsigned 2 byte integer                */
+    unsigned int   *uip;        /**< unsigned 4 byte integer                */
+    long long      *i64p;       /**< signed 8 byte integer                  */
+    unsigned long long *ui64p;  /**< unsigned 8 byte integer                */
+    char **strp;                /**< char *                                 */
 } CDSData;
 
 CDSDataType cds_data_type(const char *name);
@@ -524,6 +546,11 @@ void   *cds_set_var_data(
             size_t        sample_count,
             void         *missing_value,
             void         *data);
+
+void    cds_trim_unlim_dim(
+            CDSGroup   *group,
+            const char *unlim_dim_name,
+            size_t      length);
 
 /*@}*/
 
@@ -1148,6 +1175,11 @@ void    *cds_copy_array(
             void        *orv_min,
             void        *out_max,
             void        *orv_max);
+
+void    cds_free_array(CDSDataType type, size_t length, void *array);
+
+char  **cds_copy_string_array(size_t length, char **in_strpp, char **out_strpp);
+void    cds_free_string_array(size_t length, char **array);
 
 void   *cds_create_data_index(
             void        *data,

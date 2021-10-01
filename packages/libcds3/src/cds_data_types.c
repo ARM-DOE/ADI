@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 6691 $
-*    $Author: ermold $
-*    $Date: 2011-05-16 19:55:00 +0000 (Mon, 16 May 2011) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -57,6 +47,30 @@ static double      _Double_Min  = CDS_MIN_DOUBLE;
 static double      _Double_Max  = CDS_MAX_DOUBLE;
 static double      _Double_Fill = CDS_FILL_DOUBLE;
 
+/* NetCDF4 extended data types */
+
+static unsigned char       _UByte_Min   = CDS_MIN_UBYTE;
+static unsigned char       _UByte_Max   = CDS_MAX_UBYTE;
+static unsigned char       _UByte_Fill  = CDS_FILL_UBYTE;
+
+static unsigned short      _UShort_Min  = CDS_MIN_USHORT;
+static unsigned short      _UShort_Max  = CDS_MAX_USHORT;
+static unsigned short      _UShort_Fill = CDS_FILL_USHORT;
+
+static unsigned int        _UInt_Min    = CDS_MIN_UINT;
+static unsigned int        _UInt_Max    = CDS_MAX_UINT;
+static unsigned int        _UInt_Fill   = CDS_FILL_UINT;
+
+static long long           _Int64_Min   = CDS_MIN_INT64;
+static long long           _Int64_Max   = CDS_MAX_INT64;
+static long long           _Int64_Fill  = CDS_FILL_INT64;
+
+static unsigned long long  _UInt64_Min  = CDS_MIN_UINT64;
+static unsigned long long  _UInt64_Max  = CDS_MAX_UINT64;
+static unsigned long long  _UInt64_Fill = CDS_FILL_UINT64;
+
+static char *              _String_Fill = CDS_FILL_STRING;
+
 void *_cds_data_type_min(CDSDataType type)
 {
     switch(type) {
@@ -66,8 +80,43 @@ void *_cds_data_type_min(CDSDataType type)
         case CDS_INT:    return(&_Int_Min);
         case CDS_FLOAT:  return(&_Float_Min);
         case CDS_DOUBLE: return(&_Double_Min);
-        default:         return(&_Double_Min);
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  return(&_UByte_Min);
+        case CDS_USHORT: return(&_UShort_Min);
+        case CDS_UINT:   return(&_UInt_Min);
+        case CDS_INT64:  return(&_Int64_Min);
+        case CDS_UINT64: return(&_UInt64_Min);
+        default:         return((void *)NULL);
     }
+}
+
+double _cds_data_type_min_double(CDSDataType type)
+{
+    switch(type) {
+        case CDS_BYTE:   return((double)_Byte_Min);
+        case CDS_CHAR:   return((double)_Char_Min);
+        case CDS_SHORT:  return((double)_Short_Min);
+        case CDS_INT:    return((double)_Int_Min);
+        case CDS_FLOAT:  return((double)_Float_Min);
+        case CDS_DOUBLE: return(_Double_Min);
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  return((double)_UByte_Min);
+        case CDS_USHORT: return((double)_UShort_Min);
+        case CDS_UINT:   return((double)_UInt_Min);
+        case CDS_INT64:  return((double)_Int64_Min);
+        case CDS_UINT64: return((double)_UInt64_Min);
+        default:         return(_Double_Min);
+    }
+}
+
+int _cds_data_type_mincmp(CDSDataType type1, CDSDataType type2)
+{
+    double dbl1 = _cds_data_type_min_double(type1);
+    double dbl2 = _cds_data_type_min_double(type2);
+
+    if (dbl1 < dbl2) return(-1);
+    if (dbl1 > dbl2) return(1);
+    return(0);
 }
 
 void *_cds_data_type_max(CDSDataType type)
@@ -79,8 +128,43 @@ void *_cds_data_type_max(CDSDataType type)
         case CDS_INT:    return(&_Int_Max);
         case CDS_FLOAT:  return(&_Float_Max);
         case CDS_DOUBLE: return(&_Double_Max);
-        default:         return(&_Double_Max);
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  return(&_UByte_Max);
+        case CDS_USHORT: return(&_UShort_Max);
+        case CDS_UINT:   return(&_UInt_Max);
+        case CDS_INT64:  return(&_Int64_Max);
+        case CDS_UINT64: return(&_UInt64_Max);
+        default:         return((void *)NULL);
     }
+}
+
+double _cds_data_type_max_double(CDSDataType type)
+{
+    switch(type) {
+        case CDS_BYTE:   return((double)_Byte_Max);
+        case CDS_CHAR:   return((double)_Char_Max);
+        case CDS_SHORT:  return((double)_Short_Max);
+        case CDS_INT:    return((double)_Int_Max);
+        case CDS_FLOAT:  return((double)_Float_Max);
+        case CDS_DOUBLE: return(_Double_Max);
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  return((double)_UByte_Max);
+        case CDS_USHORT: return((double)_UShort_Max);
+        case CDS_UINT:   return((double)_UInt_Max);
+        case CDS_INT64:  return((double)_Int64_Max);
+        case CDS_UINT64: return((double)_UInt64_Max);
+        default:         return(_Double_Max);
+    }
+}
+
+int _cds_data_type_maxcmp(CDSDataType type1, CDSDataType type2)
+{
+    double dbl1 = _cds_data_type_max_double(type1);
+    double dbl2 = _cds_data_type_max_double(type2);
+
+    if (dbl1 < dbl2) return(-1);
+    if (dbl1 > dbl2) return(1);
+    return(0);
 }
 
 void *_cds_default_fill_value(CDSDataType type)
@@ -92,7 +176,14 @@ void *_cds_default_fill_value(CDSDataType type)
         case CDS_INT:    return(&_Int_Fill);
         case CDS_FLOAT:  return(&_Float_Fill);
         case CDS_DOUBLE: return(&_Double_Fill);
-        default:         return(&_Double_Fill);
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  return(&_UByte_Fill);
+        case CDS_USHORT: return(&_UShort_Fill);
+        case CDS_UINT:   return(&_UInt_Fill);
+        case CDS_INT64:  return(&_Int64_Fill);
+        case CDS_UINT64: return(&_UInt64_Fill);
+        case CDS_STRING: return(_String_Fill);
+        default:         return((void *)NULL);
     }
 }
 
@@ -112,6 +203,14 @@ void *_cds_default_fill_value(CDSDataType type)
  *    - float
  *    - double
  *
+ *    NetCDF4 extended data types
+ *
+ *    - ubyte
+ *    - ushort
+ *    - uint
+ *    - int64
+ *    - uint64
+ *
  *  @param  name - the name of the data type
  *
  *  @return
@@ -128,6 +227,13 @@ CDSDataType cds_data_type(const char *name)
     else if (strcmp(name, "int")    == 0) type = CDS_INT;
     else if (strcmp(name, "float")  == 0) type = CDS_FLOAT;
     else if (strcmp(name, "double") == 0) type = CDS_DOUBLE;
+    /* NetCDF4 extended data types */
+    else if (strcmp(name, "ubyte")  == 0) type = CDS_UBYTE;
+    else if (strcmp(name, "ushort") == 0) type = CDS_USHORT;
+    else if (strcmp(name, "uint")   == 0) type = CDS_UINT;
+    else if (strcmp(name, "int64")  == 0) type = CDS_INT64;
+    else if (strcmp(name, "uint64") == 0) type = CDS_UINT64;
+    else if (strcmp(name, "string") == 0) type = CDS_STRING;
     else                                  type = CDS_NAT;
 
     return(type);
@@ -153,6 +259,13 @@ const char *cds_data_type_name(CDSDataType type)
         case CDS_INT:    name = "int";    break;
         case CDS_FLOAT:  name = "float";  break;
         case CDS_DOUBLE: name = "double"; break;
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  name = "ubyte";  break;
+        case CDS_USHORT: name = "ushort"; break;
+        case CDS_UINT:   name = "uint";   break;
+        case CDS_INT64:  name = "int64";  break;
+        case CDS_UINT64: name = "uint64"; break;
+        case CDS_STRING: name = "string"; break;
         default:         name = (const char *)NULL;
     }
 
@@ -179,6 +292,13 @@ size_t cds_data_type_size(CDSDataType type)
         case CDS_INT:    size = sizeof(int);    break;
         case CDS_FLOAT:  size = sizeof(float);  break;
         case CDS_DOUBLE: size = sizeof(double); break;
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  size = sizeof(unsigned char);      break;
+        case CDS_USHORT: size = sizeof(unsigned short);     break;
+        case CDS_UINT:   size = sizeof(unsigned int);       break;
+        case CDS_INT64:  size = sizeof(long long);          break;
+        case CDS_UINT64: size = sizeof(unsigned long long); break;
+        case CDS_STRING: size = sizeof(char *); break;
         default:         size = 0;
     }
 
@@ -219,6 +339,27 @@ void cds_get_data_type_range(CDSDataType type, void *min, void *max)
             memcpy(min, &_Double_Min, sizeof(double));
             memcpy(max, &_Double_Max, sizeof(double));
             break;
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:
+            memcpy(min, &_UByte_Min,  sizeof(unsigned char));
+            memcpy(max, &_UByte_Max,  sizeof(unsigned char));
+            break;
+        case CDS_USHORT:
+            memcpy(min, &_UShort_Min, sizeof(unsigned short));
+            memcpy(max, &_UShort_Max, sizeof(unsigned short));
+            break;
+        case CDS_UINT:
+            memcpy(min, &_UInt_Min,   sizeof(unsigned int));
+            memcpy(max, &_UInt_Max,   sizeof(unsigned int));
+            break;
+        case CDS_INT64:
+            memcpy(min, &_Int64_Min,  sizeof(long long));
+            memcpy(max, &_Int64_Max,  sizeof(long long));
+            break;
+        case CDS_UINT64:
+            memcpy(min, &_UInt64_Min, sizeof(unsigned long long));
+            memcpy(max, &_UInt64_Max, sizeof(unsigned long long));
+            break;
         default:
             break;
     }
@@ -239,6 +380,14 @@ void cds_get_default_fill_value(CDSDataType type, void *value)
         case CDS_INT:    memcpy(value, &_Int_Fill,    sizeof(int));    break;
         case CDS_FLOAT:  memcpy(value, &_Float_Fill,  sizeof(float));  break;
         case CDS_DOUBLE: memcpy(value, &_Double_Fill, sizeof(double)); break;
+        /* NetCDF4 extended data types */
+        case CDS_UBYTE:  memcpy(value, &_UByte_Fill,  sizeof(unsigned char));  break;
+        case CDS_USHORT: memcpy(value, &_UShort_Fill, sizeof(unsigned short)); break;
+        case CDS_UINT:   memcpy(value, &_UInt_Fill,   sizeof(unsigned int));   break;
+        case CDS_INT64:  memcpy(value, &_Int64_Fill,  sizeof(long long));      break;
+        case CDS_UINT64: memcpy(value, &_UInt64_Fill, sizeof(unsigned long long)); break;
+//        case CDS_STRING: memcpy(value, &_String_Fill, sizeof(char *)); break;
+        case CDS_STRING: *(char **)value = strdup(_String_Fill); break;
         default:  break;
     }
 }

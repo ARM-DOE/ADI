@@ -1,21 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2011 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 9751 $
-*    $Author: ermold $
-*    $Date: 2011-12-01 20:31:50 +0000 (Thu, 01 Dec 2011) $
-*    $Version:$
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -96,14 +89,44 @@ static double DoubleData[] = {
     12345678912.3456, 123456789123456.0
 };
 
-static char TextAtt[] =
+long long Int64Data[] = {
+    CDS_MIN_INT64, -4611686018427387904LL, -2147483648, -32768, -128,
+    127, 32767, 2147483647, 4611686018427387904LL, 9223372036854775807LL
+};
+
+unsigned char UByteData[] = {
+    0, 2, 3, 4, 8, 16, 32, 64, 128, 255
+};
+
+unsigned short UShortData[] = {
+    0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535
+};
+
+unsigned int UIntData[] = {
+    0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648, 4294967295U
+};
+
+unsigned long long UInt64Data[] ={
+    0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295U, 4294967296U, 18446744073709551615ULL
+};
+
+static char *StringData[] = {
+    "string 1", "string 2", "string 3", "string 4", "string 5",
+    "string 6", "string 7", "string 8", "string 9", "string 10"
+};
+
+static char CharAtt[] =
     "Single line text attribute.";
 
-static char MultiLineAtt[] =
+static char MultiLineCharAtt[] =
     "Multi line text attribute:\n"
     "    - Line 1\n"
     "    - Line 2\n"
     "    - Line 3";
+
+static char *StringAtt[] = {
+    "string array value 1", "string array value 2", "string array value 3"
+};
 
 static timeval_t TimeData[] = {
     { 1234567890, 999995 },
@@ -154,9 +177,15 @@ static AttDef TypeAtts[] = {
     { "att_int",        CDS_INT,    NSAMPLES,  (void *)IntData },
     { "att_float",      CDS_FLOAT,  NSAMPLES,  (void *)FloatData },
     { "att_double",     CDS_DOUBLE, NSAMPLES,  (void *)DoubleData },
-    { "att_text",       CDS_CHAR,   0,  (void *)TextAtt },
-    { "att_multi_line", CDS_CHAR,   0,  (void *)MultiLineAtt },
-    { NULL,             CDS_NAT,    0,  NULL }
+    { "att_text",       CDS_CHAR,   0,         (void *)CharAtt },
+    { "att_multi_line", CDS_CHAR,   0,         (void *)MultiLineCharAtt },
+    { "att_int64",      CDS_INT64,  NSAMPLES,  (void *)Int64Data },
+    { "att_ubyte",      CDS_UBYTE,  NSAMPLES,  (void *)UByteData },
+    { "att_ushort",     CDS_USHORT, NSAMPLES,  (void *)UShortData },
+    { "att_uint",       CDS_UINT,   NSAMPLES,  (void *)UIntData },
+    { "att_uint64",     CDS_UINT64, NSAMPLES,  (void *)UInt64Data },
+    { "att_string",     CDS_STRING, 3,         (void *)StringAtt },
+    { NULL,             CDS_NAT,    0,         NULL }
 };
 
 static AttDef Atts_1[] = {
@@ -292,8 +321,15 @@ static VarDef RootVars[] = {
     { "var_float",         CDS_FLOAT,  TimeDim,   StdAtts,  NSAMPLES, FloatData,  "vargroup_2", "vararray_5" },
     { "var_double",        CDS_DOUBLE, TimeDim,   StdAtts,  NSAMPLES, DoubleData, "vargroup_2", "vararray_6" },
 
+    { "var_int64",         CDS_INT64,  TimeDim,   StdAtts,  NSAMPLES, Int64Data,  "vargroup_2", "vararray_4" },
+    { "var_ubyte",         CDS_UBYTE,  TimeDim,   StdAtts,  NSAMPLES, UByteData,  "vargroup_2", "vararray_2" },
+    { "var_ushort",        CDS_USHORT, TimeDim,   StdAtts,  NSAMPLES, UShortData, "vargroup_2", "vararray_3" },
+    { "var_uint",          CDS_UINT,   TimeDim,   StdAtts,  NSAMPLES, UIntData,   "vargroup_2", "vararray_4" },
+    { "var_uint64",        CDS_UINT64, TimeDim,   StdAtts,  NSAMPLES, UInt64Data, "vargroup_2", "vararray_4" },
+    { "var_string",        CDS_STRING, TimeDim,   StdAtts,  NSAMPLES, StringData, "vargroup_2", "vararray_1" },
+
     { "var_2D",            CDS_DOUBLE, TimeRangeDims,  StdAtts,  0,   NULL,       "vargroup_2", "vararray_6" },
-    { "var_string",        CDS_CHAR,   TimeStringDims, StdAtts,  0,   NULL,       "vargroup_2", "vararray_1" },
+    { "var_char_2D",       CDS_CHAR,   TimeStringDims, StdAtts,  0,   NULL,       "vargroup_2", "vararray_1" },
     { NULL,                CDS_NAT,    NULL,           NULL,     0,   NULL,       NULL, NULL }
 };
 

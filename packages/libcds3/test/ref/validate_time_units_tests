@@ -1471,5 +1471,5 @@ seconds since 2012-06-10T00:09:00Z0:00:
  - fixed:  seconds since 2012-06-10 00:09:00 0:00
 
 seconds:
- - time_t: 0
+ - time_t: -1
  - fixed:  seconds

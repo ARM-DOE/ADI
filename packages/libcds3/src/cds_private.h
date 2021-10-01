@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 50509 $
-*    $Author: ermold $
-*    $Date: 2013-12-18 18:38:14 +0000 (Wed, 18 Dec 2013) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -49,8 +39,18 @@ void        _cds_remove_object(void **array, int *nobjects, void *object);
 /*****  Data Type Functions  *****/
 
 void       *_cds_data_type_min(CDSDataType type);
+double      _cds_data_type_min_double(CDSDataType type);
+int         _cds_data_type_mincmp(CDSDataType type1, CDSDataType type2);
 void       *_cds_data_type_max(CDSDataType type);
+double      _cds_data_type_max_double(CDSDataType type);
+int         _cds_data_type_maxcmp(CDSDataType type1, CDSDataType type2);
 void       *_cds_default_fill_value(CDSDataType type);
+
+/*****  Utility Functions  *****/
+
+void        _cds_free_array(CDSDataType type, size_t length, void *array);
+size_t      _cds_max_strlen(size_t length, char **strpp);
+size_t      _cds_total_strlen(size_t length, char **strpp);
 
 /*****  Group Functions  *****/
 
@@ -92,6 +92,8 @@ CDSAtt      *_cds_define_att(
                 void        *value);
 
 void        _cds_destroy_att(CDSAtt *att);
+
+void        _cds_free_att_value(CDSAtt *att);
 
 int         _cds_set_att_value(
                 CDSAtt      *att,
@@ -214,7 +216,8 @@ int _cds_copy_atts(
 }
 
 int         _cds_print_att_array(FILE *fp, CDSAtt *att);
-int         _cds_print_att_string(FILE *fp, CDSAtt *att);
+int         _cds_print_att_array_char(FILE *fp, CDSAtt *att);
+int         _cds_print_att_array_string(FILE *fp, const char *indent, CDSAtt *att);
 
 int         _cds_print_data_array(
                 FILE        *fp,
@@ -224,11 +227,18 @@ int         _cds_print_data_array(
                 size_t       count,
                 CDSData      data);
 
-int         _cds_print_data_string(
-                FILE    *fp,
-                size_t   start,
-                size_t   count,
-                CDSData  data);
+int         _cds_print_data_array_char(
+                FILE   *fp,
+                size_t  start,
+                size_t  count,
+                char   *data);
+
+int         _cds_print_data_array_string(
+                FILE        *fp,
+                const char  *indent,
+                size_t       start,
+                size_t       count,
+                char       **strpp);
 
 /*****  Transformation Parameters *****/
 
@@ -294,6 +304,78 @@ typedef struct _CDSConverter {
 /*****  Macros *****/
 
 /**
+*  Macro for checking if a signed integer = an unsigned integer.
+*/
+#define EQ_SU(x, y_t, y) \
+( (x >= 0) && ( (y_t)x == y ) )
+
+/**
+*  Macro for checking if an unsigned integer = a signed integer.
+*/
+#define EQ_US(x_t, x, y) \
+( (y >= 0) && ( x == (x_t)y ) )
+
+/**
+*  Macro for checking if a signed integer != an unsigned integer.
+*/
+#define NEQ_SU(x, y_t, y) \
+( (x < 0) || ( (y_t)x != y ) )
+
+/**
+*  Macro for checking if an unsigned integer != a signed integer.
+*/
+#define NEQ_US(x_t, x, y) \
+( (y < 0) || ( x != (x_t)y ) )
+
+/**
+*  Macro for checking if a signed integer < an unsigned integer.
+*/
+#define LT_SU(x, y_t, y) \
+( (x < 0) || ( (y_t)x < y ) )
+
+/**
+*  Macro for checking if an unsigned integer < a signed integer.
+*/
+#define LT_US(x_t, x, y) \
+( (y >= 0) && ( x < (x_t)y ) )
+
+/**
+*  Macro for checking if a signed integer <= an unsigned integer.
+*/
+#define LTEQ_SU(x, y_t, y) \
+( (x < 0) || ( (y_t)x <= y ) )
+
+/**
+*  Macro for checking if an unsigned integer <= a signed integer.
+*/
+#define LTEQ_US(x_t, x, y) \
+( (y >= 0) && ( x <= (x_t)y ) )
+
+/**
+*  Macro for checking if a signed integer > an unsigned integer.
+*/
+#define GT_SU(x, y_t, y) \
+( (x >= 0) && ( (y_t)x > y ) )
+
+/**
+*  Macro for checking if an unsigned integer > a signed integer.
+*/
+#define GT_US(x_t, x, y) \
+( (y < 0) || ( x > (x_t)y ) )
+
+/**
+*  Macro for checking if a signed integer >= an unsigned integer.
+*/
+#define GTEQ_SU(x, y_t, y) \
+( (x >= 0) && ( (y_t)x >= y ) )
+
+/**
+*  Macro for checking if an unsigned integer >= a signed integer.
+*/
+#define GTEQ_US(x_t, x, y) \
+( (y <= 0) || ( x >= (x_t)y ) )
+
+/**
 *  Macro used to set the data in a cell boundary variable
 *  using constant data offsets.
 */
@@ -316,20 +398,102 @@ res = 0; \
 len++; \
 if (threshp) { \
     while (--len) { \
-        if ( *a1p < (*a2p - *threshp) || *a1p > (*a2p + *threshp) ) { \
-            res = (*a1p < *a2p) ? -1 : 1; \
-            break; \
+        if (*a1p != *a2p) { \
+            if ( *a1p < *a2p) { \
+                if (*a2p - *a1p > *threshp) { \
+                    res = -1; \
+                    break; \
+                } \
+            } \
+            else { \
+                if (*a1p - *a2p > *threshp) { \
+                    res = 1; \
+                    break; \
+                } \
+            } \
         } \
         ++a1p; ++a2p; \
     } \
 } \
 else { \
     while (--len) { \
-        if (*a1p++ != *a2p++) { \
-            --a1p; --a2p; \
+        if (*a1p != *a2p) { \
             res = (*a1p < *a2p) ? -1 : 1; \
             break; \
         } \
+        ++a1p; ++a2p; \
+    } \
+}
+
+/**
+*  Macro used to compare the values in two arrays.
+*  (compare signed with unsigned)
+*/
+#define CDS_COMPARE_ARRAYS_SU(res, len, a1p, a2_t, a2p, threshp) \
+res = 0; \
+len++; \
+if (threshp) { \
+    while (--len) { \
+        if ( NEQ_SU(*a1p, a2_t, *a2p) ) { \
+            if ( LT_SU(*a1p, a2_t, *a2p) ) { \
+                if (*a2p - *a1p > *threshp) { \
+                    res = -1; \
+                    break; \
+                } \
+            } \
+            else { \
+                if (*a1p - *a2p > *threshp) { \
+                    res = 1; \
+                    break; \
+                } \
+            } \
+        } \
+        ++a1p; ++a2p; \
+    } \
+} \
+else { \
+    while (--len) { \
+        if ( NEQ_SU(*a1p, a2_t, *a2p) ) { \
+            res = ( LT_SU(*a1p, a2_t, *a2p) ) ? -1 : 1; \
+            break; \
+        } \
+        ++a1p; ++a2p; \
+    } \
+}
+
+/**
+*  Macro used to compare the values in two arrays.
+*  (compare unsigned with signed)
+*/
+#define CDS_COMPARE_ARRAYS_US(res, len, a1_t, a1p, a2p, threshp) \
+res = 0; \
+len++; \
+if (threshp) { \
+    while (--len) { \
+        if ( NEQ_US(a1_t, *a1p, *a2p) ) { \
+            if ( LT_US(a1_t, *a1p, *a2p) ) { \
+                if (*a2p - *a1p > (a1_t)*threshp) { \
+                    res = -1; \
+                    break; \
+                } \
+            } \
+            else { \
+                if (*a1p - *a2p > (a1_t)*threshp) { \
+                    res = 1; \
+                    break; \
+                } \
+            } \
+        } \
+        ++a1p; ++a2p; \
+    } \
+} \
+else { \
+    while (--len) { \
+        if ( NEQ_US(a1_t, *a1p, *a2p) ) { \
+            res = ( LT_US(a1_t, *a1p, *a2p) ) ? -1 : 1; \
+            break; \
+        } \
+        ++a1p; ++a2p; \
     } \
 }
 
@@ -340,6 +504,32 @@ else { \
 *orvp = *ofillp; \
 for (mi = 0; mi < nmv; ++mi) { \
     if ((imvp[mi] >= *ominp) && (imvp[mi] <= *omaxp)) { \
+        *orvp = (out_t)imvp[mi]; \
+        break; \
+    } \
+}
+
+/**
+*  Macro used to determine the out-of-range value to use in an output array.
+*  (signed to unsigned)
+*/
+#define CDS_FIND_ORV_SU(nmv, imvp, out_t, ominp, omaxp, orvp, ofillp) \
+*orvp = *ofillp; \
+for (mi = 0; mi < nmv; ++mi) { \
+    if ( (GTEQ_SU(imvp[mi], out_t, *ominp)) && (LTEQ_SU(imvp[mi], out_t, *omaxp)) ) { \
+        *orvp = (out_t)imvp[mi]; \
+        break; \
+    } \
+}
+
+/**
+*  Macro used to determine the out-of-range value to use in an output array.
+*  (unsigned to signed)
+*/
+#define CDS_FIND_ORV_US(in_t, nmv, imvp, out_t, ominp, omaxp, orvp, ofillp) \
+*orvp = *ofillp; \
+for (mi = 0; mi < nmv; ++mi) { \
+    if ( (GTEQ_US(in_t, imvp[mi], *ominp)) && (LTEQ_US(in_t, imvp[mi], *omaxp)) ) { \
         *orvp = (out_t)imvp[mi]; \
         break; \
     } \
@@ -369,6 +559,28 @@ if (*inp < *minp) { \
 }
 
 /**
+*  Macro used to check for below min values in CDS_COPY_ARRAY_SU.
+*  (signed to unsigned conversion)
+*/
+#define CDS_CHECK_MIN_SU(out_t, inp, outp, minp, orminp) \
+if ( LT_SU(*inp, out_t, *minp) ) { \
+    *outp++ = *orminp; \
+    ++inp; \
+    continue; \
+}
+
+/**
+*  Macro used to check for below min values in CDS_COPY_ARRAY_US.
+*  (unsigned to signed conversion)
+*/
+#define CDS_CHECK_MIN_US(in_t, inp, outp, minp, orminp) \
+if ( LT_US(in_t, *inp, *minp) ) { \
+    *outp++ = *orminp; \
+    ++inp; \
+    continue; \
+}
+
+/**
 *  Macro used to check for above max values in CDS_COPY_ARRAY.
 */
 #define CDS_CHECK_MAX(inp, outp, maxp, ormaxp) \
@@ -379,8 +591,29 @@ if (*inp > *maxp) { \
 }
 
 /**
+*  Macro used to check for above max values in CDS_COPY_ARRAY_SU.
+*  (signed to unsigned conversion)
+*/
+#define CDS_CHECK_MAX_SU(out_t, inp, outp, maxp, ormaxp) \
+if ( GT_SU(*inp, out_t, *maxp) ) { \
+    *outp++ = *ormaxp; \
+    ++inp; \
+    continue; \
+}
+
+/**
+*  Macro used to check for above max values in CDS_COPY_ARRAY_US.
+*  (unsigned to signed conversion)
+*/
+#define CDS_CHECK_MAX_US(in_t, inp, outp, maxp, ormaxp) \
+if ( GT_US(in_t, *inp, *maxp) ) { \
+    *outp++ = *ormaxp; \
+    ++inp; \
+    continue; \
+}
+
+/**
 *  Macro used to copy an array of data.
-*
 */
 #define CDS_COPY_ARRAY(len, inp, nmv, imvp, out_t, outp, omvp, minp, orminp, maxp, ormaxp, round) \
 len++; \
@@ -502,6 +735,225 @@ else { \
     else if (round) { \
         while (--len) { \
             *outp++ = (out_t)( (*inp < 0) ? *inp++ - 0.5 : *inp++ + 0.5 ); \
+        } \
+    } \
+    else { \
+        while (--len) { \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+}
+
+/**
+*  Macro used to copy an array of data.
+*  (unsigned to float/double conversion)
+*/
+#define CDS_COPY_ARRAY_U(len, inp, nmv, imvp, out_t, outp, omvp, minp, orminp, maxp, ormaxp) \
+len++; \
+if (orminp) { \
+    if (ormaxp) { \
+        if (nmv) { \
+            size_t mi; \
+            while (--len) { \
+                CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+                CDS_CHECK_MIN(inp, outp, minp, orminp); \
+                CDS_CHECK_MAX(inp, outp, maxp, ormaxp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+        else { \
+            while (--len) { \
+                CDS_CHECK_MIN(inp, outp, minp, orminp); \
+                CDS_CHECK_MAX(inp, outp, maxp, ormaxp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+    } \
+    else { \
+        if (nmv) { \
+            size_t mi; \
+            while (--len) { \
+                CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+                CDS_CHECK_MIN(inp, outp, minp, orminp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+        else { \
+            while (--len) { \
+                CDS_CHECK_MIN(inp, outp, minp, orminp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+    } \
+} \
+else if (ormaxp) { \
+    if (nmv) { \
+        size_t mi; \
+        while (--len) { \
+            CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+            CDS_CHECK_MAX(inp, outp, maxp, ormaxp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+    else { \
+        while (--len) { \
+            CDS_CHECK_MAX(inp, outp, maxp, ormaxp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+} \
+else { \
+    if (nmv) { \
+        size_t mi; \
+        while (--len) { \
+            CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+    else { \
+        while (--len) { \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+}
+
+/**
+*  Macro used to copy an array of data.
+*  (signed to unsigned conversion)
+*/
+#define CDS_COPY_ARRAY_SU(len, inp, nmv, imvp, out_t, outp, omvp, minp, orminp, maxp, ormaxp) \
+len++; \
+if (orminp) { \
+    if (ormaxp) { \
+        if (nmv) { \
+            size_t mi; \
+            while (--len) { \
+                CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+                CDS_CHECK_MIN_SU(out_t, inp, outp, minp, orminp); \
+                CDS_CHECK_MAX_SU(out_t, inp, outp, maxp, ormaxp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+        else { \
+            while (--len) { \
+                CDS_CHECK_MIN_SU(out_t, inp, outp, minp, orminp); \
+                CDS_CHECK_MAX_SU(out_t, inp, outp, maxp, ormaxp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+    } \
+    else { \
+        if (nmv) { \
+            size_t mi; \
+            while (--len) { \
+                CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+                CDS_CHECK_MIN_SU(out_t, inp, outp, minp, orminp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+        else { \
+            while (--len) { \
+                CDS_CHECK_MIN_SU(out_t, inp, outp, minp, orminp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+    } \
+} \
+else if (ormaxp) { \
+    if (nmv) { \
+        size_t mi; \
+        while (--len) { \
+            CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+            CDS_CHECK_MAX_SU(out_t, inp, outp, maxp, ormaxp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+    else { \
+        while (--len) { \
+            CDS_CHECK_MAX_SU(out_t, inp, outp, maxp, ormaxp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+} \
+else { \
+    if (nmv) { \
+        size_t mi; \
+        while (--len) { \
+            CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+    else { \
+        while (--len) { \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+}
+
+/**
+*  Macro used to copy an array of data.
+*  (unsigned to signed conversion)
+*/
+#define CDS_COPY_ARRAY_US(in_t, len, inp, nmv, imvp, out_t, outp, omvp, minp, orminp, maxp, ormaxp) \
+len++; \
+if (orminp) { \
+    if (ormaxp) { \
+        if (nmv) { \
+            size_t mi; \
+            while (--len) { \
+                CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+                CDS_CHECK_MIN_US(in_t, inp, outp, minp, orminp); \
+                CDS_CHECK_MAX_US(in_t, inp, outp, maxp, ormaxp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+        else { \
+            while (--len) { \
+                CDS_CHECK_MIN_US(in_t, inp, outp, minp, orminp); \
+                CDS_CHECK_MAX_US(in_t, inp, outp, maxp, ormaxp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+    } \
+    else { \
+        if (nmv) { \
+            size_t mi; \
+            while (--len) { \
+                CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+                CDS_CHECK_MIN_US(in_t, inp, outp, minp, orminp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+        else { \
+            while (--len) { \
+                CDS_CHECK_MIN_US(in_t, inp, outp, minp, orminp); \
+                *outp++ = (out_t)*inp++; \
+            } \
+        } \
+    } \
+} \
+else if (ormaxp) { \
+    if (nmv) { \
+        size_t mi; \
+        while (--len) { \
+            CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+            CDS_CHECK_MAX_US(in_t, inp, outp, maxp, ormaxp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+    else { \
+        while (--len) { \
+            CDS_CHECK_MAX_US(in_t, inp, outp, maxp, ormaxp); \
+            *outp++ = (out_t)*inp++; \
+        } \
+    } \
+} \
+else { \
+    if (nmv) { \
+        size_t mi; \
+        while (--len) { \
+            CDS_MAP_VALUES(inp, nmv, imvp, outp, omvp); \
+            *outp++ = (out_t)*inp++; \
         } \
     } \
     else { \
@@ -1213,7 +1665,7 @@ else if (value > max) *flagsp |= max_flag;
 *  Macro used by cds_qc_delta_checks() to perform QC delta checks across
 *  an array of data with only 1 dimension.
 */
-#define CDS_QC_DELTA_CHECKS_1D_1(data_t, abs_t, abs_f) \
+#define CDS_QC_DELTA_CHECKS_1D_1(data_t) \
 { \
     data_t  max_delta   = *((data_t *)deltas_vp); \
     int     delta_flag  = *delta_flags; \
@@ -1242,8 +1694,15 @@ else if (value > max) *flagsp |= max_flag;
             if (!(*flagsp    & bad_flags) && \
                 !(prev_flags & bad_flags)) { \
 \
-                if (abs_f((abs_t)(value - prev_value)) > max_delta) { \
-                    *flagsp |= delta_flag; \
+                if (value > prev_value) { \
+                    if (value - prev_value > max_delta) { \
+                        *flagsp |= delta_flag; \
+                    } \
+                } \
+                else { \
+                    if (prev_value - value > max_delta) { \
+                        *flagsp |= delta_flag; \
+                    } \
                 } \
             } \
 \
@@ -1257,7 +1716,7 @@ else if (value > max) *flagsp |= max_flag;
 *  Macro used by cds_qc_delta_checks() to perform sample to sample QC delta
 *  checks for arrays that have more than 1 dimension.
 */
-#define CDS_QC_DELTA_CHECKS_1D_N(data_t, abs_t, abs_f) \
+#define CDS_QC_DELTA_CHECKS_1D_N(data_t) \
 { \
     data_t  max_delta    = *((data_t *)deltas_vp); \
     int     delta_flag   = *delta_flags; \
@@ -1307,8 +1766,15 @@ else if (value > max) *flagsp |= max_flag;
                 if (!(*flagsp    & bad_flags) && \
                     !(prev_flags & bad_flags)) { \
 \
-                    if (abs_f((abs_t)(value - prev_value)) > max_delta) { \
-                        *flagsp |= delta_flag; \
+                    if (value > prev_value) { \
+                        if (value - prev_value > max_delta) { \
+                            *flagsp |= delta_flag; \
+                        } \
+                    } \
+                    else { \
+                        if (prev_value - value > max_delta) { \
+                            *flagsp |= delta_flag; \
+                        } \
                     } \
                 } \
 \
@@ -1327,7 +1793,7 @@ else if (value > max) *flagsp |= max_flag;
 /**
 *  Macro used by cds_qc_delta_checks() to perform N-dimensional QC delta checks.
 */
-#define CDS_QC_DELTA_CHECKS_ND(data_t, abs_t, abs_f) \
+#define CDS_QC_DELTA_CHECKS_ND(data_t) \
 { \
     data_t  max_delta; \
     int     delta_flag; \
@@ -1384,8 +1850,15 @@ else if (value > max) *flagsp |= max_flag;
                 if (!(*flagsp      & bad_flags) && \
                     !(*prev_flagsp & bad_flags)) { \
 \
-                    if (abs_f((abs_t)(*valuep - *prev_valuep)) > max_delta) { \
-                        *flagsp |= delta_flag; \
+                    if (*valuep > *prev_valuep) { \
+                        if (*valuep - *prev_valuep > max_delta) { \
+                            *flagsp |= delta_flag; \
+                        } \
+                    } \
+                    else { \
+                        if (*prev_valuep - *valuep > max_delta) { \
+                            *flagsp |= delta_flag; \
+                        } \
                     } \
                 } \
 \

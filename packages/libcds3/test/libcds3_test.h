@@ -1,21 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2009 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 60277 $
-*    $Author: ermold $
-*    $Date: 2015-02-15 00:42:57 +0000 (Sun, 15 Feb 2015) $
-*    $Version: afl-libcds3-1.3-0 $
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 

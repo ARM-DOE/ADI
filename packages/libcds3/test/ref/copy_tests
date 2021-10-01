@@ -1,7 +1,5 @@
 ------------------------------------------------------------
 Copy all dimensions, attributes and variables.
- - attributes will be cast into CDS_CHAR type
- - variables will be cast into CDS_DOUBLE type
 ------------------------------------------------------------
 
 
@@ -27,6 +25,21 @@ Group: /copy tests
     - Line 1
     - Line 2
     - Line 3"
+        att_int64      = [-9223372036854775808, -4611686018427387904, -2147483648, -32768, -128, 127, 32767, 2147483647, 4611686018427387904, 9223372036854775807] : int64
+        att_ubyte      = [0, 2, 3, 4, 8, 16, 32, 64, 128, 255] : ubyte
+        att_ushort     = [0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535] : ushort
+        att_uint       = [0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648, 4294967295] : uint
+        att_uint64     = [0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295, 4294967296, 18446744073709551615] : uint64
+        att_string     = "string 1",
+                         "string 2",
+                         "string 3",
+                         "string 4",
+                         "string 5",
+                         "string 6",
+                         "string 7",
+                         "string 8",
+                         "string 9",
+                         "string 10"
 
     Variables:
 
@@ -86,6 +99,14 @@ Group: /copy tests
     - Line 1
     - Line 2
     - Line 3"
+            att_int64      = [-9223372036854775808, -4611686018427387904, -2147483648, -32768, -128, 127, 32767, 2147483647, 4611686018427387904, 9223372036854775807] : int64
+            att_ubyte      = [0, 2, 3, 4, 8, 16, 32, 64, 128, 255] : ubyte
+            att_ushort     = [0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535] : ushort
+            att_uint       = [0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648, 4294967295] : uint
+            att_uint64     = [0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295, 4294967296, 18446744073709551615] : uint64
+            att_string     = "string array value 1",
+                             "string array value 2",
+                             "string array value 3"
 
         var_float(time) : float
             long_name = "long_name attribute value"
@@ -95,11 +116,35 @@ Group: /copy tests
             long_name = "long_name attribute value"
             units     = "units attribute value"
 
+        var_int64(time) : int64
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_ubyte(time) : ubyte
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_ushort(time) : ushort
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_uint(time) : uint
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_uint64(time) : uint64
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_string(time) : string
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
         var_2D(time, range) : double
             long_name = "long_name attribute value"
             units     = "units attribute value"
 
-        var_string(time, string) : char
+        var_char_2D(time, string) : char
             long_name = "long_name attribute value"
             units     = "units attribute value"
 
@@ -153,6 +198,32 @@ Group: /copy tests
     -123.456789123456, -0.0123456789123456, 0.0123456789123456,
     123.456789123456, 1234567.89123456, 12345678912.3456, 123456789123456
 
+        var_int64 = -9223372036854775808, -4611686018427387904, -2147483648,
+    -32768, -128, 127, 32767, 2147483647, 4611686018427387904,
+    9223372036854775807
+
+        var_ubyte = 0, 2, 3, 4, 8, 16, 32, 64, 128, 255
+
+        var_ushort = 0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535
+
+        var_uint = 0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648,
+    4294967295
+
+        var_uint64 = 0, 127, 128, 65535, 65536, 2147483647, 2147483648,
+    4294967295, 4294967296, 18446744073709551615
+
+        var_string = 
+            "string 1",
+            "string 2",
+            "string 3",
+            "string 4",
+            "string 5",
+            "string 6",
+            "string 7",
+            "string 8",
+            "string 9",
+            "string 10"
+
         var_2D = 
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
     20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
@@ -184,15 +255,13 @@ Group: /copy tests
     914, 915, 916, 917, 918, 919, 920, 921, 922, 923, 924, 925, 926, 927, 928,
     929, 930, 931, 932, 933, 934, 935, 936, 937
 
-        var_string = NULL
+        var_char_2D = NULL
 
         base_time = 1266019200
 
         time_offset = 0.05, 0.06, 0.07, 0.08, 0.09, 1, 1.01, 1.02, 1.03, 1.04
 ------------------------------------------------------------
 Copy selected dimensions, attributes and variables.
- - attributes will be cast into CDS_CHAR type
- - variables will be cast into CDS_DOUBLE type
 ------------------------------------------------------------
 
 
@@ -247,6 +316,14 @@ Group: /copy tests
     - Line 1
     - Line 2
     - Line 3"
+            att_int64      = [-9223372036854775808, -4611686018427387904, -2147483648, -32768, -128, 127, 32767, 2147483647, 4611686018427387904, 9223372036854775807] : int64
+            att_ubyte      = [0, 2, 3, 4, 8, 16, 32, 64, 128, 255] : ubyte
+            att_ushort     = [0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535] : ushort
+            att_uint       = [0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648, 4294967295] : uint
+            att_uint64     = [0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295, 4294967296, 18446744073709551615] : uint64
+            att_string     = "string array value 1",
+                             "string array value 2",
+                             "string array value 3"
 
         var_float(time) : float
             long_name = "long_name attribute value"

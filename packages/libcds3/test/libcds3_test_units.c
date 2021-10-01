@@ -28,19 +28,21 @@ extern FILE       *gLogFP;
  *  Test Data
  */
 
-static CDSDataType  degC_type  = CDS_INT;
-static const char  *degC_units = "degC";
-static int          degC[]     = { -3, 0, 20, -9999, 60, CDS_FILL_INT, 100, 103 };
-static int          degC_mv[]  = { -9999, CDS_FILL_INT };
-static size_t       degC_len   = sizeof(degC)/sizeof(int);
-static size_t       degC_nmv   = sizeof(degC_mv)/sizeof(int);
+static signed char  test_bdat[]    = { -64, -32, -128, -8, 8, CDS_FILL_BYTE, 64, 127 };
+static size_t       test_bdat_len  = sizeof(test_bdat)/sizeof(signed char);
+static signed char  test_bdat_mv[] = { -128, CDS_FILL_BYTE };
+static size_t       test_bdat_nmv  = sizeof(test_bdat_mv)/sizeof(signed char);
 
-static CDSDataType  km_type  = CDS_BYTE;
-static const char  *km_units = "km";
-static signed char  km[]     = { -64, -32, -128, -8, 8, CDS_FILL_BYTE, 64, 127 };
-static signed char  km_mv[]  = { -128, CDS_FILL_BYTE };
-static size_t       km_len   = sizeof(km)/sizeof(signed char);
-static size_t       km_nmv   = sizeof(km_mv)/sizeof(signed char);
+static int          test_idat[]    = { -3, 0, 20, -9999, 60, CDS_FILL_INT, 100, 103 };
+static size_t       test_idat_len  = sizeof(test_idat)/sizeof(int);
+static int          test_idat_mv[] = { -9999, CDS_FILL_INT };
+static size_t       test_idat_nmv  = sizeof(test_idat_mv)/sizeof(int);
+
+static float        test_fdat[]    = {
+    -345.67890, -123.45678, 0, 123.45678, 345.67890, -9999, CDS_FILL_FLOAT, 456.78901 };
+static size_t       test_fdat_len  = sizeof(test_fdat)/sizeof(int);
+static float        test_fdat_mv[] = { -9999, CDS_FILL_FLOAT };
+static size_t       test_fdat_nmv  = sizeof(test_fdat_mv)/sizeof(int);
 
 /*******************************************************************************
  *  Test Unit Symbol Map
@@ -107,7 +109,6 @@ static int symbol_map_tests(void)
 static int units_conversion_test(
     const char  *in_units,
     const char  *out_units,
-
     CDSDataType  in_type,
     size_t       length,
     void        *in_data,
@@ -134,7 +135,7 @@ static int units_conversion_test(
         return(0);
     }
     else if (status == 0) {
-        fprintf(gLogFP, "Units are equal: %s == %s\n", in_units, out_units);
+        fprintf(gLogFP, "Units are equal: '%s' == '%s'\n", in_units, out_units);
         return(1);
     }
 
@@ -154,16 +155,22 @@ static int units_conversion_test(
     return(1);
 }
 
-#define degC_UNITS_TEST(out_units, out_type, out_data, out_missing) \
+#define UNITS_TEST_BYTE(in_units, out_units, out_type, out_data, out_missing) \
     units_conversion_test( \
-        degC_units, out_units, degC_type, degC_len, degC, out_type, out_data, \
-        degC_nmv, degC_mv, out_missing, \
+        in_units, out_units, CDS_BYTE, test_bdat_len, test_bdat, out_type, out_data, \
+        test_bdat_nmv, test_bdat_mv, out_missing, \
         NULL, NULL, out_missing)
 
-#define km_UNITS_TEST(out_units, out_type, out_data, out_missing) \
+#define UNITS_TEST_INT(in_units, out_units, out_type, out_data, out_missing) \
     units_conversion_test( \
-        km_units, out_units, km_type, km_len, km, out_type, out_data, \
-        km_nmv, km_mv, out_missing, \
+        in_units, out_units, CDS_INT, test_idat_len, test_idat, out_type, out_data, \
+        test_idat_nmv, test_idat_mv, out_missing, \
+        NULL, NULL, out_missing)
+
+#define UNITS_TEST_FLOAT(in_units, out_units, out_type, out_data, out_missing) \
+    units_conversion_test( \
+        in_units, out_units, CDS_FLOAT, test_fdat_len, test_fdat, out_type, out_data, \
+        test_fdat_nmv, test_fdat_mv, out_missing, \
         NULL, NULL, out_missing)
 
 static int units_conversion_tests(void)
@@ -176,14 +183,14 @@ static int units_conversion_tests(void)
         "int degC -> float degF (in place)\n"
         "------------------------------------------------------------\n\n");
 
-    memcpy(out_buffer, degC, degC_len * sizeof(int));
+    memcpy(out_buffer, test_idat, test_idat_len * sizeof(int));
 
     cds_get_missing_values_map(
-        degC_type, degC_nmv, degC_mv, CDS_FLOAT, out_missing);
+        CDS_INT, test_idat_nmv, test_idat_mv, CDS_FLOAT, out_missing);
 
     units_conversion_test(
-        degC_units, "degF", degC_type, degC_len, out_buffer, CDS_FLOAT, out_buffer,
-        degC_nmv, degC_mv, out_missing,
+        "degC", "degF", CDS_INT, test_idat_len, out_buffer, CDS_FLOAT, out_buffer,
+        test_idat_nmv, test_idat_mv, out_missing,
         NULL, NULL, out_missing);
 
     LOG( gProgramName,
@@ -191,14 +198,14 @@ static int units_conversion_tests(void)
         "int degC -> float degF (with output buffer)\n"
         "------------------------------------------------------------\n\n");
 
-    degC_UNITS_TEST("degF", CDS_FLOAT, out_buffer, out_missing);
+    UNITS_TEST_INT("degC", "degF", CDS_FLOAT, out_buffer, out_missing);
 
     LOG( gProgramName,
         "\n------------------------------------------------------------\n"
         "int degC -> float degF (dynamic allocation)\n"
         "------------------------------------------------------------\n\n");
 
-    degC_UNITS_TEST("degF", CDS_FLOAT, NULL, out_missing);
+    UNITS_TEST_INT("degC", "degF", CDS_FLOAT, NULL, out_missing);
 
     LOG( gProgramName,
         "\n------------------------------------------------------------\n"
@@ -206,9 +213,9 @@ static int units_conversion_tests(void)
         "------------------------------------------------------------\n\n");
 
     cds_get_missing_values_map(
-        km_type, km_nmv, km_mv, CDS_SHORT, out_missing);
+        CDS_BYTE, test_bdat_nmv, test_bdat_mv, CDS_SHORT, out_missing);
 
-    km_UNITS_TEST("m", CDS_SHORT, out_buffer, out_missing);
+    UNITS_TEST_BYTE("km", "m", CDS_SHORT, out_buffer, out_missing);
 
     LOG( gProgramName,
         "\n------------------------------------------------------------\n"
@@ -216,9 +223,9 @@ static int units_conversion_tests(void)
         "------------------------------------------------------------\n\n");
 
     cds_get_missing_values_map(
-        km_type, km_nmv, km_mv, CDS_INT, out_missing);
+        CDS_BYTE, test_bdat_nmv, test_bdat_mv, CDS_INT, out_missing);
 
-    km_UNITS_TEST("m", CDS_INT, out_buffer, out_missing);
+    UNITS_TEST_BYTE("km", "m", CDS_INT, out_buffer, out_missing);
 
     LOG( gProgramName,
         "\n------------------------------------------------------------\n"
@@ -226,9 +233,9 @@ static int units_conversion_tests(void)
         "------------------------------------------------------------\n\n");
 
     cds_get_missing_values_map(
-        km_type, km_nmv, km_mv, CDS_FLOAT, out_missing);
+        CDS_BYTE, test_bdat_nmv, test_bdat_mv, CDS_FLOAT, out_missing);
 
-    km_UNITS_TEST("m", CDS_FLOAT, out_buffer, out_missing);
+    UNITS_TEST_BYTE("km", "m", CDS_FLOAT, out_buffer, out_missing);
 
     LOG( gProgramName,
         "\n------------------------------------------------------------\n"
@@ -236,9 +243,60 @@ static int units_conversion_tests(void)
         "------------------------------------------------------------\n\n");
 
     cds_get_missing_values_map(
-        km_type, km_nmv, km_mv, CDS_DOUBLE, out_missing);
+        CDS_BYTE, test_bdat_nmv, test_bdat_mv, CDS_DOUBLE, out_missing);
 
-    km_UNITS_TEST("m", CDS_DOUBLE, out_buffer, out_missing);
+    UNITS_TEST_BYTE("km", "m", CDS_DOUBLE, out_buffer, out_missing);
+
+    LOG( gProgramName,
+        "\n------------------------------------------------------------\n"
+        "float km -> int m\n"
+        "------------------------------------------------------------\n\n");
+
+    cds_get_missing_values_map(
+        CDS_FLOAT, test_fdat_nmv, test_fdat_mv, CDS_INT, out_missing);
+
+    UNITS_TEST_FLOAT("km", "m", CDS_INT, out_buffer, out_missing);
+
+    LOG( gProgramName,
+        "\n------------------------------------------------------------\n"
+        "Bad unit mapping table test: float meters_per_second -> float m/s\n"
+        "------------------------------------------------------------\n\n");
+
+    cds_get_missing_values_map(
+        CDS_FLOAT, test_fdat_nmv, test_fdat_mv, CDS_FLOAT, out_missing);
+
+    UNITS_TEST_FLOAT("meters_per_second", "m/s", CDS_FLOAT, out_buffer, out_missing);
+
+    LOG( gProgramName,
+        "\n------------------------------------------------------------\n"
+        "Bad unit mapping table test: int 'number of samples' -> int count\n"
+        "------------------------------------------------------------\n\n");
+
+    cds_get_missing_values_map(
+        CDS_INT, test_idat_nmv, test_idat_mv, CDS_INT, out_missing);
+
+    UNITS_TEST_FLOAT("number of samples", "count", CDS_INT, out_buffer, out_missing);
+
+    LOG( gProgramName,
+        "\n------------------------------------------------------------\n"
+        "Bad unit mapping table test: float 'km AGL' -> float m\n"
+        "------------------------------------------------------------\n\n");
+
+    cds_get_missing_values_map(
+        CDS_FLOAT, test_fdat_nmv, test_fdat_mv, CDS_FLOAT, out_missing);
+
+    UNITS_TEST_FLOAT("km AGL", "m", CDS_FLOAT, out_buffer, out_missing);
+
+    LOG( gProgramName,
+        "\n------------------------------------------------------------\n"
+        "Bad unit mapping table test: Invalid unit\n"
+        "------------------------------------------------------------\n\n");
+
+    cds_get_missing_values_map(
+        CDS_FLOAT, test_fdat_nmv, test_fdat_mv, CDS_FLOAT, out_missing);
+
+    UNITS_TEST_FLOAT("Unknown", "m", CDS_FLOAT, out_buffer, out_missing);
+
 
     cds_free_unit_system();
 

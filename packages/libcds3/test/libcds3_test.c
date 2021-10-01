@@ -1,21 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 60277 $
-*    $Author: ermold $
-*    $Date: 2015-02-15 00:42:57 +0000 (Sun, 15 Feb 2015) $
-*    $Version: afl-libcds3-1.1-0 $
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -41,7 +34,7 @@ int         gFailCount   = 0;
  *  Create test data arrays
  */
 
-static size_t NumTestDataTypes =  5;
+static size_t NumTestDataTypes = 10;
 static size_t NumTestValues    = 19;
 static size_t NumTestFills     =  2;
 
@@ -50,7 +43,13 @@ static CDSDataType TestDataTypes[] = {
     CDS_SHORT,
     CDS_INT,
     CDS_FLOAT,
-    CDS_DOUBLE
+    CDS_DOUBLE,
+    /* NetCDF4 extended data types */
+    CDS_INT64,
+    CDS_UBYTE,
+    CDS_USHORT,
+    CDS_UINT,
+    CDS_UINT64
 };
 
 static const char *TestBytesString =
@@ -194,6 +193,147 @@ static double TestDoubles[] = {
     CDS_FILL_DOUBLE
 };
 
+static const char *TestInt64sString =
+    "-9223372036854775808, -2147483648, -32768, -128, -89012, -4567, -123, "
+    "0, 123, 4567, 127, 32767, 2147483647, 9223372036854775807,"
+    "-9999, -127, -32767, -2147483647, -9223372036854775806";
+
+static long long TestInt64Fills[] = { -9999, CDS_FILL_INT64 };
+static long long TestInt64s[] = {
+    CDS_MIN_INT64,
+    CDS_MIN_INT,
+    CDS_MIN_SHORT,
+    CDS_MIN_BYTE,
+     -89012,
+      -4567,
+       -123,
+          0,
+        123,
+       4567,
+    CDS_MAX_BYTE,
+    CDS_MAX_SHORT,
+    CDS_MAX_INT,
+    CDS_MAX_INT64,
+      -9999,
+    CDS_FILL_BYTE,
+    CDS_FILL_SHORT,
+    CDS_FILL_INT,
+    CDS_FILL_INT64,
+};
+
+static const char *TestUBytesString =
+    "0, 0, 3, 7, 12, 24, 34, 36, 56, "
+    "64, 78, 88, 90, 100, 123, "
+    "127, 255, 255, 255";
+
+static unsigned char TestUByteFills[] = { 255, CDS_FILL_UBYTE };
+static unsigned char TestUBytes[] = {
+    CDS_MIN_UBYTE,
+          0,
+          3,
+          7,
+         12,
+         24,
+         34,
+         36,
+         56,
+         64,
+         78,
+         88,
+         90,
+        100,
+        123,
+    CDS_MAX_BYTE,
+    CDS_MAX_UBYTE,
+        255,
+    CDS_FILL_UBYTE,
+};
+
+static const char *TestUShortsString =
+    "0, 0, 0, 78, 90, 123, 256, 512, "
+    "4567, 8901, 23456, 32766, "
+    "127, 255, 32767, 65535U, 65535, 255, 65535";
+
+static unsigned short TestUShortFills[] = { 65535, CDS_FILL_USHORT };
+static unsigned short TestUShorts[] = {
+    CDS_MIN_USHORT,
+    CDS_MIN_UBYTE,
+          0,
+         78,
+         90,
+        123,
+        256,
+        512,
+       4567,
+       8901,
+      23456,
+      32766,
+    CDS_MAX_BYTE,
+    CDS_MAX_UBYTE,
+    CDS_MAX_SHORT,
+    CDS_MAX_USHORT,
+      65535,
+    CDS_FILL_UBYTE,
+    CDS_FILL_USHORT,
+};
+
+static const char *TestUIntsString =
+    "0, 0, 0, 0, 123, 4567, 23456, 89012, 345678, "
+    "127, 255, 32767, 65535U, 2147483647, 4294967295U"
+    "4294967295, 255, 65535, 4294967295U";
+
+static unsigned int TestUIntFills[] = { 4294967295U, CDS_FILL_UINT };
+static unsigned int TestUInts[] = {
+    CDS_MIN_UINT,
+    CDS_MIN_USHORT,
+    CDS_MIN_UBYTE,
+          0,
+        123,
+       4567,
+      23456,
+      89012,
+     345678,
+    CDS_MAX_BYTE,
+    CDS_MAX_UBYTE,
+    CDS_MAX_SHORT,
+    CDS_MAX_USHORT,
+    CDS_MAX_INT,
+    CDS_MAX_UINT,
+    4294967295U,
+    CDS_FILL_UBYTE,
+    CDS_FILL_USHORT,
+    CDS_FILL_UINT,
+};
+
+static const char *TestUInt64sString =
+    "0, 0, 0, 0, 0, 123, 4567, "
+    "127, 255, 32767, 65535, 2147483647, 4294967295,"
+    "9223372036854775807LL, 18446744073709551615ULL, "
+    "255, 65535, 4294967295U, 18446744073709551614ULL";
+
+static unsigned long long TestUInt64Fills[] = { -9999, CDS_FILL_UINT64 };
+static unsigned long long TestUInt64s[] = {
+    CDS_MIN_UINT64,
+    CDS_MIN_UINT,
+    CDS_MIN_USHORT,
+    CDS_MIN_UBYTE,
+          0,
+        123,
+       4567,
+    CDS_MAX_BYTE,
+    CDS_MAX_UBYTE,
+    CDS_MAX_SHORT,
+    CDS_MAX_USHORT,
+    CDS_MAX_INT,
+    CDS_MAX_UINT,
+    CDS_MAX_INT64,
+    CDS_MAX_UINT64,
+    CDS_FILL_UBYTE,
+    CDS_FILL_USHORT,
+    CDS_FILL_UINT,
+    CDS_FILL_UINT64,
+};
+
 void get_test_data_types(
     size_t        *ntypes,
     CDSDataType  **types)
@@ -240,6 +380,32 @@ void get_test_data(
             if (values) *values = (void *)TestBytes;
             if (fills)  *fills  = (void *)TestByteFills;
             if (string) *string = TestBytesString;
+            break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:
+            if (values) *values = (void *)TestInt64s;
+            if (fills)  *fills  = (void *)TestInt64Fills;
+            if (string) *string = TestInt64sString;
+            break;
+        case CDS_UBYTE:
+            if (values) *values = (void *)TestUBytes;
+            if (fills)  *fills  = (void *)TestUByteFills;
+            if (string) *string = TestUBytesString;
+            break;
+        case CDS_USHORT:
+            if (values) *values = (void *)TestUShorts;
+            if (fills)  *fills  = (void *)TestUShortFills;
+            if (string) *string = TestUShortsString;
+            break;
+        case CDS_UINT:
+            if (values) *values = (void *)TestUInts;
+            if (fills)  *fills  = (void *)TestUIntFills;
+            if (string) *string = TestUIntsString;
+            break;
+        case CDS_UINT64:
+            if (values) *values = (void *)TestUInt64s;
+            if (fills)  *fills  = (void *)TestUInt64Fills;
+            if (string) *string = TestUInt64sString;
             break;
         default: break;
     }
@@ -377,6 +543,15 @@ int define_missing_value_atts(
     short         sval = (short)dval;
     int           ival = (int)dval;
     float         fval = (float)dval;
+
+    long long      i64val = (long long)dval;
+    unsigned char  ubval  = (unsigned char)dval;
+    unsigned short usval  = (unsigned short)dval;
+    unsigned int   uival  = (unsigned int)dval;
+    unsigned long long ui64val = (unsigned long long)dval;
+
+    char *strval = (char *)"";
+
     void         *fill;
     void         *miss;
     char          fillbuf[8];
@@ -413,6 +588,41 @@ int define_missing_value_atts(
             sprintf(fillstr, "%f", *(float *)fill);
             break;
         case CDS_DOUBLE:
+            miss = &dval;
+            sprintf(missstr, "%f", *(double *)miss);
+            sprintf(fillstr, "%f", *(double *)fill);
+            break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:
+            miss = &i64val;
+            sprintf(missstr, "%lld", *(long long *)miss);
+            sprintf(fillstr, "%lld", *(long long *)fill);
+            break;
+        case CDS_UBYTE:
+            miss = &ubval;
+            sprintf(missstr, "%hhu", *(unsigned char *)miss);
+            sprintf(fillstr, "%hhu", *(unsigned char *)fill);
+            break;
+        case CDS_USHORT:
+            miss = &usval;
+            sprintf(missstr, "%hu", *(unsigned short *)miss);
+            sprintf(fillstr, "%hu", *(unsigned short *)fill);
+            break;
+        case CDS_UINT:
+            miss = &uival;
+            sprintf(missstr, "%u", *(unsigned int *)miss);
+            sprintf(fillstr, "%u", *(unsigned int *)fill);
+            break;
+        case CDS_UINT64:
+            miss = &ui64val;
+            sprintf(missstr, "%llu", *(unsigned long long *)miss);
+            sprintf(fillstr, "%llu", *(unsigned long long *)fill);
+            break;
+        case CDS_STRING:
+            miss = &strval;
+            sprintf(missstr, "%s", *(char **)miss);
+            sprintf(fillstr, "%s", *(char **)fill);
+            break;
         default:
             miss = &dval;
             sprintf(missstr, "%f", *(double *)miss);
@@ -552,7 +762,13 @@ void log_array_values(
         case CDS_INT:    fprintf(gLog->fp, "int    "); break;
         case CDS_FLOAT:  fprintf(gLog->fp, "float  "); break;
         case CDS_DOUBLE: fprintf(gLog->fp, "double "); break;
-
+        /* NetCDF4 extended data types */
+        case CDS_INT64:  fprintf(gLog->fp, "int64  "); break;
+        case CDS_UBYTE:  fprintf(gLog->fp, "ubyte  "); break;
+        case CDS_USHORT: fprintf(gLog->fp, "ushort "); break;
+        case CDS_UINT:   fprintf(gLog->fp, "uint   "); break;
+        case CDS_UINT64: fprintf(gLog->fp, "uint64 "); break;
+        case CDS_STRING: fprintf(gLog->fp, "string "); break;
         default:
             break;
     }

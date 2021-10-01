@@ -1,21 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2011 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 13175 $
-*    $Author: ermold $
-*    $Date: 2012-03-24 23:05:24 +0000 (Sat, 24 Mar 2012) $
-*    $Version:$
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -66,8 +59,6 @@ static int copy_tests(void)
     LOG( gProgramName,
         "------------------------------------------------------------\n"
         "Copy all dimensions, attributes and variables.\n"
-        " - attributes will be cast into CDS_CHAR type\n"
-        " - variables will be cast into CDS_DOUBLE type\n"
         "------------------------------------------------------------\n\n");
 
     copy = cds_define_group(NULL, "copy tests");
@@ -93,8 +84,6 @@ static int copy_tests(void)
     LOG( gProgramName,
         "------------------------------------------------------------\n"
         "Copy selected dimensions, attributes and variables.\n"
-        " - attributes will be cast into CDS_CHAR type\n"
-        " - variables will be cast into CDS_DOUBLE type\n"
         "------------------------------------------------------------\n\n");
 
     copy = cds_define_group(NULL, "copy tests");
@@ -245,9 +234,9 @@ static int rename_tests(void)
     LOG( gProgramName,
         "- Renaming a variable to an existing name should fail.\n\n");
 
-    if (cds_rename_var(var, "var_string") != 0) {
+    if (cds_rename_var(var, "var_char_2D") != 0) {
         ERROR( gProgramName,
-            "Rename of var_2D to var_string should have failed!\n");
+            "Rename of var_2D to var_char_2D should have failed!\n");
         return(0);
     }
 

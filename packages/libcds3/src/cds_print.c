@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 63472 $
-*    $Author: ermold $
-*    $Date: 2015-08-26 20:39:27 +0000 (Wed, 26 Aug 2015) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -50,10 +40,10 @@ int _cds_print_att_array(FILE *fp, CDSAtt *att)
 
             switch (att->type) {
                 case CDS_BYTE:
-                    nbytes = fprintf(fp, "%d", att->value.bp[i]);
+                    nbytes = fprintf(fp, "%hhd", att->value.bp[i]);
                     break;
                 case CDS_SHORT:
-                    nbytes = fprintf(fp, "%d", att->value.sp[i]);
+                    nbytes = fprintf(fp, "%hd", att->value.sp[i]);
                     break;
                 case CDS_INT:
                     nbytes = fprintf(fp, "%d", att->value.ip[i]);
@@ -63,6 +53,22 @@ int _cds_print_att_array(FILE *fp, CDSAtt *att)
                     break;
                 case CDS_DOUBLE:
                     nbytes = fprintf(fp, "%.15g", att->value.dp[i]);
+                    break;
+                /* NetCDF4 extended data types */
+                case CDS_INT64:
+                    nbytes = fprintf(fp, "%lld", att->value.i64p[i]);
+                    break;
+                case CDS_UBYTE:
+                    nbytes = fprintf(fp, "%hhu", att->value.ubp[i]);
+                    break;
+                case CDS_USHORT:
+                    nbytes = fprintf(fp, "%hu", att->value.usp[i]);
+                    break;
+                case CDS_UINT:
+                    nbytes = fprintf(fp, "%u", att->value.uip[i]);
+                    break;
+                case CDS_UINT64:
+                    nbytes = fprintf(fp, "%llu", att->value.ui64p[i]);
                     break;
                 default:
                     break;
@@ -87,7 +93,7 @@ int _cds_print_att_array(FILE *fp, CDSAtt *att)
     return(tbytes);
 }
 
-int _cds_print_att_string(FILE *fp, CDSAtt *att)
+int _cds_print_att_array_char(FILE *fp, CDSAtt *att)
 {
     int   nbytes;
     int   tbytes;
@@ -134,6 +140,29 @@ int _cds_print_att_string(FILE *fp, CDSAtt *att)
     return(tbytes);
 }
 
+int _cds_print_att_array_string(FILE *fp, const char *indent, CDSAtt *att)
+{
+    int    nbytes;
+    int    tbytes = 0;
+    size_t i;
+
+    if (att->length <= 0) {
+        return(0);
+    }
+
+    nbytes = fprintf(fp, "\"%s\"", att->value.strp[0]);
+    if (nbytes < 0) return(nbytes);
+    tbytes += nbytes;
+
+    for (i = 1; i < att->length; i++) {
+        nbytes = fprintf(fp, ",\n%s\"%s\"", indent, att->value.strp[i]);
+        if (nbytes < 0) return(nbytes);
+        tbytes += nbytes;
+    }
+
+    return(tbytes);
+}
+
 int _cds_print_data_array(
     FILE        *fp,
     int          line_length,
@@ -160,10 +189,10 @@ int _cds_print_data_array(
 
         switch (type) {
             case CDS_BYTE:
-                str_length = sprintf(str_value, "%d", data.bp[i]);
+                str_length = sprintf(str_value, "%hhd", data.bp[i]);
                 break;
             case CDS_SHORT:
-                str_length = sprintf(str_value, "%d", data.sp[i]);
+                str_length = sprintf(str_value, "%hd", data.sp[i]);
                 break;
             case CDS_INT:
                 str_length = sprintf(str_value, "%d", data.ip[i]);
@@ -173,6 +202,22 @@ int _cds_print_data_array(
                 break;
             case CDS_DOUBLE:
                 str_length = sprintf(str_value, "%.15g", data.dp[i]);
+                break;
+            /* NetCDF4 extended data types */
+            case CDS_INT64:
+                str_length = sprintf(str_value, "%lld", data.i64p[i]);
+                break;
+            case CDS_UBYTE:
+                str_length = sprintf(str_value, "%hhu", data.ubp[i]);
+                break;
+            case CDS_USHORT:
+                str_length = sprintf(str_value, "%hu", data.usp[i]);
+                break;
+            case CDS_UINT:
+                str_length = sprintf(str_value, "%u", data.uip[i]);
+                break;
+            case CDS_UINT64:
+                str_length = sprintf(str_value, "%llu", data.ui64p[i]);
                 break;
             default:
                 str_length = sprintf(str_value, "NaT");
@@ -199,11 +244,11 @@ int _cds_print_data_array(
     return(tbytes);
 }
 
-int _cds_print_data_string(
-    FILE    *fp,
-    size_t   start,
-    size_t   count,
-    CDSData  data)
+int _cds_print_data_array_char(
+    FILE   *fp,
+    size_t  start,
+    size_t  count,
+    char   *chrp)
 {
     int    nbytes;
     int    tbytes;
@@ -219,7 +264,7 @@ int _cds_print_data_string(
 
     for (i = start; i < end; i++) {
 
-        switch (uc = data.cp[i] & 0377) {
+        switch (uc = chrp[i] & 0377) {
             case '\0': nbytes = fprintf(fp, "\\0");    break;
             case '\b': nbytes = fprintf(fp, "\\b");    break;
             case '\f': nbytes = fprintf(fp, "\\f");    break;
@@ -238,6 +283,38 @@ int _cds_print_data_string(
     nbytes = fprintf(fp, "\"");
     if (nbytes < 0) return(nbytes);
     tbytes += nbytes;
+
+    return(tbytes);
+}
+
+int _cds_print_data_array_string(
+    FILE        *fp,
+    const char  *indent,
+    size_t       start,
+    size_t       count,
+    char       **strpp)
+{
+    int    nbytes;
+    int    tbytes;
+    size_t end;
+    size_t i;
+
+    tbytes = 0;
+    end    = start + count;
+
+    if (!strpp || end <= start) {
+        return(0);
+    }
+
+    nbytes = fprintf(fp, "\n%s\"%s\"", indent, strpp[start]);
+    if (nbytes < 0) return(nbytes);
+    tbytes += nbytes;
+
+    for (i = start + 1; i < end; i++) {
+        nbytes = fprintf(fp, ",\n%s\"%s\"", indent, strpp[i]);
+        if (nbytes < 0) return(nbytes);
+        tbytes += nbytes;
+    }
 
     return(tbytes);
 }
@@ -298,6 +375,7 @@ int cds_print_att(
     char        format[64];
     int         nbytes;
     int         tbytes;
+    char        indent2[128];
 
     sprintf(format, "%%s%%-%ds = ", min_width);
 
@@ -307,7 +385,19 @@ int cds_print_att(
 
     if (att->type == CDS_CHAR) {
 
-        nbytes = _cds_print_att_string(fp, att);
+        nbytes = _cds_print_att_array_char(fp, att);
+        if (nbytes < 0) return(nbytes);
+        tbytes += nbytes;
+
+        nbytes = fprintf(fp, "\n");
+    }
+    else if (att->type == CDS_STRING) {
+
+        if (nbytes > 127) nbytes = 127;
+        memset(indent2, ' ', nbytes);
+        indent2[nbytes] = '\0';
+
+        nbytes = _cds_print_att_array_string(fp, indent2, att);
         if (nbytes < 0) return(nbytes);
         tbytes += nbytes;
 
@@ -631,6 +721,7 @@ int cds_print_var_data(
     size_t sample_size;
     int    nbytes;
     int    tbytes;
+    char   indent2[128];
     size_t si;
 
     tbytes = 0;
@@ -661,10 +752,25 @@ int cds_print_var_data(
 
     sample_size = cds_var_sample_size(var);
 
-    if (sample_size == 1) {
+    if (var->type == CDS_STRING) {
+
+        nbytes = (indent) ? strlen(indent) : 0;
+        nbytes += 4;
+        if (nbytes > 127) nbytes = 127;
+        memset(indent2, ' ', nbytes);
+        indent2[nbytes] = '\0';
+
+        nbytes = _cds_print_data_array_string(
+            fp, indent2, 0, var->sample_count * sample_size, var->data.strp);
+
+        if (nbytes < 0) return(nbytes);
+        tbytes += nbytes;
+    }
+    else if (sample_size == 1) {
+
         if (var->type == CDS_CHAR) {
-            nbytes = _cds_print_data_string(
-                fp, 0, var->sample_count, var->data);
+            nbytes = _cds_print_data_array_char(
+                fp, 0, var->sample_count, var->data.cp);
         }
         else {
             nbytes = _cds_print_data_array(
@@ -683,8 +789,8 @@ int cds_print_var_data(
         for (si = 0; si < var->sample_count; si++) {
 
             if (var->type == CDS_CHAR) {
-                nbytes = _cds_print_data_string(
-                    fp, si * sample_size, sample_size, var->data);
+                nbytes = _cds_print_data_array_char(
+                    fp, si * sample_size, sample_size, var->data.cp);
             }
             else {
                 nbytes = _cds_print_data_array(

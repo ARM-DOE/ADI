@@ -17,6 +17,12 @@ defined:    /root/_atts_/att_float
 defined:    /root/_atts_/att_double
 defined:    /root/_atts_/att_text
 defined:    /root/_atts_/att_multi_line
+defined:    /root/_atts_/att_int64
+defined:    /root/_atts_/att_ubyte
+defined:    /root/_atts_/att_ushort
+defined:    /root/_atts_/att_uint
+defined:    /root/_atts_/att_uint64
+defined:    /root/_atts_/att_string
 defined:    /root/_vars_/time
 added data: /root/_vars_/time
 defined:    /root/_vars_/range
@@ -67,6 +73,12 @@ defined:    /root/_vars_/var_int/_atts_/att_float
 defined:    /root/_vars_/var_int/_atts_/att_double
 defined:    /root/_vars_/var_int/_atts_/att_text
 defined:    /root/_vars_/var_int/_atts_/att_multi_line
+defined:    /root/_vars_/var_int/_atts_/att_int64
+defined:    /root/_vars_/var_int/_atts_/att_ubyte
+defined:    /root/_vars_/var_int/_atts_/att_ushort
+defined:    /root/_vars_/var_int/_atts_/att_uint
+defined:    /root/_vars_/var_int/_atts_/att_uint64
+defined:    /root/_vars_/var_int/_atts_/att_string
 added data: /root/_vars_/var_int
 defined:    /root/_vars_/var_float
 defined:    /root/_vars_/var_float/_atts_/long_name
@@ -76,12 +88,36 @@ defined:    /root/_vars_/var_double
 defined:    /root/_vars_/var_double/_atts_/long_name
 defined:    /root/_vars_/var_double/_atts_/units
 added data: /root/_vars_/var_double
-defined:    /root/_vars_/var_2D
-defined:    /root/_vars_/var_2D/_atts_/long_name
-defined:    /root/_vars_/var_2D/_atts_/units
+defined:    /root/_vars_/var_int64
+defined:    /root/_vars_/var_int64/_atts_/long_name
+defined:    /root/_vars_/var_int64/_atts_/units
+added data: /root/_vars_/var_int64
+defined:    /root/_vars_/var_ubyte
+defined:    /root/_vars_/var_ubyte/_atts_/long_name
+defined:    /root/_vars_/var_ubyte/_atts_/units
+added data: /root/_vars_/var_ubyte
+defined:    /root/_vars_/var_ushort
+defined:    /root/_vars_/var_ushort/_atts_/long_name
+defined:    /root/_vars_/var_ushort/_atts_/units
+added data: /root/_vars_/var_ushort
+defined:    /root/_vars_/var_uint
+defined:    /root/_vars_/var_uint/_atts_/long_name
+defined:    /root/_vars_/var_uint/_atts_/units
+added data: /root/_vars_/var_uint
+defined:    /root/_vars_/var_uint64
+defined:    /root/_vars_/var_uint64/_atts_/long_name
+defined:    /root/_vars_/var_uint64/_atts_/units
+added data: /root/_vars_/var_uint64
 defined:    /root/_vars_/var_string
 defined:    /root/_vars_/var_string/_atts_/long_name
 defined:    /root/_vars_/var_string/_atts_/units
+added data: /root/_vars_/var_string
+defined:    /root/_vars_/var_2D
+defined:    /root/_vars_/var_2D/_atts_/long_name
+defined:    /root/_vars_/var_2D/_atts_/units
+defined:    /root/_vars_/var_char_2D
+defined:    /root/_vars_/var_char_2D/_atts_/long_name
+defined:    /root/_vars_/var_char_2D/_atts_/units
 defined:    /root/group_1
 defined:    /root/group_1/_dims_/dim_delete_1
 defined:    /root/group_1/_dims_/dim_1_1
@@ -179,6 +215,14 @@ Group: /root
     - Line 1
     - Line 2
     - Line 3"
+        att_int64      = [-9223372036854775808, -4611686018427387904, -2147483648, -32768, -128, 127, 32767, 2147483647, 4611686018427387904, 9223372036854775807] : int64
+        att_ubyte      = [0, 2, 3, 4, 8, 16, 32, 64, 128, 255] : ubyte
+        att_ushort     = [0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535] : ushort
+        att_uint       = [0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648, 4294967295] : uint
+        att_uint64     = [0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295, 4294967296, 18446744073709551615] : uint64
+        att_string     = "string array value 1",
+                         "string array value 2",
+                         "string array value 3"
 
     Variables:
 
@@ -238,6 +282,14 @@ Group: /root
     - Line 1
     - Line 2
     - Line 3"
+            att_int64      = [-9223372036854775808, -4611686018427387904, -2147483648, -32768, -128, 127, 32767, 2147483647, 4611686018427387904, 9223372036854775807] : int64
+            att_ubyte      = [0, 2, 3, 4, 8, 16, 32, 64, 128, 255] : ubyte
+            att_ushort     = [0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535] : ushort
+            att_uint       = [0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648, 4294967295] : uint
+            att_uint64     = [0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295, 4294967296, 18446744073709551615] : uint64
+            att_string     = "string array value 1",
+                             "string array value 2",
+                             "string array value 3"
 
         var_float(time) : float
             long_name = "long_name attribute value"
@@ -247,11 +299,35 @@ Group: /root
             long_name = "long_name attribute value"
             units     = "units attribute value"
 
+        var_int64(time) : int64
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_ubyte(time) : ubyte
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_ushort(time) : ushort
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_uint(time) : uint
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_uint64(time) : uint64
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        var_string(time) : string
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
         var_2D(time, range) : double
             long_name = "long_name attribute value"
             units     = "units attribute value"
 
-        var_string(time, string) : char
+        var_char_2D(time, string) : char
             long_name = "long_name attribute value"
             units     = "units attribute value"
 
@@ -268,15 +344,21 @@ Group: /root
             vararray_1[0]: /root/_vars_/var_char_static
             vararray_1[1]: /root/_vars_/var_char
             vararray_1[2]: /root/_vars_/var_string
+            vararray_1[3]: /root/_vars_/var_char_2D
 
             vararray_2[0]: /root/_vars_/var_byte_static
             vararray_2[1]: /root/_vars_/var_byte
+            vararray_2[2]: /root/_vars_/var_ubyte
 
             vararray_3[0]: /root/_vars_/var_short_static
             vararray_3[1]: /root/_vars_/var_short
+            vararray_3[2]: /root/_vars_/var_ushort
 
             vararray_4[0]: /root/_vars_/var_int_static
             vararray_4[1]: /root/_vars_/var_int
+            vararray_4[2]: /root/_vars_/var_int64
+            vararray_4[3]: /root/_vars_/var_uint
+            vararray_4[4]: /root/_vars_/var_uint64
 
             vararray_5[0]: /root/_vars_/var_float_static
             vararray_5[1]: /root/_vars_/var_float
@@ -339,6 +421,32 @@ Group: /root
     -123.456789123456, -0.0123456789123456, 0.0123456789123456,
     123.456789123456, 1234567.89123456, 12345678912.3456, 123456789123456
 
+        var_int64 = -9223372036854775808, -4611686018427387904, -2147483648,
+    -32768, -128, 127, 32767, 2147483647, 4611686018427387904,
+    9223372036854775807
+
+        var_ubyte = 0, 2, 3, 4, 8, 16, 32, 64, 128, 255
+
+        var_ushort = 0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535
+
+        var_uint = 0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648,
+    4294967295
+
+        var_uint64 = 0, 127, 128, 65535, 65536, 2147483647, 2147483648,
+    4294967295, 4294967296, 18446744073709551615
+
+        var_string = 
+            "string 1",
+            "string 2",
+            "string 3",
+            "string 4",
+            "string 5",
+            "string 6",
+            "string 7",
+            "string 8",
+            "string 9",
+            "string 10"
+
         var_2D = 
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
     20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
@@ -370,7 +478,7 @@ Group: /root
     914, 915, 916, 917, 918, 919, 920, 921, 922, 923, 924, 925, 926, 927, 928,
     929, 930, 931, 932, 933, 934, 935, 936, 937
 
-        var_string = NULL
+        var_char_2D = NULL
 
 Group: /root/group_1
 
@@ -560,7 +668,25 @@ VarGroup: /root/_vargroups_/vargroup_2
 
     vararray_1[2]: /root/_vars_/var_string
 
-        var_string(time, string) : char
+        var_string(time) : string
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        data = 
+            "string 1",
+            "string 2",
+            "string 3",
+            "string 4",
+            "string 5",
+            "string 6",
+            "string 7",
+            "string 8",
+            "string 9",
+            "string 10"
+
+    vararray_1[3]: /root/_vars_/var_char_2D
+
+        var_char_2D(time, string) : char
             long_name = "long_name attribute value"
             units     = "units attribute value"
 
@@ -582,6 +708,14 @@ VarGroup: /root/_vargroups_/vargroup_2
 
         data = -128, -64, -32, -16, -8, 8, 16, 32, 64, 127
 
+    vararray_2[2]: /root/_vars_/var_ubyte
+
+        var_ubyte(time) : ubyte
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        data = 0, 2, 3, 4, 8, 16, 32, 64, 128, 255
+
     vararray_3[0]: /root/_vars_/var_short_static
 
         var_short_static(static) : short
@@ -599,6 +733,14 @@ VarGroup: /root/_vargroups_/vargroup_2
 
         data = -32768, -16384, -8192, -4096, -2048, 2048, 4096, 8192, 16384,
     32767
+
+    vararray_3[2]: /root/_vars_/var_ushort
+
+        var_ushort(time) : ushort
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        data = 0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535
 
     vararray_4[0]: /root/_vars_/var_int_static
 
@@ -623,9 +765,44 @@ VarGroup: /root/_vargroups_/vargroup_2
     - Line 1
     - Line 2
     - Line 3"
+            att_int64      = [-9223372036854775808, -4611686018427387904, -2147483648, -32768, -128, 127, 32767, 2147483647, 4611686018427387904, 9223372036854775807] : int64
+            att_ubyte      = [0, 2, 3, 4, 8, 16, 32, 64, 128, 255] : ubyte
+            att_ushort     = [0, 127, 128, 255, 256, 1024, 8192, 16384, 32768, 65535] : ushort
+            att_uint       = [0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648, 4294967295] : uint
+            att_uint64     = [0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295, 4294967296, 18446744073709551615] : uint64
+            att_string     = "string array value 1",
+                             "string array value 2",
+                             "string array value 3"
 
         data = -2147483648, -268435456, -33554432, -4194304, -524288, 524288,
     4194304, 33554432, 268435456, 2147483647
+
+    vararray_4[2]: /root/_vars_/var_int64
+
+        var_int64(time) : int64
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        data = -9223372036854775808, -4611686018427387904, -2147483648, -32768,
+    -128, 127, 32767, 2147483647, 4611686018427387904, 9223372036854775807
+
+    vararray_4[3]: /root/_vars_/var_uint
+
+        var_uint(time) : uint
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        data = 0, 127, 128, 255, 256, 65535, 65536, 2147483647, 2147483648,
+    4294967295
+
+    vararray_4[4]: /root/_vars_/var_uint64
+
+        var_uint64(time) : uint64
+            long_name = "long_name attribute value"
+            units     = "units attribute value"
+
+        data = 0, 127, 128, 65535, 65536, 2147483647, 2147483648, 4294967295,
+    4294967296, 18446744073709551615
 
     vararray_5[0]: /root/_vars_/var_float_static
 

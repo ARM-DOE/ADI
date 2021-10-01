@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2011 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 60277 $
-*    $Author: ermold $
-*    $Date: 2015-02-15 00:42:57 +0000 (Sun, 15 Feb 2015) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -63,31 +53,19 @@ static int          _NumUserDataAtts;
 /**
  *  Private: Cleanup CDS data converter mapping values.
  *
- *  @param  in_type  - input data type
- *  @param  out_type - output data type
- */
-static int _cds_apply_range_check(CDSDataType in_type, CDSDataType out_type)
-{
-    if ((in_type  > out_type) &&
-        (in_type != CDS_BYTE)) {
-
-        return(1);
-    }
-
-    return(0);
-}
-
-/**
- *  Private: Cleanup CDS data converter mapping values.
- *
  *  @param  dc - pointer to the _CDSConverter
  */
 static void _cds_cleanup_converter_map(_CDSConverter *dc)
 {
     if (dc) {
 
-        if (dc->in_map)  free(dc->in_map);
-        if (dc->out_map) free(dc->out_map);
+        if (dc->in_map) {
+            cds_free_array(dc->in_type, dc->map_length, dc->in_map);
+        }
+
+        if (dc->out_map) {
+            cds_free_array(dc->out_type, dc->map_length, dc->out_map);
+        }
 
         dc->map_length = 0;
         dc->in_map     = (void *)NULL;
@@ -152,7 +130,7 @@ int _cds_has_conversion(CDSConverter converter, int flags)
     if ((dc->in_type != dc->out_type)           ||
         (dc->uc && !(flags & CDS_IGNORE_UNITS)) ||
         (dc->map_length && !dc->map_ident)      ||
-        (dc->orv_min ||dc->orv_max)) {
+        (dc->orv_min || dc->orv_max)) {
 
         return(1);
     }
@@ -642,8 +620,10 @@ int cds_convert_var(
  *                      NULL for no unit conversion
  *
  *  @return
- *    -  the data converter
- *    -  NULL if an error occurred
+ *    - the data converter
+ *    - NULL if attempting to convert between string and numbers,
+ *           or attempting to convert units for string values,
+ *           or a memory allocation error occurs
  *
  *  @see
  *    - cds_destroy_converter()
@@ -658,6 +638,21 @@ CDSConverter cds_create_converter(
 {
     _CDSConverter *dc;
     int            status;
+
+    /* Check for CDS_STRING types */
+
+    if (in_type == CDS_STRING) {
+        if (out_type != CDS_STRING) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert between strings and numbers in cds_create_converter\n");
+            return((CDSConverter)NULL);
+        }
+    }
+    else if (out_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to convert between strings and numbers in cds_create_converter\n");
+        return((CDSConverter)NULL);
+    }
 
     /* Initialize the converter */
 
@@ -711,6 +706,13 @@ CDSConverter cds_create_converter(
 
         status = cds_get_unit_converter(in_units, out_units, &dc->uc);
         if (status < 0) {
+            _cds_destroy_converter(dc);
+            return((CDSConverter)NULL);
+        }
+
+        if (in_type == CDS_STRING && dc->uc) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert units for string values in cds_create_converter\n");
             _cds_destroy_converter(dc);
             return((CDSConverter)NULL);
         }
@@ -846,12 +848,12 @@ CDSConverter cds_create_converter_array_to_var(
                 "Could not create array-to-var converter for: %s\n",
                 cds_get_object_path(out_var));
 
-            free(out_missing);
+            cds_free_array(out_var->type, out_nmissing, out_missing);
             cds_destroy_converter(converter);
             return((CDSConverter)NULL);
         }
 
-        free(out_missing);
+        cds_free_array(out_var->type, out_nmissing, out_missing);
     }
 
     return(converter);
@@ -946,12 +948,12 @@ CDSConverter cds_create_converter_var_to_array(
                 "Could not create var-to-array converter for: %s\n",
                 cds_get_object_path(in_var));
 
-            free(in_missing);
+            cds_free_array(in_var->type, in_nmissing, in_missing);
             cds_destroy_converter(converter);
             return((CDSConverter)NULL);
         }
 
-        free(in_missing);
+        cds_free_array(in_var->type, in_nmissing, in_missing);
     }
     else if (!out_nmissing && out_missing) {
         cds_get_default_fill_value(out_type, out_missing);
@@ -1044,8 +1046,11 @@ CDSConverter cds_create_converter_var_to_var(
         goto RETURN_ERROR;
     }
 
-    free(out_missing);
     free(in_missing);
+    free(out_missing);
+
+//    cds_free_array(in_var->type, in_nmissing, in_missing);
+//    cds_free_array(out_var->type, out_nmissing, out_missing);
 
     return(converter);
 
@@ -1054,6 +1059,8 @@ RETURN_ERROR:
     if (converter)   cds_destroy_converter(converter);
     if (in_missing)  free(in_missing);
     if (out_missing) free(out_missing);
+//    if (in_missing)  cds_free_array(in_var->type, in_nmissing, in_missing);
+//    if (out_missing) cds_free_array(out_var->type, out_nmissing, out_missing);
 
     ERROR( CDS_LIB_NAME,
         "Could not create var-to-var converter\n"
@@ -1137,7 +1144,14 @@ int cds_set_converter_map(
         return(1);
     }
 
-    if (!(dc->in_map = cds_memdup(in_nbytes, in_map))) {
+    if (dc->in_type == CDS_STRING) {
+        dc->in_map = cds_copy_string_array(in_map_length, in_map, NULL);
+    }
+    else {
+        dc->in_map = cds_memdup(in_nbytes, in_map);
+    }
+
+    if (!dc->in_map) {
 
         ERROR( CDS_LIB_NAME,
             "Could not set data converter mapping values\n"
@@ -1157,27 +1171,75 @@ int cds_set_converter_map(
         dc->out_map = cds_get_missing_values_map(
             dc->in_type, in_map_length, in_map, dc->out_type, NULL);
 
-        if (dc->out_map && out_map) {
+        if (!dc->out_map) {
+            _cds_cleanup_converter_map(dc);
+            return(0);
+        }
+
+        if (out_map) {
 
             /* Map all input values to a single output value */
 
-            mp = (char *)dc->out_map + dc->out_size;
+            if (dc->out_type == CDS_STRING) {
 
-            for (mi = 1; mi < in_map_length; mi++) {
-                memcpy(mp, dc->out_map, dc->out_size);
-                mp += dc->out_size;
+                char **strpp = dc->out_map;
+                char  *strp  = strpp[0];
+
+                for (mi = 1; mi < in_map_length; mi++) {
+                    if (strpp[mi]) free(strpp[mi]);
+                    if (strp) {
+                        strpp[mi] = strdup(strp);
+                        if (strpp[mi]) goto MEMORY_ERROR;
+                    }
+                    else {
+                        strpp[mi] = (char *)NULL;
+                    }
+                }
+
+                strpp = out_map;
+
+                if (strp) {
+                    *strpp = strdup(strp);
+                    if (!*strpp) goto MEMORY_ERROR;
+                }
+                else {
+                    *strpp = (char *)NULL;
+                }
             }
-
-            memcpy(out_map, dc->out_map, dc->out_size);
+            else {
+                mp = (char *)dc->out_map + dc->out_size;
+                for (mi = 1; mi < in_map_length; mi++) {
+                    memcpy(mp, dc->out_map, dc->out_size);
+                    mp += dc->out_size;
+                }
+                memcpy(out_map, dc->out_map, dc->out_size);
+            }
         }
     }
     else if (out_map_length < in_map_length) {
 
         /* Pad output data mapping array with first value in the array */
 
-        dc->out_map = malloc(in_map_length * dc->out_size);
+        dc->out_map = calloc(in_map_length, dc->out_size);
+        if (!dc->out_map) goto MEMORY_ERROR;
 
-        if (dc->out_map) {
+        if (dc->out_type == CDS_STRING) {
+
+            char **strpp1 = (char **)out_map;
+            char **strpp2 = (char **)dc->out_map;
+
+            if (!cds_copy_string_array(out_map_length, strpp1, strpp2)) {
+                goto MEMORY_ERROR;
+            }
+
+            char *strp = strpp1[0];
+
+            for (mi = out_map_length; mi < in_map_length; mi++) {
+                strpp2[mi] = strdup(strp);
+                if (!strpp2[mi]) goto MEMORY_ERROR;
+            }
+        }
+        else {
 
             memcpy(dc->out_map, out_map, out_nbytes);
 
@@ -1193,18 +1255,14 @@ int cds_set_converter_map(
 
         /* Use specified output data mapping array */
 
-        dc->out_map = cds_memdup(out_nbytes, out_map);
-    }
+        if (dc->out_type == CDS_STRING) {
+            dc->out_map = cds_copy_string_array(out_map_length, (char **)out_map, NULL);
+        }
+        else {
+            dc->out_map = cds_memdup(out_nbytes, out_map);
+        }
 
-    if (!dc->out_map) {
-
-        ERROR( CDS_LIB_NAME,
-            "Could not set data converter mapping values\n"
-            " -> memory allocation error\n");
-
-        _cds_cleanup_converter_map(dc);
-
-        return(0);
+        if (!dc->out_map) goto MEMORY_ERROR;
     }
 
     /* Check if the input and output map values are equal */
@@ -1222,6 +1280,14 @@ int cds_set_converter_map(
     }
 
     return(1);
+
+MEMORY_ERROR:
+
+    ERROR( CDS_LIB_NAME,
+        "Could not set data converter mapping values\n"
+        " -> memory allocation error\n");
+    _cds_cleanup_converter_map(dc);
+    return(0);
 }
 
 /**
@@ -1236,17 +1302,17 @@ int cds_set_converter_map(
  *  @param  converter - the data converter
  *
  *  @param  out_min   - pointer to the minimum value, or NULL to use the
- *                      minimum value of the output data type if the range of
- *                      the output data type is less than the range of the
- *                      input data type.
- *
+ *                      minimum value of the output data type if the 
+ *                      minimum value of the input data type is less than
+ *                      the minimum value of the output data type.
+ * 
  *  @param  orv_min   - pointer to the value to use for values less than min,
  *                      or NULL to disable the min value check.
  *
  *  @param  out_max   - pointer to the maximum value, or NULL to use the
- *                      maximum value of the output data type if the range of
- *                      the output data type is less than the range of the
- *                      input data type.
+ *                      maximum value of the output data type if the
+ *                      maximum value of the input data type is greater than
+ *                      the maximum value of the output data type.
  *
  *  @param  orv_max   - pointer to the value to use for values greater than max,
  *                      or NULL to disable the max value check.
@@ -1262,8 +1328,7 @@ int cds_set_converter_range(
     void         *out_max,
     void         *orv_max)
 {
-    _CDSConverter *dc        = (_CDSConverter *)converter;
-    int            range_check;
+    _CDSConverter *dc = (_CDSConverter *)converter;
 
     /* Cleanup previous values */
 
@@ -1271,43 +1336,49 @@ int cds_set_converter_range(
 
     /* Set new values */
 
-    range_check = _cds_apply_range_check(dc->in_type, dc->out_type);
-
-    if (orv_min && (out_min || range_check)) {
+    if (orv_min) {
 
         if (!out_min) {
-            out_min = _cds_data_type_min(dc->out_type);
+            if (_cds_data_type_mincmp(dc->in_type, dc->out_type) < 0) {
+                out_min = _cds_data_type_min(dc->out_type);
+            }
         }
 
-        if (!(dc->out_min = cds_memdup(dc->out_size, out_min)) ||
-            !(dc->orv_min = cds_memdup(dc->out_size, orv_min))) {
+        if (out_min) {
+            if (!(dc->out_min = cds_memdup(dc->out_size, out_min)) ||
+                !(dc->orv_min = cds_memdup(dc->out_size, orv_min))) {
 
-            ERROR( CDS_LIB_NAME,
-                "Could not set data converter range\n"
-                " -> memory allocation error\n");
+                ERROR( CDS_LIB_NAME,
+                    "Could not set data converter range\n"
+                    " -> memory allocation error\n");
 
-            _cds_cleanup_converter_range(dc);
+                _cds_cleanup_converter_range(dc);
 
-            return(0);
+                return(0);
+            }
         }
     }
 
-    if (orv_max && (out_max || range_check)) {
+    if (orv_max) {
 
         if (!out_max) {
-            out_max = _cds_data_type_max(dc->out_type);
+            if (_cds_data_type_maxcmp(dc->in_type, dc->out_type) > 0) {
+                out_max = _cds_data_type_max(dc->out_type);
+            }
         }
 
-        if (!(dc->out_max = cds_memdup(dc->out_size, out_max)) ||
-            !(dc->orv_max = cds_memdup(dc->out_size, orv_max))) {
+        if (out_max) {
+            if (!(dc->out_max = cds_memdup(dc->out_size, out_max)) ||
+                !(dc->orv_max = cds_memdup(dc->out_size, orv_max))) {
 
-            ERROR( CDS_LIB_NAME,
-                "Could not set data converter range\n"
-                " -> memory allocation error\n");
+                ERROR( CDS_LIB_NAME,
+                    "Could not set data converter range\n"
+                    " -> memory allocation error\n");
 
-            _cds_cleanup_converter_range(dc);
+                _cds_cleanup_converter_range(dc);
 
-            return(0);
+                return(0);
+            }
         }
     }
 

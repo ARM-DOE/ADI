@@ -25,6 +25,27 @@ extern const char *gProgramName;
 extern CDSGroup   *gRoot;
 extern FILE       *gLogFP;
 
+static void _print_missings(CDSVar *var)
+{
+    int     nmissing;
+    double *missing;
+    int     mi;
+
+    nmissing = cds_get_var_missing_values(var, (void **)&missing);
+    if (!nmissing) {
+        fprintf(gLogFP, "\nmissing values = (null)\n\n");
+        return;
+    }
+
+    fprintf(gLogFP, "\nmissing values = [ %g", missing[0]);
+    for (mi = 1; mi < nmissing; ++mi) {
+        fprintf(gLogFP, ", %g", missing[mi]);
+    }
+    fprintf(gLogFP, " ]\n\n");
+
+    free(missing);
+}
+
 /*******************************************************************************
  *  Create Test Variabless
  */
@@ -1692,6 +1713,136 @@ static int bounds_var_data_tests(void)
 }
 
 /*******************************************************************************
+ *  Get missing values test
+ */
+
+static int get_missing_values_test(void)
+{
+    CDSGroup *group = NULL;
+    CDSVar   *var;
+    double    dblval;
+    CDSAtt   *att, *att1, *att2;
+    double    default_fill = CDS_FILL_DOUBLE;
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Get missing values test\n"
+        "------------------------------------------------------------\n");
+
+    if (!create_test_var_double_mm(&group, &var, 0)) {
+        return(0);
+    }
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Call cds_create_missing_value_att() with flags == 1\n"
+        "------------------------------------------------------------\n");
+
+    if (!cds_create_missing_value_att(var, 1)) {
+        return(0);
+    }
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Call cds_create_missing_value_att() with flags == 0\n"
+        "------------------------------------------------------------\n");
+
+    if (!cds_create_missing_value_att(var, 0)) {
+        return(0);
+    }
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Change missing_value to -9999\n"
+        "Add 'missing-value = -8888' as char type\n"
+        "Add 'missing_data = -7777' as char type\n"
+        "------------------------------------------------------------\n");
+
+    dblval = -9999;
+    if (!cds_change_att(var, 1, "missing_value", CDS_DOUBLE, 1, &dblval)) {
+        return(0);
+    }
+
+    att1 = cds_define_att(var, "missing-value", CDS_CHAR, 5, "-8888");
+    if (!att1) return(0);
+
+    att2 = cds_define_att(var, "missing_data", CDS_CHAR, 5, "-7777");
+    if (!att2) return(0);
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Set default fill value\n"
+        "------------------------------------------------------------\n");
+
+    if (!cds_set_var_default_fill_value(var, &default_fill)) {
+        return(0);
+    }
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Change 'missing_data = -9999'\n"
+        "------------------------------------------------------------\n");
+
+    if (!cds_change_att(var, 1, "missing_data", CDS_CHAR, 5, "-9999")) {
+        return(0);
+    }
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Remove 'missing_value' and \n"
+        "call cds_create_missing_value_att() with flags == 0\n"
+        "------------------------------------------------------------\n");
+
+    att = cds_get_att(var, "missing_value");
+    cds_delete_att(att);
+
+    if (!cds_create_missing_value_att(var, 0)) {
+        return(0);
+    }
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    LOG( gProgramName,
+        "------------------------------------------------------------\n"
+        "Remove 'missing_value' and \n"
+        "call cds_create_missing_value_att() with flags == 1\n"
+        "------------------------------------------------------------\n");
+
+    att = cds_get_att(var, "missing_value");
+    cds_delete_att(att);
+
+    if (!cds_create_missing_value_att(var, 1)) {
+        return(0);
+    }
+
+    cds_print(gLogFP, group, 0);
+    _print_missings(var);
+
+    cds_delete_group(group);
+
+    return(1);
+}
+
+/*******************************************************************************
  *  Run Var Data Tests
  */
 
@@ -1722,4 +1873,7 @@ void libcds3_test_var_data(void)
 
     run_test(" - bounds_var_data_tests",
         "bounds_var_data_tests", bounds_var_data_tests);
+    
+    run_test(" - get_missing_values_test",
+        "get_missing_values_test", get_missing_values_test);
 }

@@ -1,21 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2011 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 16012 $
-*    $Author: ermold $
-*    $Date: 2012-11-28 03:54:13 +0000 (Wed, 28 Nov 2012) $
-*    $Version:$
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -176,6 +169,12 @@ void print_matix_vectors(
         case CDS_SHORT:  PRINT_MATRIX_VECTORS(short);         break;
         case CDS_BYTE:   PRINT_MATRIX_VECTORS(signed char);   break;
         case CDS_CHAR:   PRINT_MATRIX_VECTORS(unsigned char); break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:  PRINT_MATRIX_VECTORS(long long);     break;
+        case CDS_UBYTE:  PRINT_MATRIX_VECTORS(unsigned char);  break;
+        case CDS_USHORT: PRINT_MATRIX_VECTORS(unsigned short); break;
+        case CDS_UINT:   PRINT_MATRIX_VECTORS(unsigned int);   break;
+        case CDS_UINT64: PRINT_MATRIX_VECTORS(unsigned long long); break;
         default:
             break;
     }
@@ -676,7 +675,7 @@ static void print_int_array_test(
 
     fprintf(gLogFP, "\n\nlength = %d\n", (int)nchars);
 }
- 
+
 static void _print_array_tests(int sprint)
 {
     int    int_data[100];
@@ -1025,6 +1024,40 @@ static int string_to_array_test()
         get_test_data(types[ti], NULL, NULL, NULL, NULL, NULL, &string);
 
         array = cds_string_to_array(string, types[ti], &length, NULL);
+        cds_print_array(gLogFP, types[ti], length, array, NULL, 0, 0, 0x2);
+        fprintf(gLogFP, "\nlength = %d\n", (int)length);
+        free(array);
+    }
+
+    fprintf(gLogFP,
+        "\n============================================================\n"
+        "String to Array Test: (with out-of-range values - using limits)\n"
+        "============================================================\n\n");
+
+    get_test_data(CDS_DOUBLE, NULL, NULL, NULL, NULL, NULL, &string);
+
+    for (ti = 0; ti < ntypes; ti++) {
+
+        fprintf(gLogFP, "\n");
+
+        array = cds_string_to_array(string, types[ti], &length, NULL);
+        cds_print_array(gLogFP, types[ti], length, array, NULL, 0, 0, 0x2);
+        fprintf(gLogFP, "\nlength = %d\n", (int)length);
+        free(array);
+    }
+
+    fprintf(gLogFP,
+        "\n============================================================\n"
+        "String to Array Test: (with out-of-range values - using fills)\n"
+        "============================================================\n\n");
+
+    get_test_data(CDS_DOUBLE, NULL, NULL, NULL, NULL, NULL, &string);
+
+    for (ti = 0; ti < ntypes; ti++) {
+
+        fprintf(gLogFP, "\n");
+
+        array = cds_string_to_array_use_fill(string, types[ti], &length, NULL);
         cds_print_array(gLogFP, types[ti], length, array, NULL, 0, 0, 0x2);
         fprintf(gLogFP, "\nlength = %d\n", (int)length);
         free(array);

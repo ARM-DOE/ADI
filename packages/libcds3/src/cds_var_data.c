@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 60386 $
-*    $Author: ermold $
-*    $Date: 2015-02-19 20:43:41 +0000 (Thu, 19 Feb 2015) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -176,8 +166,9 @@ void _cds_delete_var_data_index(CDSVar *var)
  *                  store the output value (see CDS_MAX_TYPE_SIZE).
  *
  *  @return
- *    - 1 if a missing or fill value was found
- *    - 0 if the variable does not have any missing or fill values defined.
+ *    -  1 if a missing or fill value was found
+ *    -  0 if the variable does not have any missing or fill values defined.
+ *    - -1 if an error occurs
  */
 int _cds_get_first_missing_value(CDSVar *var, void *value)
 {
@@ -235,7 +226,9 @@ int _cds_get_first_missing_value(CDSVar *var, void *value)
     }
 
     length = 1;
-    cds_get_att_value(att, var->type, &length, value);
+    if (!cds_get_att_value(att, var->type, &length, value)) {
+        return( (length == 0) ? 0 : -1 );
+    }
 
     return(1);
 }
@@ -393,6 +386,20 @@ int _cds_set_bounds_var_data(
                 cds_get_object_path(bounds_var));
 
             return(-1);
+        /* NetCDF4 extended data types */
+        case CDS_INT64:  CDS_SET_BOUNDS_DATA(nelems, data.i64p, noffsets, offsets.i64p, bounds.i64p); break;
+        case CDS_UBYTE:  CDS_SET_BOUNDS_DATA(nelems, data.ubp, noffsets, offsets.ubp, bounds.ubp); break;
+        case CDS_USHORT: CDS_SET_BOUNDS_DATA(nelems, data.usp, noffsets, offsets.usp, bounds.usp); break;
+        case CDS_UINT:   CDS_SET_BOUNDS_DATA(nelems, data.uip, noffsets, offsets.uip, bounds.uip); break;
+        case CDS_UINT64: CDS_SET_BOUNDS_DATA(nelems, data.ui64p, noffsets, offsets.ui64p, bounds.ui64p); break;
+        case CDS_STRING:
+
+            ERROR( CDS_LIB_NAME,
+                "Invalid data type 'CDS_STRING' for boundary variable: %s\n"
+                " -> boundary variables can only be used for numeric data types\n",
+                cds_get_object_path(bounds_var));
+
+            return(-1);
 
         default:
 
@@ -486,7 +493,9 @@ void *cds_alloc_var_data(
     size_t  length;
     int     update_unlimdim;
     char    missing[CDS_MAX_TYPE_SIZE];
+    char  **strpp;
     void   *datap;
+    int     status;
 
     if (!sample_count) {
 
@@ -601,7 +610,10 @@ void *cds_alloc_var_data(
 
     if (sample_start > var->sample_count) {
 
-        if (!_cds_get_first_missing_value(var, (void *)missing)) {
+        status = _cds_get_first_missing_value(var, (void *)missing);
+        if (status < 0) return((void *)NULL);
+
+        if (status == 0) {
 
             cds_get_default_fill_value(var->type, (void *)missing);
 
@@ -612,6 +624,11 @@ void *cds_alloc_var_data(
                     " -> memory allocation error\n",
                     cds_get_object_path(var));
 
+                if (var->type == CDS_STRING) {
+                    strpp = (char **)missing;
+                    if (*strpp) free(*strpp);
+                }
+
                 return((void *)NULL);
             }
         }
@@ -620,6 +637,11 @@ void *cds_alloc_var_data(
         datap  = var->data.bp + (var->sample_count * sample_size * type_size);
 
         cds_init_array(var->type, length, (void *)missing, datap);
+
+        if (var->type == CDS_STRING) {
+            strpp = (char **)missing;
+            if (*strpp) free(*strpp);
+        }
     }
 
     /* Update the variable's sample count */
@@ -927,7 +949,16 @@ void cds_delete_var_data(CDSVar *var)
 
         _cds_delete_var_data_index(var);
 
-        if (var->data.vp) free(var->data.vp);
+        if (var->data.vp) {
+            if (var->type == CDS_STRING) {
+                cds_free_string_array(
+                    var->sample_count * cds_var_sample_size(var),
+                    var->data.strp);
+            }
+            else {
+                free(var->data.vp);
+            }
+        }
 
         var->sample_count = 0;
         var->alloc_count  = 0;
@@ -1134,6 +1165,10 @@ int cds_get_var_missing_values(CDSVar *var, void **values)
     void      *mvp;
     int        mi;
 
+    size_t     nunique;
+    void      *mvp1, *mvp2;
+    size_t     mi1, mi2;
+
     nvalues   = 0;
     *values   = (void *)NULL;
     type_size = cds_data_type_size(var->type);
@@ -1197,9 +1232,46 @@ int cds_get_var_missing_values(CDSVar *var, void **values)
 
         mvp = (char *)(*values) + (nvalues * type_size);
 
-        memcpy(mvp, var->default_fill, type_size);
+        if (var->type == CDS_STRING) {
+// BDE - Need to check this
+            *(char **)mvp = strdup(var->default_fill);
+        }
+        else {
+            memcpy(mvp, var->default_fill, type_size);
+        }
 
         nvalues += 1;
+    }
+
+    /* Filter duplicate values from the missing values array */
+
+    if (nvalues) {
+
+        nunique = 1;
+
+        for (mi2 = 1; mi2 < nvalues; ++mi2) {
+            mvp2 = (char *)(*values) + (mi2 * type_size);
+
+            for (mi1 = 0; mi1 < nunique; ++mi1) {
+                mvp1 = (char *)(*values) + (mi1 * type_size);
+
+                if (memcmp(mvp2, mvp1, type_size) == 0) {
+                    break;
+                }
+            }
+
+            if (mi1 == nunique) {
+
+                mvp1 = (char *)(*values) + (nunique * type_size);
+                if (mvp1 != mvp2) {
+                    memcpy(mvp1, mvp2, type_size);
+                }
+
+                nunique += 1;
+            }
+        }
+
+        nvalues = nunique;
     }
 
     /* Return the number of missing values found. */
@@ -1318,6 +1390,8 @@ void *cds_init_var_data(
     void   *var_data;
     size_t  length;
     char    missing[CDS_MAX_TYPE_SIZE];
+    char  **strpp;
+    int     status;
 
     if (!sample_count) {
 
@@ -1341,7 +1415,10 @@ void *cds_init_var_data(
 
     if (use_missing) {
 
-        if (!_cds_get_first_missing_value(var, (void *)missing)) {
+        status = _cds_get_first_missing_value(var, (void *)missing);
+        if (status < 0) return((void *)NULL);
+
+        if (status == 0) {
 
             cds_get_default_fill_value(var->type, (void *)missing);
 
@@ -1352,6 +1429,11 @@ void *cds_init_var_data(
                     " -> memory allocation error\n",
                     cds_get_object_path(var));
 
+                if (var->type == CDS_STRING) {
+                    strpp = (char **)missing;
+                    if (*strpp) free(*strpp);
+                }
+
                 return((void *)NULL);
             }
         }
@@ -1359,6 +1441,11 @@ void *cds_init_var_data(
         length = sample_count * sample_size;
 
         cds_init_array(var->type, length, (void *)missing, var_data);
+
+        if (var->type == CDS_STRING) {
+            strpp = (char **)missing;
+            if (*strpp) free(*strpp);
+        }
     }
     else {
         length = sample_count * sample_size * type_size;
@@ -1687,7 +1774,12 @@ int cds_set_var_default_fill_value(CDSVar *var, void *fill_value)
         fill_value = _cds_default_fill_value(var->type);
     }
 
-    new_fill = cds_memdup(type_size, fill_value);
+    if (var->type == CDS_STRING) {
+        new_fill = strdup((char *)fill_value);
+    }
+    else {
+        new_fill = cds_memdup(type_size, fill_value);
+    }
 
     if (!new_fill) {
 
@@ -1830,4 +1922,61 @@ void *cds_set_var_data(
     cds_destroy_converter(converter);
 
     return(var_data);
+}
+
+/**
+ *  Trim the length of an unimited dimension.
+ *
+ *  This function will trim the length of an unlimited dimension
+ *  and the sample_count of all associated variables that use it.
+ *  It can only be used to decrease the length of a dimension and
+ *  variable sample counts.  Nothing will be done if the specified
+ *  length is greater than the current dimension length.
+ *
+ *  @param  group          - pointer to the group
+ *  @param  unlim_dim_name - the name of the unlimited dimension
+ *  @param  length         - the new length of the unlimited dimension
+ *                           (must be shorter than the current length)
+ */
+void cds_trim_unlim_dim(
+    CDSGroup   *group,
+    const char *unlim_dim_name,
+    size_t      length)
+{
+    CDSDim *dim = (CDSDim *)NULL;
+    CDSVar *var;
+    int     di, vi;
+
+    /* Find the specified unlimited dimension. */
+
+    for (di = 0; di < group->ndims; ++di) {
+        dim = group->dims[di];
+        if (dim->is_unlimited &&
+            strcmp(dim->name, unlim_dim_name) == 0) {
+            
+            break;
+        }
+    }
+
+    if (di == group->ndims) {
+        /* Unlimited dimension with the specified name was not found. */
+        return;
+    }
+
+    if (dim->length > length) {
+        dim->length = length;
+    }
+
+    /* Update the sample count for all variables that use this dimension. */
+
+    for (vi = 0; vi < group->nvars; ++vi) {
+
+        var = group->vars[vi];
+
+        if (var->ndims && var->dims[0] == dim) {
+            if (var->sample_count > length) {
+                var->sample_count = length;
+            }
+        }
+    }
 }

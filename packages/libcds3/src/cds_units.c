@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2011 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 77481 $
-*    $Author: ermold $
-*    $Date: 2017-04-12 20:12:06 +0000 (Wed, 12 Apr 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -38,6 +28,8 @@
  *  Private Data and Functions
  */
 /** @privatesection */
+
+#include "cds_units_map.h"
 
 /** Macro used to generate an error message from a UDUNITS-2 status value. */
 #define UDUNITS_ERROR(sender, status, ...) \
@@ -75,6 +67,7 @@ void _cds_udunits_error(
     const char *ut_string;
     char       *user_message;
     va_list     args;
+    char       *chrp;
 
     switch (status) {
         case UT_BAD_ARG:
@@ -133,6 +126,9 @@ void _cds_udunits_error(
     va_end(args);
 
     if (user_message) {
+
+        chrp = user_message + strlen(user_message) - 1;
+        if (*chrp == '\n') *chrp = '\0';
 
         if (ut_string) {
             msngr_send(sender, func, src_file, src_line, MSNGR_ERROR,
@@ -263,6 +259,50 @@ static int _cds_map_symbols(void)
     return(1);
 }
 
+static ut_unit *_cds_ut_parse_from_units(const char *from_units)
+{
+    ut_unit   *parsed_unit;
+    ut_status  status;
+    int        mi;
+
+    /* Parse from_units string */
+
+    parsed_unit = ut_parse(_UnitSystem, from_units, UT_ASCII);
+    if (parsed_unit) {
+        return(parsed_unit);
+    }
+
+    for (mi = 0; CDSBadUnitsMap[mi].bad; ++mi) {
+
+        if (strcmp(from_units, CDSBadUnitsMap[mi].bad) == 0) {
+
+            parsed_unit = ut_parse(_UnitSystem, CDSBadUnitsMap[mi].good, UT_ASCII);
+            if (parsed_unit) {
+                return(parsed_unit);
+            }
+
+            /* Bad unit in mapping table */
+
+            status = ut_get_status();
+
+            UDUNITS_ERROR( CDS_LIB_NAME, status,
+                "Bad units in mapping table, mapping '%s' to '%s'\n",
+                from_units, CDSBadUnitsMap[mi].good);
+
+            return((ut_unit *)NULL);
+        }
+    }
+
+    /* Bad unit not found in mapping table */
+
+    status = ut_get_status();
+
+    UDUNITS_ERROR( CDS_LIB_NAME, status,
+        "Could not parse from_units string: '%s'\n", from_units);
+
+    return((ut_unit *)NULL);
+}
+
 /*******************************************************************************
  *  Public Functions
  */
@@ -312,15 +352,8 @@ int cds_compare_units(
 
     /* Parse from_units string */
 
-    from = ut_parse(_UnitSystem, from_units, UT_ASCII);
-
+    from = _cds_ut_parse_from_units(from_units);
     if (!from) {
-
-        status = ut_get_status();
-
-        UDUNITS_ERROR( CDS_LIB_NAME, status,
-            "Could not parse from_units string: '%s'\n", from_units);
-
         return(-1);
     }
 
@@ -405,8 +438,10 @@ int cds_compare_units(
  *
  *  @return
  *    - pointer to the output data array
- *    - NULL if a memory allocation error occurs
- *      (this can only happen if the specified out_data argument is NULL)
+ *    - NULL if attempting to convert between string and numbers,
+ *           or attempting to convert units for string values,
+ *           or a memory allocation error occurs (this can only happen
+ *           if the specified out_data argument is NULL)
  */
 void *cds_convert_units(
     CDSUnitConverter  converter,
@@ -434,6 +469,30 @@ void *cds_convert_units(
     CDSData       ormax;
     size_t        out_size;
 
+    /* Check for CDS_STRING types */
+
+    if (in_type == CDS_STRING) {
+
+        if (out_type != CDS_STRING) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert between strings and numbers in cds_convert_units\n");
+            return((void *)NULL);
+        }
+
+        if (converter) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert units for string values in cds_convert_units\n");
+            return((void *)NULL);
+        }
+    }
+    else if (out_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to convert between strings and numbers in cds_convert_units\n");
+        return((void *)NULL);
+    }
+
+    /* Check if a converter was specified */
+
     if (!converter) {
         return(cds_copy_array(
             in_type, length, in_data, out_type, out_data,
@@ -446,6 +505,9 @@ void *cds_convert_units(
         out_size = cds_data_type_size(out_type);
         out_data = malloc(length * out_size);
         if (!out_data) {
+            ERROR( CDS_LIB_NAME,
+                "Memory allocation error creating '%s' array of length %lu\n",
+                cds_data_type_name(out_type), length);
             return((void *)NULL);
         }
     }
@@ -482,6 +544,12 @@ void *cds_convert_units(
           case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.bp, nmap, imap.bp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_UNITS_FLOAT (uc, length, in.bp, nmap, imap.bp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.bp, nmap, imap.bp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.bp, nmap, imap.bp, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
           default:
             break;
         }
@@ -494,6 +562,12 @@ void *cds_convert_units(
           case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.cp, nmap, imap.cp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_UNITS_FLOAT (uc, length, in.cp, nmap, imap.cp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.cp, nmap, imap.cp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.cp, nmap, imap.cp, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
           default:
             break;
         }
@@ -506,6 +580,12 @@ void *cds_convert_units(
           case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.sp, nmap, imap.sp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_UNITS_FLOAT (uc, length, in.sp, nmap, imap.sp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.sp, nmap, imap.sp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.sp, nmap, imap.sp, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
           default:
             break;
         }
@@ -518,6 +598,12 @@ void *cds_convert_units(
           case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
           default:
             break;
         }
@@ -530,6 +616,12 @@ void *cds_convert_units(
           case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.fp, nmap, imap.fp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_UNITS_FLOAT (uc, length, in.fp, nmap, imap.fp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.fp, nmap, imap.fp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.fp, nmap, imap.fp, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
           default:
             break;
         }
@@ -542,10 +634,108 @@ void *cds_convert_units(
           case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
           default:
             break;
         }
         break;
+      /* NetCDF4 extended data types */
+      case CDS_INT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UBYTE:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_UNITS_FLOAT (uc, length, in.ubp, nmap, imap.ubp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_USHORT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_UNITS_FLOAT (uc, length, in.usp, nmap, imap.usp, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, signed char, out.bp, omap.bp, min.bp, ormin.bp, max.bp, ormax.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, char,        out.cp, omap.cp, min.cp, ormin.cp, max.cp, ormax.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, short,       out.sp, omap.sp, min.sp, ormin.sp, max.sp, ormax.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, int,         out.ip, omap.ip, min.ip, ormin.ip, max.ip, ormax.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, float,       out.fp, omap.fp, min.fp, ormin.fp, max.fp, ormax.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, double,      out.dp, omap.dp, min.dp, ormin.dp, max.dp, ormax.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, long long,   out.i64p, omap.i64p, min.i64p, ormin.i64p, max.i64p, ormax.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned char,  out.ubp, omap.ubp, min.ubp, ormin.ubp, max.ubp, ormax.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned short, out.usp, omap.usp, min.usp, ormin.usp, max.usp, ormax.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned int,   out.uip, omap.uip, min.uip, ormin.uip, max.uip, ormax.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_UNITS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned long long, out.ui64p, omap.ui64p, min.ui64p, ormin.ui64p, max.ui64p, ormax.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+
       default:
         break;
     }
@@ -589,8 +779,10 @@ void *cds_convert_units(
  *
  *  @return
  *    - pointer to the output data array
- *    - NULL if a memory allocation error occurs
- *      (this can only happen if the specified out_data argument is NULL)
+ *    - NULL if attempting to convert between string and numbers,
+ *           or attempting to convert units for string values,
+ *           or a memory allocation error occurs (this can only happen
+ *           if the specified out_data argument is NULL)
  */
 void *cds_convert_unit_deltas(
     CDSUnitConverter  converter,
@@ -609,6 +801,30 @@ void *cds_convert_unit_deltas(
     CDSData imap;
     CDSData omap;
     size_t  out_size;
+
+    /* Check for CDS_STRING types */
+
+    if (in_type == CDS_STRING) {
+
+        if (out_type != CDS_STRING) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert between strings and numbers in cds_convert_unit_deltas\n");
+            return((void *)NULL);
+        }
+
+        if (converter) {
+            ERROR( CDS_LIB_NAME,
+                "Attempt to convert units for string values in cds_convert_unit_deltas\n");
+            return((void *)NULL);
+        }
+    }
+    else if (out_type == CDS_STRING) {
+        ERROR( CDS_LIB_NAME,
+            "Attempt to convert between strings and numbers in cds_convert_unit_deltas\n");
+        return((void *)NULL);
+    }
+
+    /* Check if a converter was specified */
 
     if (!converter) {
         return(cds_copy_array(
@@ -642,6 +858,12 @@ void *cds_convert_unit_deltas(
           case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.bp, nmap, imap.bp, int,         out.ip, omap.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.bp, nmap, imap.bp, float,       out.fp, omap.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.bp, nmap, imap.bp, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.bp, nmap, imap.bp, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.bp, nmap, imap.bp, unsigned long long, out.ui64p, omap.ui64p, 1); break;
           default:
             break;
         }
@@ -654,6 +876,12 @@ void *cds_convert_unit_deltas(
           case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.cp, nmap, imap.cp, int,         out.ip, omap.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.cp, nmap, imap.cp, float,       out.fp, omap.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.cp, nmap, imap.cp, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.cp, nmap, imap.cp, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.cp, nmap, imap.cp, unsigned long long, out.ui64p, omap.ui64p, 1); break;
           default:
             break;
         }
@@ -666,6 +894,12 @@ void *cds_convert_unit_deltas(
           case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.sp, nmap, imap.sp, int,         out.ip, omap.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.sp, nmap, imap.sp, float,       out.fp, omap.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.sp, nmap, imap.sp, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.sp, nmap, imap.sp, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.sp, nmap, imap.sp, unsigned long long, out.ui64p, omap.ui64p, 1); break;
           default:
             break;
         }
@@ -678,6 +912,12 @@ void *cds_convert_unit_deltas(
           case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ip, nmap, imap.ip, int,         out.ip, omap.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.ip, nmap, imap.ip, float,       out.fp, omap.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ip, nmap, imap.ip, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ip, nmap, imap.ip, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ip, nmap, imap.ip, unsigned long long, out.ui64p, omap.ui64p, 1); break;
           default:
             break;
         }
@@ -690,6 +930,12 @@ void *cds_convert_unit_deltas(
           case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.fp, nmap, imap.fp, int,         out.ip, omap.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.fp, nmap, imap.fp, float,       out.fp, omap.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.fp, nmap, imap.fp, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.fp, nmap, imap.fp, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.fp, nmap, imap.fp, unsigned long long, out.ui64p, omap.ui64p, 1); break;
           default:
             break;
         }
@@ -702,6 +948,103 @@ void *cds_convert_unit_deltas(
           case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, int,         out.ip, omap.ip, 1); break;
           case CDS_FLOAT:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, float,       out.fp, omap.fp, 0); break;
           case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.dp, nmap, imap.dp, unsigned long long, out.ui64p, omap.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      /* NetCDF4 extended data types */
+      case CDS_INT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, signed char, out.bp, omap.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, char,        out.cp, omap.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, short,       out.sp, omap.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, int,         out.ip, omap.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.i64p, nmap, imap.i64p, float,       out.fp, omap.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.i64p, nmap, imap.i64p, unsigned long long, out.ui64p, omap.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UBYTE:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, signed char, out.bp, omap.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, char,        out.cp, omap.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, short,       out.sp, omap.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, int,         out.ip, omap.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.ubp, nmap, imap.ubp, float,       out.fp, omap.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ubp, nmap, imap.ubp, unsigned long long, out.ui64p, omap.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_USHORT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, signed char, out.bp, omap.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, char,        out.cp, omap.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, short,       out.sp, omap.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, int,         out.ip, omap.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.usp, nmap, imap.usp, float,       out.fp, omap.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.usp, nmap, imap.usp, unsigned long long, out.ui64p, omap.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, signed char, out.bp, omap.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, char,        out.cp, omap.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, short,       out.sp, omap.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, int,         out.ip, omap.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.uip, nmap, imap.uip, float,       out.fp, omap.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.uip, nmap, imap.uip, unsigned long long, out.ui64p, omap.ui64p, 1); break;
+          default:
+            break;
+        }
+        break;
+      case CDS_UINT64:
+        switch (out_type) {
+          case CDS_BYTE:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, signed char, out.bp, omap.bp, 1); break;
+          case CDS_CHAR:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, char,        out.cp, omap.cp, 1); break;
+          case CDS_SHORT:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, short,       out.sp, omap.sp, 1); break;
+          case CDS_INT:    CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, int,         out.ip, omap.ip, 1); break;
+          case CDS_FLOAT:  CDS_CONVERT_DELTAS_FLOAT (uc, length, in.ui64p, nmap, imap.ui64p, float,       out.fp, omap.fp, 0); break;
+          case CDS_DOUBLE: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, double,      out.dp, omap.dp, 0); break;
+          /* NetCDF4 extended data types */
+          case CDS_INT64:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, long long,   out.i64p, omap.i64p, 1); break;
+          case CDS_UBYTE:  CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned char,  out.ubp, omap.ubp, 1); break;
+          case CDS_USHORT: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned short, out.usp, omap.usp, 1); break;
+          case CDS_UINT:   CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned int,   out.uip, omap.uip, 1); break;
+          case CDS_UINT64: CDS_CONVERT_DELTAS_DOUBLE(uc, length, in.ui64p, nmap, imap.ui64p, unsigned long long, out.ui64p, omap.ui64p, 1); break;
           default:
             break;
         }
@@ -793,15 +1136,8 @@ int cds_get_unit_converter(
 
     /* Parse from_units string */
 
-    from = ut_parse(_UnitSystem, from_units, UT_ASCII);
-
+    from = _cds_ut_parse_from_units(from_units);
     if (!from) {
-
-        status = ut_get_status();
-
-        UDUNITS_ERROR( CDS_LIB_NAME, status,
-            "Could not parse from_units string: '%s'\n", from_units);
-
         return(-1);
     }
 
@@ -994,8 +1330,8 @@ int cds_map_symbol_to_unit(const char *symbol, const char *name)
  *
  *  @return
  *    -  time in seconds since 1970
- *    -  0 if the time units string is not valid and could not be fixed
- *    - -1 if an error occurred
+ *    - -1 if the time units string is not valid and could not be fixed
+ *    - -2 if an error occurred
  */
 time_t cds_validate_time_units(char *time_units)
 {
@@ -1013,7 +1349,7 @@ time_t cds_validate_time_units(char *time_units)
 
     if (!_UnitSystem) {
         if (!cds_init_unit_system(NULL)) {
-            return(-1);
+            return(-2);
         }
     }
 
@@ -1029,7 +1365,7 @@ time_t cds_validate_time_units(char *time_units)
             "Could not parse seconds since 1970 string: '%s'\n",
             secs1970_string);
 
-        return(-1);
+        return(-2);
     }
 
     /* Parse from_units string */
@@ -1077,13 +1413,13 @@ time_t cds_validate_time_units(char *time_units)
         }
         else {
             ut_free(to);
-            return(0);
+            return(-1);
         }
 
         from = ut_parse(_UnitSystem, time_units, UT_ASCII);
         if (!from) {
             ut_free(to);
-            return(0);
+            return(-1);
         }
     }
 
@@ -1104,7 +1440,7 @@ time_t cds_validate_time_units(char *time_units)
             "  - to:   '%s'\n",
             time_units, secs1970_string);
 
-        return(-1);
+        return(-2);
     }
 
     secs1970 = cv_convert_double(converter, 0.0);
