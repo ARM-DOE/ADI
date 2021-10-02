@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 54277 $
-*    $Author: ermold $
-*    $Date: 2014-05-09 18:56:42 +0000 (Fri, 09 May 2014) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -130,6 +120,26 @@ CDSAtt *_ncds_read_att(
         case CDS_DOUBLE:
             status = nc_get_att_double(nc_grpid, nc_varid, att_name, att->value.dp);
             break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:
+            status = nc_get_att_longlong(nc_grpid, nc_varid, att_name, att->value.i64p);
+            break;
+        case CDS_UBYTE:
+            status = nc_get_att_uchar(nc_grpid, nc_varid, att_name, att->value.ubp);
+            break;
+        case CDS_USHORT:
+            status = nc_get_att_ushort(nc_grpid, nc_varid, att_name, att->value.usp);
+            break;
+        case CDS_UINT:
+            status = nc_get_att_uint(nc_grpid, nc_varid, att_name, att->value.uip);
+            break;
+        case CDS_UINT64:
+            status = nc_get_att_ulonglong(nc_grpid, nc_varid, att_name, att->value.ui64p);
+            break;
+        case CDS_STRING:
+            status = nc_get_att_string(nc_grpid, nc_varid, att_name, att->value.strp);
+            break;
+
         default:
             status = NC_EBADTYPE;
             break;
@@ -814,7 +824,9 @@ void *ncds_read_var_data(
                     " -> memory allocation error\n",
                     nc_grpid, nc_varid, cds_var->name);
 
-                if (cds_nmv) free(cds_mv);
+//                if (cds_nmv) free(cds_mv);
+                if (cds_nmv) cds_free_array(cds_var->type, cds_nmv, cds_mv);
+
                 free(nc_mv);
                 return((void *)NULL);
             }
@@ -837,11 +849,21 @@ void *ncds_read_var_data(
             }
         }
 
-        map_missing = 1;
+        map_missing = 0;
 
         if (nc_cds_type == cds_var->type) {
-            if (memcmp(nc_mv, cds_mv, nc_nmv * nc_type_size) == 0) {
-                map_missing = 0;
+            if (cds_var->type == CDS_STRING) {
+                for (mi = 0; mi < nc_nmv; ++mi) {
+                    if (strcmp(((char **)nc_mv)[mi], ((char **)cds_mv)[mi]) != 0) {
+                        map_missing = 1;
+                        break;
+                    }
+                }
+            }
+            else {
+                if (memcmp(nc_mv, cds_mv, nc_nmv * nc_type_size) != 0) {
+                    map_missing = 1;
+                }
             }
         }
     }
@@ -855,16 +877,20 @@ void *ncds_read_var_data(
 
         status = ncds_get_var_units(nc_grpid, nc_varid, &nc_units);
         if (status < 0) {
-            if (nc_nmv)  free(nc_mv);
-            if (cds_nmv) free(cds_mv);
+//            if (nc_nmv)  free(nc_mv);
+            if (nc_nmv) cds_free_array(nc_cds_type, nc_nmv, nc_mv);
+//            if (cds_nmv) free(cds_mv);
+            if (cds_nmv) cds_free_array(cds_var->type, cds_nmv, cds_mv);
             return((void *)NULL);
         }
         else if (status > 0) {
             status = cds_get_unit_converter(nc_units, cds_units, &converter);
             if (status < 0) {
                 free(nc_units);
-                if (nc_nmv)  free(nc_mv);
-                if (cds_nmv) free(cds_mv);
+//                if (nc_nmv)  free(nc_mv);
+                if (nc_nmv) cds_free_array(nc_cds_type, nc_nmv, nc_mv);
+//                if (cds_nmv) free(cds_mv);
+                if (cds_nmv) cds_free_array(cds_var->type, cds_nmv, cds_mv);
                 return((void *)NULL);
             }
         }
@@ -879,8 +905,10 @@ void *ncds_read_var_data(
     cds_datap = cds_alloc_var_data(cds_var, cds_sample_start, cds_sample_count);
     if (!cds_datap) {
         if (converter)   cds_free_unit_converter(converter);
-        if (nc_nmv)  free(nc_mv);
-        if (cds_nmv) free(cds_mv);
+//        if (nc_nmv)  free(nc_mv);
+        if (nc_nmv) cds_free_array(nc_cds_type, nc_nmv, nc_mv);
+//        if (cds_nmv) free(cds_mv);
+        if (cds_nmv) cds_free_array(cds_var->type, cds_nmv, cds_mv);
         return((void *)NULL);
     }
 
@@ -902,8 +930,10 @@ void *ncds_read_var_data(
                 nc_grpid, nc_varid, cds_var->name);
 
             if (converter) cds_free_unit_converter(converter);
-            if (nc_nmv)    free(nc_mv);
-            if (cds_nmv)   free(cds_mv);
+//            if (nc_nmv)    free(nc_mv);
+            if (nc_nmv) cds_free_array(nc_cds_type, nc_nmv, nc_mv);
+//            if (cds_nmv)   free(cds_mv);
+            if (cds_nmv) cds_free_array(cds_var->type, cds_nmv, cds_mv);
             return((void *)NULL);
         }
     }
@@ -922,7 +952,8 @@ void *ncds_read_var_data(
 
         if (converter) cds_free_unit_converter(converter);
         if (nc_nmv)    free(nc_mv);
-        if (cds_nmv)   free(cds_mv);
+//        if (cds_nmv)   free(cds_mv);
+        if (cds_nmv) cds_free_array(cds_var->type, cds_nmv, cds_mv);
         return((void *)NULL);
     }
 
@@ -949,10 +980,16 @@ void *ncds_read_var_data(
     /* Cleanup and return */
 
     if (converter) cds_free_unit_converter(converter);
-    if (nc_nmv)    free(nc_mv);
-    if (cds_nmv)   free(cds_mv);
+//    if (nc_nmv)    free(nc_mv);
+    if (nc_nmv) cds_free_array(nc_cds_type, nc_nmv, nc_mv);
+//    if (cds_nmv)   free(cds_mv);
+    if (cds_nmv) cds_free_array(cds_var->type, cds_nmv, cds_mv);
 
-    if (nc_datap != cds_datap) free(nc_datap);
+//    if (nc_datap != cds_datap) free(nc_datap);
+    if (nc_datap != cds_datap) {
+        length = cds_sample_count * cds_var_sample_size(cds_var);
+        cds_free_array(nc_cds_type, length, nc_datap);
+    }
 
     return(cds_datap);
 }

@@ -1,0 +1,361 @@
+netcdf out.netcdf4 {
+dimensions:
+	time = UNLIMITED ; // (5 currently)
+	range = 20 ;
+	static = 5 ;
+	chrlen = 13 ;
+variables:
+	double time(time) ;
+		time:long_name = "Time offset from midnight" ;
+		time:units = "seconds since 2010-03-28 00:00:00 0:00" ;
+	int range(range) ;
+		range:long_name = "Distance to the center of the corresponding range bin." ;
+		range:units = "m" ;
+	char var_char_static(static) ;
+		var_char_static:long_name = "Character variable test" ;
+		var_char_static:units = "unitless" ;
+	byte var_byte_static(static) ;
+		var_byte_static:long_name = "Byte variable test" ;
+		var_byte_static:units = "unitless" ;
+	short var_short_static(static) ;
+		var_short_static:long_name = "Short variable test" ;
+		var_short_static:units = "unitless" ;
+	int var_int_static(static) ;
+		var_int_static:long_name = "Integer variable test" ;
+		var_int_static:units = "unitless" ;
+	float var_float_static(static) ;
+		var_float_static:long_name = "Float variable test" ;
+		var_float_static:units = "unitless" ;
+	double var_double_static(static) ;
+		var_double_static:long_name = "Double variable test" ;
+		var_double_static:units = "unitless" ;
+	int64 var_int64_static(static) ;
+		var_int64_static:long_name = "64 bit Integer variable test" ;
+		var_int64_static:units = "unitless" ;
+	ubyte var_ubyte_static(static) ;
+		var_ubyte_static:long_name = "Unsigned Byte variable test" ;
+		var_ubyte_static:units = "unitless" ;
+	ushort var_ushort_static(static) ;
+		var_ushort_static:long_name = "Unsigned Short variable test" ;
+		var_ushort_static:units = "unitless" ;
+	uint var_uint_static(static) ;
+		var_uint_static:long_name = "Unsigned Integer variable test" ;
+		var_uint_static:units = "unitless" ;
+	uint64 var_uint64_static(static) ;
+		var_uint64_static:long_name = "Unsigned 64 bit Integer variable test" ;
+		var_uint64_static:units = "unitless" ;
+	string var_string_static(static) ;
+		var_string_static:long_name = "String variable test" ;
+		var_string_static:units = "unitless" ;
+	char var_char(time) ;
+		var_char:long_name = "Character variable test" ;
+		var_char:units = "unitless" ;
+	byte var_byte(time) ;
+		var_byte:long_name = "Byte variable test" ;
+		var_byte:units = "unitless" ;
+	short var_short(time) ;
+		var_short:long_name = "Short variable test" ;
+		var_short:units = "unitless" ;
+	int var_int(time) ;
+		var_int:long_name = "Integer variable test" ;
+		var_int:units = "unitless" ;
+	float var_float(time) ;
+		var_float:long_name = "Float variable test" ;
+		var_float:units = "unitless" ;
+	double var_double(time) ;
+		var_double:long_name = "Double variable test" ;
+		var_double:units = "unitless" ;
+	int64 var_int64(time) ;
+		var_int64:long_name = "64 bit Integer variable test" ;
+		var_int64:units = "unitless" ;
+	ubyte var_ubyte(time) ;
+		var_ubyte:long_name = "Unsigned Byte variable test" ;
+		var_ubyte:units = "unitless" ;
+	ushort var_ushort(time) ;
+		var_ushort:long_name = "Unsigned Short variable test" ;
+		var_ushort:units = "unitless" ;
+	uint var_uint(time) ;
+		var_uint:long_name = "Unsigned Integer variable test" ;
+		var_uint:units = "unitless" ;
+	uint64 var_uint64(time) ;
+		var_uint64:long_name = "Unsigned 64 bit Integer variable test" ;
+		var_uint64:units = "unitless" ;
+	string var_string(time) ;
+		var_string:long_name = "String variable test" ;
+		var_string:units = "unitless" ;
+	double var_2D(time, range) ;
+		var_2D:long_name = "2D variable test" ;
+		var_2D:units = "unitless" ;
+	char var_char_2D(time, chrlen) ;
+		var_char_2D:long_name = "2D Char variable test" ;
+		var_char_2D:units = "unitless" ;
+
+// global attributes:
+		:att_char = "ABCDE" ;
+		:att_byte = -128b, -64b, 0b, 64b, 127b ;
+		:att_short = -32768s, -16384s, 0s, 16384s, 32767s ;
+		:att_int = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+		:att_float = -3.402823e+38f, -2.147484e+09f, 0.f, 2.147484e+09f, 3.402823e+38f ;
+		:att_double = -1.79769313486231e+308, -9.22337203685478e+17, 0., 9.22337203685478e+17, 1.79769313486231e+308 ;
+		:att_text = "Single line text attribute." ;
+		:att_multi_line = "Multi line text attribute:\n    - Line 1\n    - Line 2\n    - Line 3" ;
+		:att_int64 = -9223372036854775808L, -4611686018427387904L, 0L, 4611686018427387904L, 9223372036854775807L ;
+		:att_ubyte = 0UB, 32UB, 64UB, 128UB, 255UB ;
+		:att_ushort = 0US, 8192US, 16384US, 32768US, 65535US ;
+		:att_uint = 0U, 536870912U, 1073741824U, 2147483648U, 4294967295U ;
+		:att_uint64 = 0UL, 2305843009213692952UL, 4611686018427387904UL, 9223372036854775808UL, 18446744073709551615UL ;
+		string :att_string = "string 1", "string 2", "string 3", "string 4", "string 5" ;
+data:
+
+ time = 10, 20.1, 30.2, 40.3, 50.4 ;
+
+ range = 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 
+    240, 255, 270, 285, 300 ;
+
+ var_char_static = "ABCDE" ;
+
+ var_byte_static = -128, -64, 0, 64, 127 ;
+
+ var_short_static = -32768, -16384, 0, 16384, 32767 ;
+
+ var_int_static = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+
+ var_float_static = -3.402823e+38, -2.147484e+09, 0, 2.147484e+09, 
+    3.402823e+38 ;
+
+ var_double_static = -1.79769313486231e+308, -9.22337203685478e+17, 0, 
+    9.22337203685478e+17, 1.79769313486231e+308 ;
+
+ var_int64_static = -9223372036854775808, -4611686018427387904, 0, 
+    4611686018427387904, 9223372036854775807 ;
+
+ var_ubyte_static = 0, 32, 64, 128, 255 ;
+
+ var_ushort_static = 0, 8192, 16384, 32768, _ ;
+
+ var_uint_static = 0, 536870912, 1073741824, 2147483648, _ ;
+
+ var_uint64_static = 0, 2305843009213692952, 4611686018427387904, 
+    9223372036854775808, 18446744073709551615 ;
+
+ var_string_static = "string 1", "string 2", "string 3", "string 4", 
+    "string 5" ;
+
+ var_char = "ABCDE" ;
+
+ var_byte = -128, -64, 0, 64, 127 ;
+
+ var_short = -32768, -16384, 0, 16384, 32767 ;
+
+ var_int = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+
+ var_float = -3.402823e+38, -2.147484e+09, 0, 2.147484e+09, 3.402823e+38 ;
+
+ var_double = -1.79769313486231e+308, -9.22337203685478e+17, 0, 
+    9.22337203685478e+17, 1.79769313486231e+308 ;
+
+ var_int64 = -9223372036854775808, -4611686018427387904, 0, 
+    4611686018427387904, 9223372036854775807 ;
+
+ var_ubyte = 0, 32, 64, 128, 255 ;
+
+ var_ushort = 0, 8192, 16384, 32768, _ ;
+
+ var_uint = 0, 536870912, 1073741824, 2147483648, _ ;
+
+ var_uint64 = 0, 2305843009213692952, 4611686018427387904, 
+    9223372036854775808, 18446744073709551615 ;
+
+ var_string = "string 1", "string 2", "string 3", "string 4", "string 5" ;
+
+ var_2D =
+  1, 2.1, 3.2, 4.3, 5.4, 6.5, 7.6, 8.7, 9.8, 10.9, 11, 12.1, 13.2, 14.3, 
+    15.4, 16.5, 17.6, 18.7, 19.8, 20.9,
+  21, 22.1, 23.2, 24.3, 25.4, 26.5, 27.6, 28.7, 29.8, 30.9, 31, 32.1, 33.2, 
+    34.3, 35.4, 36.5, 37.6, 38.7, 39.8, 40.9,
+  41, 42.1, 43.2, 44.3, 45.4, 46.5, 47.6, 48.7, 49.8, 50.9, 51, 52.1, 53.2, 
+    54.3, 55.4, 56.5, 57.6, 58.7, 59.8, 60.9,
+  61, 62.1, 63.2, 64.3, 65.4, 66.5, 67.6, 68.7, 69.8, 70.9, 71, 72.1, 73.2, 
+    74.3, 75.4, 76.5, 77.6, 78.7, 79.8, 80.9,
+  81, 82.1, 83.2, 84.3, 85.4, 86.5, 87.6, 88.7, 89.8, 90.9, 91, 92.1, 93.2, 
+    94.3, 95.4, 96.5, 97.6, 98.7, 99.8, 100.9 ;
+
+ var_char_2D =
+  "char array 1",
+  "char array 2",
+  "char array 3",
+  "char array 4",
+  "char array 5" ;
+
+group: group_1 {
+  dimensions:
+  	time = UNLIMITED ; // (5 currently)
+  	range = 10 ;
+  variables:
+  	double time(time) ;
+  		time:long_name = "Time offset from midnight" ;
+  		time:units = "seconds since 2010-03-28 00:00:00 0:00" ;
+  	int range(range) ;
+  		range:long_name = "Distance to the center of the corresponding range bin." ;
+  		range:units = "m" ;
+  	char var_char_static(static) ;
+  		var_char_static:long_name = "Character variable test" ;
+  		var_char_static:units = "unitless" ;
+  	byte var_byte_static(static) ;
+  		var_byte_static:long_name = "Byte variable test" ;
+  		var_byte_static:units = "unitless" ;
+  	short var_short_static(static) ;
+  		var_short_static:long_name = "Short variable test" ;
+  		var_short_static:units = "unitless" ;
+  	char var_char(time) ;
+  		var_char:long_name = "Character variable test" ;
+  		var_char:units = "unitless" ;
+  	byte var_byte(time) ;
+  		var_byte:long_name = "Byte variable test" ;
+  		var_byte:units = "unitless" ;
+  	short var_short(time) ;
+  		var_short:long_name = "Short variable test" ;
+  		var_short:units = "unitless" ;
+  	double var_2D(time, range) ;
+  		var_2D:long_name = "2D variable test" ;
+  		var_2D:units = "unitless" ;
+
+  // group attributes:
+  		:att_char = "ABCDE" ;
+  		:att_byte = -128b, -64b, 0b, 64b, 127b ;
+  		:att_short = -32768s, -16384s, 0s, 16384s, 32767s ;
+  		:att_int = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+  data:
+
+   time = 60.5, 70.6, 80.7, 90.8, 100.9 ;
+
+   range = 315, 330, 345, 360, 375, 390, 405, 420, 435, 450 ;
+
+   var_char_static = "ABCDE" ;
+
+   var_byte_static = -128, -64, 0, 64, 127 ;
+
+   var_short_static = -32768, -16384, 0, 16384, 32767 ;
+
+   var_char = "ABCDE" ;
+
+   var_byte = -128, -64, 0, 64, 127 ;
+
+   var_short = -32768, -16384, 0, 16384, 32767 ;
+
+   var_2D =
+  101, 102.1, 103.2, 104.3, 105.4, 106.5, 107.6, 108.7, 109.8, 110.9,
+  111, 112.1, 113.2, 114.3, 115.4, 116.5, 117.6, 118.7, 119.8, 120.9,
+  121, 122.1, 123.2, 124.3, 125.4, 126.5, 127.6, 128.7, 129.8, 130.9,
+  131, 132.1, 133.2, 134.3, 135.4, 136.5, 137.6, 138.7, 139.8, 140.9,
+  141, 142.1, 143.2, 144.3, 145.4, 146.5, 147.6, 148.7, 149.8, 150.9 ;
+
+  group: group_1_1 {
+    variables:
+    	int var_int_static(static) ;
+    		var_int_static:long_name = "Integer variable test" ;
+    		var_int_static:units = "unitless" ;
+    	float var_float_static(static) ;
+    		var_float_static:long_name = "Float variable test" ;
+    		var_float_static:units = "unitless" ;
+    	double var_double_static(static) ;
+    		var_double_static:long_name = "Double variable test" ;
+    		var_double_static:units = "unitless" ;
+    	int var_int(time) ;
+    		var_int:long_name = "Integer variable test" ;
+    		var_int:units = "unitless" ;
+    	float var_float(time) ;
+    		var_float:long_name = "Float variable test" ;
+    		var_float:units = "unitless" ;
+    	double var_double(time) ;
+    		var_double:long_name = "Double variable test" ;
+    		var_double:units = "unitless" ;
+    	char var_char_2D(time, chrlen) ;
+    		var_char_2D:long_name = "2D Char variable test" ;
+    		var_char_2D:units = "unitless" ;
+
+    // group attributes:
+    		:att_float = -3.402823e+38f, -2.147484e+09f, 0.f, 2.147484e+09f, 3.402823e+38f ;
+    		:att_double = -1.79769313486231e+308, -9.22337203685478e+17, 0., 9.22337203685478e+17, 1.79769313486231e+308 ;
+    		:att_text = "Single line text attribute." ;
+    		:att_multi_line = "Multi line text attribute:\n    - Line 1\n    - Line 2\n    - Line 3" ;
+    data:
+
+     var_int_static = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+
+     var_float_static = -3.402823e+38, -2.147484e+09, 0, 2.147484e+09, 
+        3.402823e+38 ;
+
+     var_double_static = -1.79769313486231e+308, -9.22337203685478e+17, 0, 
+        9.22337203685478e+17, 1.79769313486231e+308 ;
+
+     var_int = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+
+     var_float = -3.402823e+38, -2.147484e+09, 0, 2.147484e+09, 3.402823e+38 ;
+
+     var_double = -1.79769313486231e+308, -9.22337203685478e+17, 0, 
+        9.22337203685478e+17, 1.79769313486231e+308 ;
+
+     var_char_2D =
+  "char array 11",
+  "char array 12",
+  "char array 13",
+  "char array 14",
+  "char array 15" ;
+    } // group group_1_1
+  } // group group_1
+
+group: group_2 {
+  variables:
+  	int var_int_static(static) ;
+  		var_int_static:long_name = "Integer variable test" ;
+  		var_int_static:units = "unitless" ;
+  	float var_float_static(static) ;
+  		var_float_static:long_name = "Float variable test" ;
+  		var_float_static:units = "unitless" ;
+  	double var_double_static(static) ;
+  		var_double_static:long_name = "Double variable test" ;
+  		var_double_static:units = "unitless" ;
+  	int var_int(time) ;
+  		var_int:long_name = "Integer variable test" ;
+  		var_int:units = "unitless" ;
+  	float var_float(time) ;
+  		var_float:long_name = "Float variable test" ;
+  		var_float:units = "unitless" ;
+  	double var_double(time) ;
+  		var_double:long_name = "Double variable test" ;
+  		var_double:units = "unitless" ;
+  	char var_char_2D(time, chrlen) ;
+  		var_char_2D:long_name = "2D Char variable test" ;
+  		var_char_2D:units = "unitless" ;
+
+  // group attributes:
+  		:att_float = -3.402823e+38f, -2.147484e+09f, 0.f, 2.147484e+09f, 3.402823e+38f ;
+  		:att_double = -1.79769313486231e+308, -9.22337203685478e+17, 0., 9.22337203685478e+17, 1.79769313486231e+308 ;
+  		:att_text = "Single line text attribute." ;
+  		:att_multi_line = "Multi line text attribute:\n    - Line 1\n    - Line 2\n    - Line 3" ;
+  data:
+
+   var_int_static = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+
+   var_float_static = -3.402823e+38, -2.147484e+09, 0, 2.147484e+09, 
+      3.402823e+38 ;
+
+   var_double_static = -1.79769313486231e+308, -9.22337203685478e+17, 0, 
+      9.22337203685478e+17, 1.79769313486231e+308 ;
+
+   var_int = -2147483648, -1073741824, 0, 1073741824, 2147483647 ;
+
+   var_float = -3.402823e+38, -2.147484e+09, 0, 2.147484e+09, 3.402823e+38 ;
+
+   var_double = -1.79769313486231e+308, -9.22337203685478e+17, 0, 
+      9.22337203685478e+17, 1.79769313486231e+308 ;
+
+   var_char_2D =
+  "char array 6",
+  "char array 7",
+  "char array 8",
+  "char array 9",
+  "char array 10" ;
+  } // group group_2
+}

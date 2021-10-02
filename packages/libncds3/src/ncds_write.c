@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 50142 $
-*    $Author: ermold $
-*    $Date: 2013-11-21 00:06:12 +0000 (Thu, 21 Nov 2013) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -337,6 +327,31 @@ int _ncds_write_att(
             case CDS_DOUBLE:
                 status = nc_put_att_double(nc_grpid, nc_varid, cds_att->name,
                     nctype, cds_att->length, cds_att->value.dp);
+                break;
+            /* NetCDF4 extended data types */
+            case CDS_INT64:
+                status = nc_put_att_longlong(nc_grpid, nc_varid, cds_att->name,
+                    nctype, cds_att->length, cds_att->value.i64p);
+                break;
+            case CDS_UBYTE:
+                status = nc_put_att_uchar(nc_grpid, nc_varid, cds_att->name,
+                    nctype, cds_att->length, cds_att->value.ubp);
+                break;
+            case CDS_USHORT:
+                status = nc_put_att_ushort(nc_grpid, nc_varid, cds_att->name,
+                    nctype, cds_att->length, cds_att->value.usp);
+                break;
+            case CDS_UINT:
+                status = nc_put_att_uint(nc_grpid, nc_varid, cds_att->name,
+                    nctype, cds_att->length, cds_att->value.uip);
+                break;
+            case CDS_UINT64:
+                status = nc_put_att_ulonglong(nc_grpid, nc_varid, cds_att->name,
+                    nctype, cds_att->length, cds_att->value.ui64p);
+                break;
+            case CDS_STRING:
+                status = nc_put_att_string(nc_grpid, nc_varid, cds_att->name,
+                    cds_att->length, (const char **)cds_att->value.strp);
                 break;
             default:
                 status = NC_EBADTYPE;

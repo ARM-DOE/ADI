@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 72315 $
-*    $Author: ermold $
-*    $Date: 2016-07-11 22:06:13 +0000 (Mon, 11 Jul 2016) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -382,12 +372,13 @@ size_t ncds_get_att_value(
     nc_type     att_type;
     size_t      att_length;
     int         status;
-    CDSDataType cds_att_type;
+    CDSDataType cds_in_type;
     CDSDataType cds_out_type;
     size_t      att_type_size;
     size_t      out_type_size;
     size_t      out_length;
     void       *tmp_value;
+    char      **strpp;
 
     *value = (void *)NULL;
 
@@ -404,9 +395,9 @@ size_t ncds_get_att_value(
 
     /* Convert types to CDS data types */
 
-    cds_att_type = ncds_cds_type(att_type);
+    cds_in_type = ncds_cds_type(att_type);
 
-    if (cds_att_type == CDS_NAT) {
+    if (cds_in_type == CDS_NAT) {
 
         ERROR( NCDS_LIB_NAME,
             "Could not get netcdf attribute value for: %s\n"
@@ -436,12 +427,12 @@ size_t ncds_get_att_value(
 
     if (cds_out_type == CDS_CHAR) {
 
-        if (cds_att_type == CDS_CHAR) {
+        if (cds_in_type == CDS_CHAR) {
 
             out_length = att_length + 1;
             *value     = calloc(out_length, sizeof(char));
 
-            if (value) {
+            if (*value) {
                 status = nc_get_att(nc_grpid, nc_varid, att_name, *value);
             }
             else {
@@ -450,26 +441,78 @@ size_t ncds_get_att_value(
         }
         else {
 
-            att_type_size = cds_data_type_size(cds_att_type);
+            att_type_size = cds_data_type_size(cds_in_type);
             tmp_value     = malloc(att_length * att_type_size);
 
-            if (tmp_value) {
+            if (!tmp_value) {
+                out_length = (size_t)-1;
+            }
+            else {
 
                 status = nc_get_att(nc_grpid, nc_varid, att_name, tmp_value);
 
                 if (status == NC_NOERR) {
                     *value = (void *)cds_array_to_string(
-                        cds_att_type, att_length, tmp_value, &out_length, NULL);
+                        cds_in_type, att_length, tmp_value, &out_length, NULL);
                 }
 
-                free(tmp_value);
+                if (cds_in_type == CDS_STRING) {
+                    nc_free_string(att_length, (char **)tmp_value);
+                }
+                else {
+                    free(tmp_value);
+                }
+            }
+        }
+    }
+    else if (cds_out_type == CDS_STRING) {
+
+        if (cds_in_type == CDS_STRING) {
+
+            out_length = att_length;
+            *value     = calloc(out_length, sizeof(char *));
+
+            if (*value) {
+                status = nc_get_att(nc_grpid, nc_varid, att_name, *value);
             }
             else {
                 out_length = (size_t)-1;
             }
         }
+        else if (cds_in_type == CDS_CHAR) {
+
+            out_length = 1;
+            *value     = calloc(1, sizeof(char *));
+
+            if (*value) {
+
+                strpp  = (char **)*value;
+                *strpp = calloc(att_length + 1, sizeof(char));
+
+                if (strpp) {
+                    status = nc_get_att(nc_grpid, nc_varid, att_name, *strpp);
+                }
+                else {
+                    out_length = (size_t)-1;
+                }
+            }
+            else {
+                out_length = (size_t)-1;
+            }
+        }
+        else {
+            ERROR( NCDS_LIB_NAME,
+                "Could not get netcdf attribute value for: %s\n"
+                " -> nc_grpid = %d, nc_varid = %d\n"
+                " -> attempt to convert between '%s' and '%s'\n",
+                att_name, nc_grpid, nc_varid,
+                cds_data_type_name(cds_in_type), cds_data_type_name(cds_out_type));
+
+            *value = (void *)NULL;
+            return(-1);
+        }
     }
-    else if (cds_att_type == CDS_CHAR) {
+    else if (cds_in_type == CDS_CHAR) {
 
         out_length = att_length + 1;
         tmp_value  = calloc(out_length, sizeof(char));
@@ -489,13 +532,24 @@ size_t ncds_get_att_value(
             out_length = (size_t)-1;
         }
     }
+    else if (cds_in_type == CDS_STRING) {
+        ERROR( NCDS_LIB_NAME,
+            "Could not get netcdf attribute value for: %s\n"
+            " -> nc_grpid = %d, nc_varid = %d\n"
+            " -> attempt to convert between '%s' and '%s'\n",
+            att_name, nc_grpid, nc_varid,
+            cds_data_type_name(cds_in_type), cds_data_type_name(cds_out_type));
+
+        *value = (void *)NULL;
+        return(-1);
+    }
     else {
 
         out_length    = att_length;
         out_type_size = cds_data_type_size(cds_out_type);
         *value        = malloc(out_length * out_type_size);
 
-        if (value) {
+        if (*value) {
 
             switch (cds_out_type) {
                 case CDS_BYTE:
@@ -515,6 +569,22 @@ size_t ncds_get_att_value(
                     break;
                 case CDS_DOUBLE:
                     status = nc_get_att_double(nc_grpid, nc_varid, att_name, *value);
+                    break;
+                /* NetCDF4 extended data types */
+                case CDS_INT64:
+                    status = nc_get_att_longlong(nc_grpid, nc_varid, att_name, *value);
+                    break;
+                case CDS_UBYTE:
+                    status = nc_get_att_uchar(nc_grpid, nc_varid, att_name, *value);
+                    break;
+                case CDS_USHORT:
+                    status = nc_get_att_ushort(nc_grpid, nc_varid, att_name, *value);
+                    break;
+                case CDS_UINT:
+                    status = nc_get_att_uint(nc_grpid, nc_varid, att_name, *value);
+                    break;
+                case CDS_UINT64:
+                    status = nc_get_att_ulonglong(nc_grpid, nc_varid, att_name, *value);
                     break;
                 default:
                     status = NC_EBADTYPE;
@@ -819,10 +889,11 @@ int ncds_get_missing_values(
     void        *att_value;
     size_t       att_length;
     void        *mvp;
-    int          free_fills;
+    int          free_att_value;
     size_t       type_size;
     int          nvalues;
     int          found_fill;
+    const char  *strp;
 
     *values     = (void *)NULL;
     nvalues     = 0;
@@ -923,7 +994,7 @@ int ncds_get_missing_values(
         }
     }
 
-    /* Get the default fill value is the _FillValues
+    /* Get the default fill value if the _FillValues
      * attribute was not explicitly defined. */
 
     if (!found_fill) {
@@ -936,12 +1007,19 @@ int ncds_get_missing_values(
         }
 
         if (att_length == 0) {
-            att_length = 1;
-            free_fills = 0;
-            att_value  = _ncds_default_fill_value(nc_vartype);
+            att_length     = 1;
+            free_att_value = 0;
+            if (nc_vartype == NC_STRING) {
+                strp = strdup(_ncds_default_fill_value(nc_vartype));
+                if (!strp) goto MEMORY_ERROR;
+                att_value = &strp;
+            }
+            else {
+                att_value = _ncds_default_fill_value(nc_vartype);
+            }
         }
         else {
-            free_fills = 1;
+            free_att_value = 1;
         }
 
         /* Append fill values to the end of the missing values array */
@@ -952,7 +1030,7 @@ int ncds_get_missing_values(
         mvp = (char *)(*values) + (nvalues * type_size);
         memcpy(mvp, att_value, (att_length * type_size));
 
-        if (free_fills) free(att_value);
+        if (free_att_value) free(att_value);
 
         nvalues += att_length;
     }
@@ -1047,7 +1125,7 @@ int ncds_get_time_info(
 
     /* Get the id of the time dimension's coordinate variable */
 
-    secs1970     = 0;
+    secs1970     = -1;
     use_to_var   = 0;
     time_varname = "time";
     time_units   = (char *)NULL;
@@ -1060,8 +1138,8 @@ int ncds_get_time_info(
 
         secs1970 = ncds_get_var_time_units(nc_grpid, varid, &time_units);
 
-        if (secs1970  < 0) return(-1);
-        if (secs1970 == 0) use_to_var = 1;
+        if (secs1970  < -1) return(-1);
+        if (secs1970 == -1) use_to_var = 1;
     }
 
     if (status == 0 ||
@@ -1116,7 +1194,7 @@ int ncds_get_time_info(
 
         secs1970 = ncds_get_var_time_units(nc_grpid, varid, &time_units);
 
-        if (secs1970 < 0) {
+        if (secs1970 < -1) {
             if (time_units) free(time_units);
             return(-1);
         }
@@ -1128,7 +1206,7 @@ int ncds_get_time_info(
 
     if (base_time) {
 
-        if (secs1970) {
+        if (secs1970 > -1) {
             *base_time = secs1970;
         }
         else {
@@ -1495,12 +1573,12 @@ int ncds_get_var_dim_info(
  *
  *  @return
  *    -  time in seconds since 1970
- *    -  0 if:
+ *    - -1 if:
  *           - the units attribute does not exist or is not a character string.
  *             (units == NULL)
  *           - the time units string is not valid and could not be fixed.
  *             (units == invalid units string)
- *    - -1 if an error occurred
+ *    - -2 if an error occurred
  */
 time_t ncds_get_var_time_units(
     int    nc_grpid,
@@ -1516,7 +1594,7 @@ time_t ncds_get_var_time_units(
     status = ncds_get_var_units(nc_grpid, nc_varid, &unitsp);
 
     if (status <= 0) {
-        return(status);
+        return(status - 1);
     }
 
     base_time = cds_validate_time_units(unitsp);

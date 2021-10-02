@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
-*     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 6704 $
-*    $Author: ermold $
-*    $Date: 2011-05-16 22:47:23 +0000 (Mon, 16 May 2011) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     email: brian.ermold@pnnl.gov
 *
 *******************************************************************************/
 
@@ -58,6 +48,30 @@ static double      _Double_Min  = NC_MIN_DOUBLE;
 static double      _Double_Max  = NC_MAX_DOUBLE;
 static double      _Double_Fill = NC_FILL_DOUBLE;
 
+/* NetCDF4 extended data types */
+
+static long long   _Int64_Min   = NC_MIN_INT64;
+static long long   _Int64_Max   = NC_MAX_INT64;
+static long long   _Int64_Fill  = NC_FILL_INT64;
+
+static unsigned char      _UByte_Min   = 0;
+static unsigned char      _UByte_Max   = NC_MAX_UBYTE;
+static unsigned char      _UByte_Fill  = NC_FILL_UBYTE;
+
+static unsigned short     _UShort_Min  = 0;
+static unsigned short     _UShort_Max  = NC_MAX_USHORT;
+static unsigned short     _UShort_Fill = NC_FILL_USHORT;
+
+static unsigned int       _UInt_Min    = 0;
+static unsigned int       _UInt_Max    = NC_MAX_UINT;
+static unsigned int       _UInt_Fill   = NC_FILL_UINT;
+
+static unsigned long long _UInt64_Min  = 0;
+static unsigned long long _UInt64_Max  = NC_MAX_UINT64;
+static unsigned long long _UInt64_Fill = NC_FILL_UINT64;
+
+static char *             _String_Fill = NC_FILL_STRING;
+
 void *_ncds_data_type_min(nc_type type)
 {
     switch(type) {
@@ -67,6 +81,12 @@ void *_ncds_data_type_min(nc_type type)
         case NC_INT:    return(&_Int_Min);
         case NC_FLOAT:  return(&_Float_Min);
         case NC_DOUBLE: return(&_Double_Min);
+        /* NetCDF4 extended data types */
+        case NC_INT64:  return(&_Int64_Min);
+        case NC_UBYTE:  return(&_UByte_Min);
+        case NC_USHORT: return(&_UShort_Min);
+        case NC_UINT:   return(&_UInt_Min);
+        case NC_UINT64: return(&_UInt64_Min);
         default:        return((void *)NULL);
     }
 }
@@ -80,6 +100,12 @@ void *_ncds_data_type_max(nc_type type)
         case NC_INT:    return(&_Int_Max);
         case NC_FLOAT:  return(&_Float_Max);
         case NC_DOUBLE: return(&_Double_Max);
+        /* NetCDF4 extended data types */
+        case NC_INT64:  return(&_Int64_Max);
+        case NC_UBYTE:  return(&_UByte_Max);
+        case NC_USHORT: return(&_UShort_Max);
+        case NC_UINT:   return(&_UInt_Max);
+        case NC_UINT64: return(&_UInt64_Max);
         default:        return((void *)NULL);
     }
 }
@@ -93,6 +119,13 @@ void *_ncds_default_fill_value(nc_type type)
         case NC_INT:    return(&_Int_Fill);
         case NC_FLOAT:  return(&_Float_Fill);
         case NC_DOUBLE: return(&_Double_Fill);
+        /* NetCDF4 extended data types */
+        case NC_INT64:  return(&_Int64_Fill);
+        case NC_UBYTE:  return(&_UByte_Fill);
+        case NC_USHORT: return(&_UShort_Fill);
+        case NC_UINT:   return(&_UInt_Fill);
+        case NC_UINT64: return(&_UInt64_Fill);
+        case NC_STRING: return(_String_Fill);
         default:        return((void *)NULL);
     }
 }
@@ -122,6 +155,13 @@ CDSDataType ncds_cds_type(nc_type nctype)
         case NC_INT:    cds_type = CDS_INT;    break;
         case NC_FLOAT:  cds_type = CDS_FLOAT;  break;
         case NC_DOUBLE: cds_type = CDS_DOUBLE; break;
+        /* NetCDF4 extended data types */
+        case NC_INT64:  cds_type = CDS_INT64;  break;
+        case NC_UBYTE:  cds_type = CDS_UBYTE;  break;
+        case NC_USHORT: cds_type = CDS_USHORT; break;
+        case NC_UINT:   cds_type = CDS_UINT;   break;
+        case NC_UINT64: cds_type = CDS_UINT64; break;
+        case NC_STRING: cds_type = CDS_STRING; break;
         default:        cds_type = CDS_NAT;
     }
 
@@ -148,6 +188,13 @@ nc_type ncds_nc_type(CDSDataType cds_type)
         case CDS_INT:    nctype = NC_INT;    break;
         case CDS_FLOAT:  nctype = NC_FLOAT;  break;
         case CDS_DOUBLE: nctype = NC_DOUBLE; break;
+        /* NetCDF4 extended data types */
+        case CDS_INT64:  nctype = NC_INT64;  break;
+        case CDS_UBYTE:  nctype = NC_UBYTE;   break;
+        case CDS_USHORT: nctype = NC_USHORT;  break;
+        case CDS_UINT:   nctype = NC_UINT;    break;
+        case CDS_UINT64: nctype = NC_UINT64;  break;
+        case CDS_STRING: nctype = NC_STRING;  break;
         default:         nctype = NC_NAT;
     }
 
@@ -163,12 +210,19 @@ nc_type ncds_nc_type(CDSDataType cds_type)
 void ncds_get_default_fill_value(nc_type type, void *value)
 {
     switch(type) {
-        case NC_BYTE:   memcpy(value, &_Byte_Fill,   sizeof(char));   break;
-        case NC_CHAR:   memcpy(value, &_Char_Fill,   sizeof(char));   break;
-        case NC_SHORT:  memcpy(value, &_Short_Fill,  sizeof(short));  break;
-        case NC_INT:    memcpy(value, &_Int_Fill,    sizeof(int));    break;
-        case NC_FLOAT:  memcpy(value, &_Float_Fill,  sizeof(float));  break;
-        case NC_DOUBLE: memcpy(value, &_Double_Fill, sizeof(double)); break;
+        case NC_BYTE:   memcpy(value, &_Byte_Fill,   sizeof(signed char)); break;
+        case NC_CHAR:   memcpy(value, &_Char_Fill,   sizeof(char));        break;
+        case NC_SHORT:  memcpy(value, &_Short_Fill,  sizeof(short));       break;
+        case NC_INT:    memcpy(value, &_Int_Fill,    sizeof(int));         break;
+        case NC_FLOAT:  memcpy(value, &_Float_Fill,  sizeof(float));       break;
+        case NC_DOUBLE: memcpy(value, &_Double_Fill, sizeof(double));      break;
+        /* NetCDF4 extended data types */
+        case NC_INT64:  memcpy(value, &_Int64_Fill,  sizeof(long long));   break;
+        case NC_UBYTE:  memcpy(value, &_UByte_Fill,  sizeof(unsigned char));  break;
+        case NC_USHORT: memcpy(value, &_UShort_Fill, sizeof(unsigned short)); break;
+        case NC_UINT:   memcpy(value, &_UInt_Fill,   sizeof(unsigned int));   break;
+        case NC_UINT64: memcpy(value, &_UInt64_Fill, sizeof(unsigned long long)); break;
+        case NC_STRING: *(char **)value = strdup(_String_Fill); break;
         default:  break;
     }
 }

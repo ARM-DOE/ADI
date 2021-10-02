@@ -28,6 +28,7 @@ AC_SUBST(PROJECT)
 
 # Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
@@ -47,5 +48,7 @@ PKG_CHECK_MODULES([NETCDF], [netcdf], [],
 AC_CONFIG_FILES([Makefile
                  Doxyfile
                  src/Makefile
-                 src/ncds3.pc])
+                 src/ncds3.pc
+                 test/Makefile])
+AC_CONFIG_FILES([test/run_test], [chmod +x test/run_test])
 AC_OUTPUT

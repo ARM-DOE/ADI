@@ -1,0 +1,192 @@
+#!/bin/sh
+#@top_srcdir@/test/ref
+
+ref_dir="@top_srcdir@/test/ref"
+data_dir="@top_srcdir@/test/data"
+fail_count=0
+fail_total=0
+
+fail() {
+    echo "$1"
+    ((fail_count++))
+}
+
+run() { echo "> $1"; eval $1 || fail; }
+
+test_start() {
+    test_name=$1
+    fail_count=0
+}
+
+test_end() {
+    echo ""
+    if [ $fail_count != 0 ]; then
+       echo "FAILED: $test_name" 
+    else
+       echo "PASSED: $test_name" 
+    fi
+    echo ""
+    ((fail_total+=$fail_count))
+}
+
+check_diff() {
+
+    ref=$1
+    out=$2
+
+    if [ ! -f "$ref" ]; then
+        fail "Reference file not found: $ref"
+    elif [ ! -f "$out" ]; then
+        fail "Output file not found: $out"
+    fi
+
+    echo "> diff $ref $out > $out.diff"
+    diff $ref $out > $out.diff
+    exitcode=$?
+    if [ $exitcode -eq 1 ]; then
+        fail "Output file does not match reference file, see $out.diff"
+    elif [ $exitcode -ne 0 ]; then
+        fail "diff command failed"
+    else
+        rm $out.diff
+    fi
+}
+
+ncdump_diff() {
+
+    ref=$1
+    out=$2
+
+    if [ -f "$ref.dump" ]; then
+        ref="$ref.dump"
+    elif [ ! -f "$ref" ]; then
+        fail "Reference file not found: $ref"
+    else
+        file=${ref##*/}
+        name=${out%.nc}
+        run "ncdump -n $name $ref > ref.$file.dump"
+        ref="ref.$file.dump" 
+    fi
+
+    run "ncdump $out > $out.dump"
+    out="$out.dump"
+
+    check_diff $ref $out
+}
+
+##############################################################################
+# Test NetCDF4 Create
+
+test_start "NetCDF4 Create Test"
+
+run "libncds3_test create_nc4_test_file"
+ncdump_diff "$ref_dir/netcdf4.nc" "out.netcdf4.nc"
+
+run "libncds3_test nc_dump out.netcdf4.nc > out.netcdf4.cds_dump"
+check_diff "$ref_dir/netcdf4.cds_dump" "out.netcdf4.cds_dump"
+
+if [ $fail_count == 0 ]; then
+    rm out.netcdf4.cds_dump
+fi
+
+test_end
+
+##############################################################################
+# Test NetCDF4 Copy
+
+test_start "NetCDF4 Copy Test"
+
+run "libncds3_test nc_copy out.netcdf4.nc out.netcdf4.copy.nc"
+ncdump_diff "$ref_dir/netcdf4.copy.nc" "out.netcdf4.copy.nc"
+
+if [ $fail_count == 0 ]; then
+    rm out.netcdf4.* *netcdf4.copy.nc*
+fi
+
+test_end
+
+##############################################################################
+# Test NetCDF Classic to NetCDF4 Copy
+
+test_start "NetCDF Classic to NetCDF4 Copy Test"
+
+run "libncds3_test nc_copy $data_dir/ceil.nc out.ceil.netcdf4.nc -f NETCDF4"
+run "libncds3_test nc_copy out.ceil.netcdf4.nc out.ceil.classic.nc -f CLASSIC"
+ncdump_diff "$data_dir/ceil.nc" "out.ceil.classic.nc"
+
+if [ $fail_count == 0 ]; then
+    rm *ceil.nc* *ceil.netcdf4.nc* *ceil.classic.nc*
+fi
+
+test_end
+
+##############################################################################
+# Test NetCDF subset
+
+test_start "NetCDF Subset Test"
+
+run "libncds3_test nc_subset $data_dir/ceil.nc out.ceil.subset.nc background_light backscatter measurement_parameters"
+ncdump_diff "$ref_dir/ceil.subset.nc" "out.ceil.subset.nc"
+
+if [ $fail_count == 0 ]; then
+    rm *ceil.subset.nc*
+fi
+
+test_end
+
+##############################################################################
+# Test Unit Conversions
+
+test_start "NetCDF4 Unit Conversion Tests"
+
+rm -f ceil.nc
+rm -f ceil_global_missing_att.nc
+ln -s "$data_dir/ceil.nc" ceil.nc
+ln -s "$data_dir/ceil_global_missing_att.nc" ceil_global_missing_att.nc
+run "libncds3_test unit_conversion_tests"
+ncdump_diff "$ref_dir/unit_conversion_test_1.nc" "out.unit_conversion_test_1.nc"
+ncdump_diff "$ref_dir/unit_conversion_test_2.nc" "out.unit_conversion_test_2.nc"
+ncdump_diff "$ref_dir/unit_conversion_test_3.nc" "out.unit_conversion_test_3.nc"
+
+if [ $fail_count == 0 ]; then
+    rm *unit_conversion_test_*
+fi
+
+test_end
+
+##############################################################################
+# Special Attributes Tests
+
+test_start "NetCDF4 Special Attributes Tests"
+
+run "libncds3_test special_attribute_tests"
+run "ncdump -sh out.special_attribute_tests.nc | grep ":_" > out.special_attribute_tests.txt"
+check_diff "$ref_dir/special_attribute_tests.txt" "out.special_attribute_tests.txt"
+
+if [ $fail_count == 0 ]; then
+    rm *special_attribute_tests*
+fi
+
+test_end
+
+##############################################################################
+# Boundary Variable Tests
+
+test_start "Boundary Variable Tests"
+
+rm -f ceil.nc
+ln -s "$data_dir/ceil.nc" ceil.nc
+run "libncds3_test bounds_var_tests"
+ncdump_diff "$ref_dir/bounds_var_test_1.nc" "out.bounds_var_test_1.nc"
+ncdump_diff "$ref_dir/bounds_var_test_2.nc" "out.bounds_var_test_2.nc"
+ncdump_diff "$ref_dir/bounds_var_test_3.nc" "out.bounds_var_test_3.nc"
+ncdump_diff "$ref_dir/bounds_var_test_4.nc" "out.bounds_var_test_4.nc"
+
+if [ $fail_count == 0 ]; then
+    rm *bounds_var_test*
+fi
+
+test_end
+
+exit $fail_total
+
