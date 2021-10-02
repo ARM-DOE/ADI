@@ -85,6 +85,6 @@ setup(
     name        = name,
     version     = version,
     ext_modules = cythonize([cds3,cds3_enums,dsproc3,dsproc3_enums]),
-    packages    = ['cds3', 'dsproc3']
+    packages    = ['cds3', 'dsproc3', 'adi_py']
 )
 

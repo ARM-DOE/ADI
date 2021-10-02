@@ -43,6 +43,8 @@ OPTIONS
 
   --uninstall       uninstall all package files
 
+  --dev             install in editable mode for development
+
   -h, --help        display this help message
 
 EOM
@@ -60,6 +62,8 @@ do
         --pyprefix=*)     pyprefix="${i#*=}"
                           ;;
         --uninstall)      uninstall=1
+                          ;;
+        --dev)            dev=1
                           ;;
         -h | --help)      usage
                           exit 0
@@ -135,7 +139,11 @@ if [ ! $prefix ] && [ ! $destdir ]; then
     if [ $uninstall ]; then
         run "$pip uninstall $package"
     else
-        run "$pip install . --user --upgrade"
+        if [ $dev ]; then
+          run "$pip install --user --upgrade -e ."
+        else
+          run "$pip install . --user --upgrade"
+        fi
     fi
 else
 

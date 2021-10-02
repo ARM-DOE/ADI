@@ -476,6 +476,8 @@ cdef extern from "dsproc3_internal.h" nogil:
             time_t     end_time,
             CDSGroup **ret_data)
     
+    int dsproc_get_quicklook_mode()
+
     int dsproc_merge_retrieved_data()
     
     int dsproc_transform_data(
@@ -535,6 +537,7 @@ cdef extern from "dsproc3_internal.h" nogil:
                 time_t begin_time, 
                 time_t end_time)
     void dsproc_set_processing_interval_offset(time_t offset)
+    void dsproc_set_datastream_split_tz_offset(int ds_id, int split_tz_offset)
     void dsproc_set_retriever_time_offsets(
                 int ds_id,
                 time_t begin_offset,
@@ -749,4 +752,3 @@ cdef extern from "dsproc3_internal.h" nogil:
             char      **var_names,
             int       merge_obs,
             CDSGroup  **dataset)
-          

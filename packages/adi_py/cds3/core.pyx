@@ -35,11 +35,11 @@ np.import_array()
 
 # Convert python3 string (Unicode string) to C appropriate string 
 # (byte string)
-def b(x):
+def _to_byte_c_string(x):
     return codecs.latin_1_encode(x)[0]
 
 # Allow for bytes or unicode strings, will think on this
-#def b(x):
+#def _to_byte_c_string(x):
 #    
 #    if type(x) is str: ( or alternatively, isinstance(x, str)
 #        return codecs.latin_1_encode(x)[0]
@@ -65,42 +65,42 @@ try:
 except NameError:
     basestring = (str, bytes)
 
-cdef inline int cds_type_to_dtype(CDSDataType type) except -1:
-    if type == CDS_NAT:
+cdef inline int cds_type_to_dtype(CDSDataType cds_type) except -1:
+    if cds_type == CDS_NAT:
         raise ValueError("CDS_NAT")
-    elif type == CDS_CHAR:
+    elif cds_type == CDS_CHAR:
         return np.NPY_STRING
-    elif type == CDS_BYTE:
+    elif cds_type == CDS_BYTE:
         return np.NPY_BYTE
-    elif type == CDS_SHORT:
+    elif cds_type == CDS_SHORT:
         return np.NPY_SHORT
-    elif type == CDS_INT:
+    elif cds_type == CDS_INT:
         return np.NPY_INT
-    elif type == CDS_FLOAT:
+    elif cds_type == CDS_FLOAT:
         return np.NPY_FLOAT
-    elif type == CDS_DOUBLE:
+    elif cds_type == CDS_DOUBLE:
         return np.NPY_DOUBLE
     else:
-        raise ValueError("Unknown CDSDataType %s" % type)
+        raise ValueError("Unknown CDSDataType %s" % cds_type)
 
-cdef inline np.dtype cds_type_to_dtype_obj(CDSDataType type):
+cdef inline np.dtype cds_type_to_dtype_obj(CDSDataType cds_type):
     """Converts a CDSDataType to a dtype instance."""
-    if type == CDS_NAT:
+    if cds_type == CDS_NAT:
         raise ValueError("CDS_NAT")
-    elif type == CDS_CHAR:
+    elif cds_type == CDS_CHAR:
         return np.dtype(np.uint8)
-    elif type == CDS_BYTE:
+    elif cds_type == CDS_BYTE:
         return np.dtype(np.int8)
-    elif type == CDS_SHORT:
+    elif cds_type == CDS_SHORT:
         return np.dtype(np.int16)
-    elif type == CDS_INT:
+    elif cds_type == CDS_INT:
         return np.dtype(np.int32)
-    elif type == CDS_FLOAT:
+    elif cds_type == CDS_FLOAT:
         return np.dtype(np.float32)
-    elif type == CDS_DOUBLE:
+    elif cds_type == CDS_DOUBLE:
         return np.dtype(np.float64)
     else:
-        raise ValueError("Unknown CDSDataType %s" % type)
+        raise ValueError("Unknown CDSDataType %s" % cds_type)
 
 #cdef void _free(void *address):
 #    """Helper for freeing externally allocated memory 'owned' by ndarrays."""
@@ -119,7 +119,7 @@ cdef void _free(object obj):
 ##########################################################################
 
 cdef inline Att _change_att(void *parent, int overwrite, char *name,
-        CDSDataType type, object value):
+        CDSDataType cds_type, object value):
     """Change an attribute of a CDS group or variable.
     
     This function will define the specified attribute if it does not exist.
@@ -137,7 +137,7 @@ cdef inline Att _change_att(void *parent, int overwrite, char *name,
         Overwrite flag (1 = TRUE, 0 = FALSE)
     name : char
         Attribute name
-    type : CDSDataType
+    cds_type : CDSDataType
         Attribute data type
     value : object
         Python value(s), internally converted to numpy.ndarray
@@ -153,11 +153,11 @@ cdef inline Att _change_att(void *parent, int overwrite, char *name,
     """
     cdef CDSAtt *cds_att
     cdef Att att
-    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
+    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
     if value_nd.ndim == 0:
         value_nd = value_nd[None] # add dummy dimension to a scalar value
     assert value_nd.ndim == 1
-    cds_att = cds_change_att(parent, overwrite, name, type,
+    cds_att = cds_change_att(parent, overwrite, name, cds_type,
             len(value_nd), value_nd.data)
     if cds_att == NULL:
         return None
@@ -165,7 +165,7 @@ cdef inline Att _change_att(void *parent, int overwrite, char *name,
     att.set_att(cds_att)
     return att
 
-cdef inline Att _define_att(void *parent, char *name, CDSDataType type,
+cdef inline Att _define_att(void *parent, char *name, CDSDataType cds_type,
         object value):
     """Define a CDS Attribute on a group or variable.
     
@@ -182,7 +182,7 @@ cdef inline Att _define_att(void *parent, char *name, CDSDataType type,
         Pointer to the parent CDSGroup or CDSVar
     name : char
         Attribute name
-    type : CDSDataType
+    cds_type : CDSDataType
         Attribute data type
     value : object
         Python value(s), internally converted to numpy.ndarray
@@ -199,11 +199,11 @@ cdef inline Att _define_att(void *parent, char *name, CDSDataType type,
     """
     cdef CDSAtt *cds_att
     cdef Att att
-    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
+    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
     if value_nd.ndim == 0:
         value_nd = value_nd[None] # add dummy dimension to a scalar value
     assert value_nd.ndim == 1
-    cds_att = cds_define_att(parent, name, type, len(value_nd), value_nd.data)
+    cds_att = cds_define_att(parent, name, cds_type, len(value_nd), value_nd.data)
     if cds_att == NULL:
         return None
     att = Att()
@@ -273,7 +273,7 @@ cdef inline Att _get_att(void *parent, char *name):
     return att
 
 cdef inline Att _set_att(void *parent, int overwrite, char *name,
-        CDSDataType type, object value):
+        CDSDataType cds_type, object value):
     """Set an attribute of a CDS group or variable.
     
     This function will define the specified attribute if it does not exist.
@@ -293,7 +293,7 @@ cdef inline Att _set_att(void *parent, int overwrite, char *name,
         Overwrite flag (1 = TRUE, 0 = FALSE)
     name : char
         Attribute name
-    type : CDSDataType 
+    cds_type : CDSDataType 
         Attribute data type
     value : object
         Pointer to the attribute value
@@ -309,11 +309,11 @@ cdef inline Att _set_att(void *parent, int overwrite, char *name,
     """
     cdef CDSAtt *cds_att
     cdef Att att
-    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
+    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
     if value_nd.ndim == 0:
         value_nd = value_nd[None] # add dummy dimension to a scalar value
     assert value_nd.ndim == 1
-    cds_att = cds_set_att(parent, overwrite, name, type,
+    cds_att = cds_set_att(parent, overwrite, name, cds_type,
             len(value_nd), value_nd.data)
     if cds_att == NULL:
         return None
@@ -380,7 +380,7 @@ cdef class Object:
     def get_parent(self):
         """Get the parent of this object, or None if there is no parent."""
         cdef CDSObject *parent = NULL
-        cdef CDSObjectType type
+        cdef CDSObjectType cds_obj_type
         cdef Group group
         cdef Dim dim
         cdef Att att
@@ -391,28 +391,28 @@ cdef class Object:
         if not parent:
             return None
         else:
-            type = parent.obj_type
-        if type == ccds3_enums.CDS_GROUP:
+            cds_obj_type = parent.obj_type
+        if cds_obj_type == ccds3_enums.CDS_GROUP:
             group = Group()
             group.set_group(<CDSGroup*>parent)
             return group
-        elif type == ccds3_enums.CDS_DIM:
+        elif cds_obj_type == ccds3_enums.CDS_DIM:
             dim = Dim()
             dim.set_dim(<CDSDim*>parent)
             return dim
-        elif type == ccds3_enums.CDS_ATT:
+        elif cds_obj_type == ccds3_enums.CDS_ATT:
             att = Att()
             att.set_att(<CDSAtt*>parent)
             return att
-        elif type == ccds3_enums.CDS_VAR:
+        elif cds_obj_type == ccds3_enums.CDS_VAR:
             var = Var()
             var.set_var(<CDSVar*>parent)
             return var
-        elif type == ccds3_enums.CDS_VARGROUP:
+        elif cds_obj_type == ccds3_enums.CDS_VARGROUP:
             vargroup = VarGroup()
             vargroup.set_vargroup(<CDSVarGroup*>parent)
             return vargroup
-        elif type == ccds3_enums.CDS_VARARRAY:
+        elif cds_obj_type == ccds3_enums.CDS_VARARRAY:
             vararray = VarArray()
             vararray.set_vararray(<CDSVarArray*>parent)
             return vararray
@@ -463,7 +463,7 @@ cdef class Group(Object):
         """
         cdef CDSGroup *cds_group
         cdef Group group
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
 
         if parent is None:
             cds_group = cds_define_group(NULL, b_name)
@@ -625,7 +625,7 @@ cdef class Group(Object):
         - 0 if a memory allocation error occured
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         return cds_rename_group(self.c_ob, b_name)
 
     def define_dim(self, object name, size_t length, int is_unlimited):
@@ -656,7 +656,7 @@ cdef class Group(Object):
         - None if a memory allocation error occurred
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         cdef CDSDim *c_dim = cds_define_dim(
                 self.c_ob, b_name, length, is_unlimited)
         if c_dim == NULL:
@@ -683,7 +683,7 @@ cdef class Group(Object):
         - None if not found
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         cdef CDSDim *c_dim = cds_get_dim(self.c_ob, b_name)
         if c_dim == NULL:
             return None
@@ -691,7 +691,7 @@ cdef class Group(Object):
         dim.set_dim(c_dim)
         return dim
 
-    def change_att(self, int overwrite, object name, CDSDataType type,
+    def change_att(self, int overwrite, object name, CDSDataType cds_type,
             object value):
         """Change an attribute of a CDS group or variable.
         
@@ -708,7 +708,7 @@ cdef class Group(Object):
             Overwrite flag (1 = TRUE, 0 = FALSE)
         name : object
             Attribute name
-        type : CDSDataType
+        cds_type : CDSDataType
             Attribute data type
         value : object
             Python value(s), internally converted to numpy.ndarray
@@ -722,10 +722,10 @@ cdef class Group(Object):
         - None if a memory allocation error occurred
 
         """
-        cdef object b_name = b(name)
-        return _change_att(self.c_ob, overwrite, b_name, type, value)
+        cdef object b_name = _to_byte_c_string(name)
+        return _change_att(self.c_ob, overwrite, b_name, cds_type, value)
 
-    def define_att(self, object name, CDSDataType type, object value):
+    def define_att(self, object name, CDSDataType cds_type, object value):
         """Define a CDS Attribute.
 
         This function will first check if an attribute with the same definition
@@ -739,7 +739,7 @@ cdef class Group(Object):
         ----------
         name : object
             Attribute name
-        type : CDSDataType
+        cds_type : CDSDataType
             Attribute data type
         length : 
             Attribute length
@@ -756,8 +756,8 @@ cdef class Group(Object):
             definition has already been defined
 
         """
-        cdef object b_name = b(name)
-        return _define_att(self.c_ob, b_name, type, value)
+        cdef object b_name = _to_byte_c_string(name)
+        return _define_att(self.c_ob, b_name, cds_type, value)
 
     def define_att_text(self, object name, object text):
         """Define a CDS Text Attribute.
@@ -784,8 +784,8 @@ cdef class Group(Object):
             has already been defined
         
         """
-        cdef object b_name = b(name)
-        cdef object b_text = b(text)
+        cdef object b_name = _to_byte_c_string(name)
+        cdef object b_text = _to_byte_c_string(text)
         return _define_att_text(self.c_ob, b_name, b_text)
 
     def get_att(self, object name):
@@ -805,10 +805,10 @@ cdef class Group(Object):
         - None if not found
 
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         return _get_att(self.c_ob, b_name)
 
-    def set_att(self, int overwrite, object name, CDSDataType type,
+    def set_att(self, int overwrite, object name, CDSDataType cds_type,
             object value):
         """Set an attribute of a CDS group or variable.
         
@@ -828,7 +828,7 @@ cdef class Group(Object):
             Overwrite flag (1 = TRUE, 0 = FALSE)
         name : object
             Attribute name
-        type : CDSDataType
+        cds_type : CDSDataType
             Attribute data type
         value : object
             Python value(s), internally converted to numpy.ndarray
@@ -842,10 +842,10 @@ cdef class Group(Object):
         - None if a memory allocation error occurred
         
         """
-        cdef object b_name = b(name)
-        return _set_att(self.c_ob, overwrite, b_name, type, value)
+        cdef object b_name = _to_byte_c_string(name)
+        return _set_att(self.c_ob, overwrite, b_name, cds_type, value)
 
-    def define_var(self, object name, CDSDataType type, object dim_names):
+    def define_var(self, object name, CDSDataType cds_type, object dim_names):
         """Define a CDS Variable.
         
         This function will first check if a variable with the same definition
@@ -879,12 +879,12 @@ cdef class Group(Object):
         cdef size_t ndims = 0
         cdef const char **c_dim_names = NULL
         cdef object b_dim_names = None
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
 
         if isinstance(dim_names, basestring):
             ndims = 1
             c_dim_names = <const_char**>malloc(ndims * sizeof(char*))
-            b_dim_names = b(dim_names)
+            b_dim_names = _to_byte_c_string(dim_names)
             c_dim_names[0] = b_dim_names
         else:
             ndims = len(dim_names)
@@ -892,12 +892,12 @@ cdef class Group(Object):
             b_dim_names = [None] * ndims
 
             for idx in range(ndims):
-                b_dim_names[idx] = b( dim_names[idx] )
+                b_dim_names[idx] = _to_byte_c_string( dim_names[idx] )
 
             for idx in range(ndims):
                 c_dim_names[idx] = b_dim_names[idx]
 
-        c_var = cds_define_var(self.c_ob, b_name, type, ndims, c_dim_names)
+        c_var = cds_define_var(self.c_ob, b_name, cds_type, ndims, c_dim_names)
         free(c_dim_names)
         del b_dim_names
         if c_var == NULL:
@@ -923,7 +923,7 @@ cdef class Group(Object):
         - None if not found
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         cdef CDSVar *c_var = cds_get_var(self.c_ob, b_name)
         if c_var == NULL:
             return None
@@ -945,7 +945,7 @@ cdef class Group(Object):
         - None if not found
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         cdef CDSGroup *cds_group
         cdef Group group
         cds_group = cds_get_group(self.c_ob, b_name)
@@ -1096,7 +1096,7 @@ cdef class Dim(Object):
         - 0 if a memory allocation error occured
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         return cds_rename_dim(self.c_ob, b_name)
 
 
@@ -1172,10 +1172,10 @@ cdef class Att(Object):
         - 0 if a memory allocation error occurred
         
         """
-        cdef object b_text = b(text)
+        cdef object b_text = _to_byte_c_string(text)
         return cds_change_att_text(self.c_ob, b_text)
 
-    def change_value(self, CDSDataType type, object value):
+    def change_value(self, CDSDataType cds_type, object value):
         """Change the type and value of a CDS Attribute.
         
         Error messages from this function are sent to the message
@@ -1183,7 +1183,7 @@ cdef class Att(Object):
         
         Parameters
         ----------
-        type : CDSDataType
+        cds_type : CDSDataType
             New attribute data type
         value : object
             Python value(s), internally converted to numpy.ndarray
@@ -1195,11 +1195,11 @@ cdef class Att(Object):
         - 0 if a memory allocation error occurred
         
         """
-        cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
+        cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
         if value_nd.ndim == 0:
             value_nd = value_nd[None] # add dummy dimension to a scalar value
         assert value_nd.ndim == 1
-        return cds_change_att_value(self.c_ob, type, len(value_nd),
+        return cds_change_att_value(self.c_ob, cds_type, len(value_nd),
                 value_nd.data)
 
     def get_text(self):
@@ -1233,7 +1233,7 @@ cdef class Att(Object):
         free(retval)
         return retval_py
 
-    def get_value(self, CDSDataType type):
+    def get_value(self, CDSDataType cds_type):
         """Get a copy of a CDS attribute value.
         
         This function will get a copy of an attribute value casted into the
@@ -1250,7 +1250,7 @@ cdef class Att(Object):
         
         Parameters
         ----------
-        type : CDSDataType
+        cds_type : CDSDataType
             Data type of the output array
         
         Returns
@@ -1264,10 +1264,10 @@ cdef class Att(Object):
         cdef size_t length
         cdef np.ndarray value_nd
         cdef np.npy_intp dims
-        value_ptr = cds_get_att_value(self.c_ob, type, &length, NULL)
+        value_ptr = cds_get_att_value(self.c_ob, cds_type, &length, NULL)
         dims = length
         value_nd = np.PyArray_SimpleNewFromData(1, &dims,
-                cds_type_to_dtype(type), value_ptr)
+                cds_type_to_dtype(cds_type), value_ptr)
         # allow numpy to reclaim memory when array goes out of scope
         value_nd.base = PyCapsule_New(value_ptr,NULL,<PyCapsule_Destructor> _free)
         return value_nd
@@ -1292,7 +1292,7 @@ cdef class Att(Object):
         - 0 if a memory allocation error occured
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         return cds_rename_att(self.c_ob, b_name)
 
     def set_text(self, text):
@@ -1316,10 +1316,10 @@ cdef class Att(Object):
         - 0 if a memory allocation error occurred
         
         """
-        cdef object b_text = b( text )
+        cdef object b_text = _to_byte_c_string( text )
         return cds_set_att_text(self.c_ob, b_text)
 
-    def set_value(self, CDSDataType type, object value):
+    def set_value(self, CDSDataType cds_type, object value):
         """Set the value of a CDS attribute.
         
         This function will set the value of an attribute by casting the
@@ -1332,7 +1332,7 @@ cdef class Att(Object):
         
         Parameters
         ----------
-        type : CDSDataType
+        cds_type : CDSDataType
             Data type of the specified value
         value : object
             Pointer to the attribute value
@@ -1343,11 +1343,17 @@ cdef class Att(Object):
         - 0 if a memory allocation error occurred
         
         """
-        cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
+        cdef np.ndarray value_nd
+
+        if cds_type == CDS_CHAR:
+            return self.set_text(value)
+
+        value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
+
         if value_nd.ndim == 0:
             value_nd = value_nd[None] # add dummy dimension to a scalar value
         assert value_nd.ndim == 1
-        return cds_set_att_value(self.c_ob, type, len(value_nd),
+        return cds_set_att_value(self.c_ob, cds_type, len(value_nd),
                 value_nd.data)
 
 
@@ -1457,22 +1463,22 @@ cdef class Var(Object):
 
     def get_default_fill(self):
         cdef void *fill_ptr = self.c_ob.default_fill
-        cdef CDSDataType type = self.c_ob.type
+        cdef CDSDataType cds_type = self.c_ob.type
         if fill_ptr == NULL:
             return None
-        elif type == CDS_NAT:
+        elif cds_type == CDS_NAT:
             return None
-        elif type == CDS_CHAR:
+        elif cds_type == CDS_CHAR:
             return (<char*>fill_ptr)[0]
-        elif type == CDS_BYTE:
+        elif cds_type == CDS_BYTE:
             return (<signed char*>fill_ptr)[0]
-        elif type == CDS_SHORT:
+        elif cds_type == CDS_SHORT:
             return (<short*>fill_ptr)[0]
-        elif type == CDS_INT:
+        elif cds_type == CDS_INT:
             return (<int*>fill_ptr)[0]
-        elif type == CDS_FLOAT:
+        elif cds_type == CDS_FLOAT:
             return (<float*>fill_ptr)[0]
-        elif type == CDS_DOUBLE:
+        elif cds_type == CDS_DOUBLE:
             return (<double*>fill_ptr)[0]
 
     ###################################################################
@@ -1521,7 +1527,7 @@ cdef class Var(Object):
         - 0 if a memory allocation error occured
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         return cds_rename_var(self.c_ob, b_name)
 
     def is_unlimited(self):
@@ -1549,7 +1555,7 @@ cdef class Var(Object):
         - None if not found
         
         """
-        cdef object b_name = b(name)
+        cdef object b_name = _to_byte_c_string(name)
         cdef CDSDim *c_dim = cds_var_has_dim(self.c_ob, b_name)
         if c_dim == NULL:
             return None
@@ -1682,7 +1688,7 @@ cdef class Var(Object):
             return None
         return self.get_datap()
 
-    def change_type(self, CDSDataType type):
+    def change_type(self, CDSDataType cds_type):
         """Change the data type of a CDS Variable.
         
         This function will change the data type of a CDS variable. All data and
@@ -1706,7 +1712,7 @@ cdef class Var(Object):
         
         Parameters
         ----------
-        type : CDSDataType
+        cds_type : CDSDataType
             New data type
         
         Returns
@@ -1715,9 +1721,9 @@ cdef class Var(Object):
         - 0 if an error occurred
 
         """
-        return cds_change_var_type(self.c_ob, type)
+        return cds_change_var_type(self.c_ob, cds_type)
 
-    def change_units(self, CDSDataType type, object units):
+    def change_units(self, CDSDataType cds_type, object units):
         """Change the units of a CDS Variable.
         
         This function will change the data type and units of a CDS variable.
@@ -1741,7 +1747,7 @@ cdef class Var(Object):
         
         Parameters
         ----------
-        type : CDSDataType
+        cds_type : CDSDataType
             New data type
         units : object
             New units
@@ -1752,8 +1758,8 @@ cdef class Var(Object):
         - 0 if an error occurred
 
         """
-        cdef object b_units = b(units)
-        return cds_change_var_units(self.c_ob, type, b_units)
+        cdef object b_units = _to_byte_c_string(units)
+        return cds_change_var_units(self.c_ob, cds_type, b_units)
 
     def create_data_index(self):
         cdef void *ptr
@@ -1766,7 +1772,7 @@ cdef class Var(Object):
         """Delete the data for a CDS variable."""
         cds_delete_var_data(self.c_ob)
 
-    def get_data(self, CDSDataType type, size_t sample_start):
+    def get_data(self, CDSDataType cds_type, size_t sample_start):
         """Get the data from a CDS variable.
         
         This function will get the data from a variable casted into the
@@ -1796,7 +1802,7 @@ cdef class Var(Object):
         
         Parameters
         ----------
-        type : CDSDataType
+        cds_type : CDSDataType
             Data type of the output missing_value and data array
         sample_start : size_t
             Start sample (0 based indexing)
@@ -1827,23 +1833,23 @@ cdef class Var(Object):
         cdef float missing_float
         cdef double missing_double
         cdef object missing_py
-        if type == CDS_NAT:
+        if cds_type == CDS_NAT:
             raise ValueError("CDS_NAT")
-        elif type == CDS_CHAR:
+        elif cds_type == CDS_CHAR:
             missing_ptr = &missing_char
-        elif type == CDS_BYTE:
+        elif cds_type == CDS_BYTE:
             missing_ptr = &missing_signed_char
-        elif type == CDS_SHORT:
+        elif cds_type == CDS_SHORT:
             missing_ptr = &missing_short
-        elif type == CDS_INT:
+        elif cds_type == CDS_INT:
             missing_ptr = &missing_int
-        elif type == CDS_FLOAT:
+        elif cds_type == CDS_FLOAT:
             missing_ptr = &missing_float
-        elif type == CDS_DOUBLE:
+        elif cds_type == CDS_DOUBLE:
             missing_ptr = &missing_double
         else:
             raise ValueError("Unknown CDSDataType")
-        ptr = cds_get_var_data(self.c_ob, type, sample_start, &sample_count,
+        ptr = cds_get_var_data(self.c_ob, cds_type, sample_start, &sample_count,
                 missing_ptr, NULL)
         if ptr == NULL:
             return None,None
@@ -1852,23 +1858,23 @@ cdef class Var(Object):
             dims[i] = self.c_ob.dims[i].length
         dims[0] = sample_count
         array = np.PyArray_SimpleNewFromData(ndims, dims,
-                cds_type_to_dtype(type), ptr)
+                cds_type_to_dtype(cds_type), ptr)
         # allow numpy to reclaim memory when array goes out of scope
         array.base = PyCapsule_New(ptr, NULL, <PyCapsule_Destructor>_free)
         free(dims)
-        if type == CDS_NAT:
+        if cds_type == CDS_NAT:
             raise ValueError("CDS_NAT")
-        elif type == CDS_CHAR:
+        elif cds_type == CDS_CHAR:
             missing_py = missing_char
-        elif type == CDS_BYTE:
+        elif cds_type == CDS_BYTE:
             missing_py = missing_signed_char
-        elif type == CDS_SHORT:
+        elif cds_type == CDS_SHORT:
             missing_py = missing_short
-        elif type == CDS_INT:
+        elif cds_type == CDS_INT:
             missing_py = missing_int
-        elif type == CDS_FLOAT:
+        elif cds_type == CDS_FLOAT:
             missing_py = missing_float
-        elif type == CDS_DOUBLE:
+        elif cds_type == CDS_DOUBLE:
             missing_py = missing_double
         else:
             raise ValueError("Unknown CDSDataType")
@@ -1893,7 +1899,7 @@ cdef class Var(Object):
         cdef np.ndarray array
         cdef np.npy_intp *dims
         cdef int ndims = self.c_ob.ndims
-        cdef np.dtype type = cds_type_to_dtype_obj(self.c_ob.type)
+        cdef np.dtype dtype = cds_type_to_dtype_obj(self.c_ob.type)
         ptr = cds_get_var_datap(self.c_ob, 0)
         if ptr == NULL:
             return None
@@ -1901,7 +1907,7 @@ cdef class Var(Object):
         for i in range(ndims):
             dims[i] = self.c_ob.dims[i].length
         dims[0] = sample_count
-        array = np.PyArray_SimpleNewFromData(ndims, dims, type.num, ptr)
+        array = np.PyArray_SimpleNewFromData(ndims, dims, dtype.num, ptr)
         free(dims)
         if 0 == sample_start:
             return array
@@ -1974,7 +1980,7 @@ cdef class Var(Object):
     def set_default_fill_value(self, object fill_value):
         raise NotImplementedError("TODO")
 
-    def set_data(self, CDSDataType type, size_t sample_start, size_t
+    def set_data(self, CDSDataType cds_type, size_t sample_start, size_t
             sample_count, object missing_value, object data):
         raise NotImplementedError("TODO")
 
@@ -2026,7 +2032,7 @@ def print_all(object file_like, Group group, int flags):
 def print_att(object file_like, object indent, int  min_width, Att att):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent ) 
+    cdef object b_indent = _to_byte_c_string( indent ) 
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2037,7 +2043,7 @@ def print_att(object file_like, object indent, int  min_width, Att att):
 def print_atts(object file_like, object indent, Object parent):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent ) 
+    cdef object b_indent = _to_byte_c_string( indent ) 
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2048,7 +2054,7 @@ def print_atts(object file_like, object indent, Object parent):
 def print_dim(object file_like, object indent, int min_width, Dim dim):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent ) 
+    cdef object b_indent = _to_byte_c_string( indent ) 
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2069,7 +2075,7 @@ def print_dims(object file_like, object indent, Group group):
 def print_var(object file_like, object indent, Var var, int flags):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent ) 
+    cdef object b_indent = _to_byte_c_string( indent ) 
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2080,7 +2086,7 @@ def print_var(object file_like, object indent, Var var, int flags):
 def print_vars(object file_like, object indent, Group group, int flags):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent ) 
+    cdef object b_indent = _to_byte_c_string( indent ) 
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2091,8 +2097,8 @@ def print_vars(object file_like, object indent, Group group, int flags):
 def print_var_data(object file_like, object label, object indent, Var var):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent ) 
-    cdef object b_label = b( label ) 
+    cdef object b_indent = _to_byte_c_string( indent ) 
+    cdef object b_label = _to_byte_c_string( label ) 
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2103,7 +2109,7 @@ def print_var_data(object file_like, object label, object indent, Var var):
 def print_data(object file_like, object indent, Group group):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent )
+    cdef object b_indent = _to_byte_c_string( indent )
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2114,7 +2120,7 @@ def print_data(object file_like, object indent, Group group):
 def print_group(object file_like, object indent, Group group, int flags):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent )
+    cdef object b_indent = _to_byte_c_string( indent )
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2125,7 +2131,7 @@ def print_group(object file_like, object indent, Group group, int flags):
 def print_groups(object file_like, object indent, Group group, int flags):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent )
+    cdef object b_indent = _to_byte_c_string( indent )
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2136,7 +2142,7 @@ def print_groups(object file_like, object indent, Group group, int flags):
 def print_vararray(object file_like, object indent, VarArray vararray, int flags):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent )
+    cdef object b_indent = _to_byte_c_string( indent )
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2147,7 +2153,7 @@ def print_vararray(object file_like, object indent, VarArray vararray, int flags
 def print_vargroup(object file_like, object indent, VarGroup vargroup, int flags):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent )
+    cdef object b_indent = _to_byte_c_string( indent )
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")
@@ -2158,7 +2164,7 @@ def print_vargroup(object file_like, object indent, VarGroup vargroup, int flags
 def print_vargroups(object file_like, object indent, Group group, int flags):
     cdef FILE *fp
     cdef int fd
-    cdef object b_indent = b( indent )
+    cdef object b_indent = _to_byte_c_string( indent )
     file_like.flush()
     fd = file_like.fileno()
     fp = fdopen(fd, "w")

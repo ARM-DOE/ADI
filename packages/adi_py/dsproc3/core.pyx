@@ -64,7 +64,7 @@ import codecs
 # numpy
 import numpy as np
 cimport numpy as np
-np.import_array()
+np.import_array()  # initialize the numpy C API
 
 def check_type(x):
     print(type(x))
@@ -73,17 +73,15 @@ def check_type(x):
 # (byte string)
 # If want to work for python 2.7 as well, will include additional
 # definition dependign on python version
-def b(x):
+def _to_byte_c_string(x):
     return codecs.latin_1_encode(x)[0]
 
 # Allow for bytes or unicode strings, will think on this
-#def b(x):
+#def _to_byte_c_string(x):
 #    if type(x) is str: 
 #        return codecs.latin_1_encode(x)[0]
 #    else: 
 #        return x
-        
-
 
 # Old function
 # Convert C string (byte string) to Python 3 string( unicode string)
@@ -99,6 +97,7 @@ def _to_python_string(c_string):
     else:
         # In Python 3, strings are Unicode
         return _to_unicode(c_string)
+        
 # Convert C string (byte string) to Python 3 string( unicode string)
 cdef unicode _to_unicode(char *x):
     return x.decode('UTF-8', 'strict')
@@ -184,12 +183,12 @@ cdef inline __line():
     #if frame.f_back:
     #    frame = frame.f_back
 
-    b_filename = b(frame.f_code.co_filename)
+    b_filename = _to_byte_c_string(frame.f_code.co_filename)
     filename = b_filename
 
     lineno = frame.f_lineno
 
-    b_function = b(frame.f_code.co_name)
+    b_function = _to_byte_c_string(frame.f_code.co_name)
     function = b_function
 
     del frame
@@ -209,7 +208,7 @@ def log(object format, *args):
             s = format.format(*args)
 
     #python byte string of s, equivalent to c string (char *)
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     dsproc_log(func, file, line, b_s)
 
 
@@ -223,7 +222,7 @@ def warning(object format, *args):
         except TypeError:
             s = format.format(*args)
 
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     dsproc_warning(func, file, line, b_s)
 
 #def ERROR(char *status, char *format, *args, char *_file="", int _line=0):
@@ -251,8 +250,8 @@ def error(object status, object format, *args):
         except TypeError:
             s = format.format(*args)
 
-    b_status = b(status)
-    b_s = b(s)
+    b_status = _to_byte_c_string(status)
+    b_s = _to_byte_c_string(s)
     dsproc_error(func, file, line, b_status, b_s)
 
 def abort(object status, object format, *args):
@@ -294,8 +293,8 @@ def abort(object status, object format, *args):
         except TypeError:
             s = format.format(*args)
 
-    b_status = b(status)
-    b_s = b(s)
+    b_status = _to_byte_c_string(status)
+    b_s = _to_byte_c_string(s)
     dsproc_abort(func, file, line, b_status, b_s)
 
 def mentor_mail(object format, *args):
@@ -307,7 +306,7 @@ def mentor_mail(object format, *args):
         except TypeError:
             s = format.format(*args)
     
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     dsproc_mentor_mail(func, file, line, b_s)
 
 #def debug_lv1(char *format, *args, char *_file="", int _line=0):
@@ -321,7 +320,7 @@ def debug_lv1(object format, *args):
         except TypeError:
             s = format.format(*args)
     
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     if msngr_debug_level or msngr_provenance_level:
         dsproc_debug(func, file, line, 1, b_s)
 
@@ -334,7 +333,7 @@ def debug_lv2(object format, *args):
         except TypeError:
             s = format.format(*args)
 
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     if msngr_debug_level or msngr_provenance_level:
         dsproc_debug(func, file, line, 2, b_s)
 
@@ -347,7 +346,7 @@ def debug_lv3(object format, *args):
         except TypeError:
             s = format.format(*args)
 
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     if msngr_debug_level or msngr_provenance_level:
         dsproc_debug(func, file, line, 3, b_s)
 
@@ -360,7 +359,7 @@ def debug_lv4(object format, *args):
         except TypeError:
             s = format.format(*args)
 
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     if msngr_debug_level or msngr_provenance_level:
         dsproc_debug(func, file, line, 4, b_s)
 
@@ -373,7 +372,7 @@ def debug_lv5(object format, *args):
         except TypeError:
             s = format.format(*args)
 
-    b_s = b(s)
+    b_s = _to_byte_c_string(s)
     if msngr_debug_level or msngr_provenance_level:
         dsproc_debug(func, file, line, 5, b_s)
 
@@ -1188,14 +1187,14 @@ def _run_quicklook_hook(
     cdef int   status
     status = 1
     if _quicklook_hook:
-        debug_lv1("\n----- ENTERING SET QUICKLOOK HOOK -----\n")
+        debug_lv1("\n----- ENTERING QUICKLOOK HOOK -----\n")
         status = _quicklook_hook(
             _user_data, begin_date, end_date)
         if status < 0:
             status_text = dsproc_get_status()
             if len(status_text) == 0 or status_text.startswith(b'\0'):
                 error("Unknown Data Processing Error (check logs)","Error message not set by quicklook_hook function\n")
-        debug_lv1("----- EXITING SET QUICKLOOK HOOK ------\n\n")
+        debug_lv1("----- EXITING QUICKLOOK HOOK ------\n\n")
 
     return status
 
@@ -1259,65 +1258,65 @@ cdef void _free(object obj):
 # unicode (python3) stringi ('e')?
 # initial value is python object, so assume python string???
 # I believe char in this case is a character value (0-255)
-cdef inline void* _alloc_single(CDSDataType type, object initial_value=None):
+cdef inline void* _alloc_single(CDSDataType cds_type, object initial_value=None):
     """Allocates a single value of the given type and return its address."""
     cdef void *retval = NULL
-    if type == CDS_NAT:
+    if cds_type == CDS_NAT:
         raise ValueError("CDS_NAT")
-    elif type == CDS_CHAR:
+    elif cds_type == CDS_CHAR:
         retval = malloc(sizeof(char))
         if initial_value is not None:
             (<char*>retval)[0] = initial_value
-    elif type == CDS_BYTE:
+    elif cds_type == CDS_BYTE:
         retval = malloc(sizeof(char))
         if initial_value is not None:
             (<char*>retval)[0] = initial_value
-    elif type == CDS_SHORT:
+    elif cds_type == CDS_SHORT:
         retval = malloc(sizeof(short))
         if initial_value is not None:
             (<short*>retval)[0] = initial_value
-    elif type == CDS_INT:
+    elif cds_type == CDS_INT:
         retval = malloc(sizeof(int))
         if initial_value is not None:
             (<int*>retval)[0] = initial_value
-    elif type == CDS_FLOAT:
+    elif cds_type == CDS_FLOAT:
         retval = malloc(sizeof(float))
         if initial_value is not None:
             (<float*>retval)[0] = initial_value
-    elif type == CDS_DOUBLE:
+    elif cds_type == CDS_DOUBLE:
         retval = malloc(sizeof(double))
         if initial_value is not None:
             (<double*>retval)[0] = initial_value
     else:
-        raise ValueError( "Unknown CDSDataType %s" % type)
+        raise ValueError( "Unknown CDSDataType %s" % cds_type)
     return retval
 
-cdef inline object _convert_single(CDSDataType type, void *value):
+cdef inline object _convert_single(CDSDataType cds_type, void *value):
     """Converts a single value at the given address to the given type
     and frees it."""
     cdef object retval
-    if type == CDS_NAT:
+    if cds_type == CDS_NAT:
         raise ValueError("CDS_NAT")
-    elif type == CDS_CHAR:
+    elif cds_type == CDS_CHAR:
         retval = (<char*>value)[0];
         free(<char*>value)
-    elif type == CDS_BYTE:
+    elif cds_type == CDS_BYTE:
         retval = (<char*>value)[0];
         free(<char*>value)
-    elif type == CDS_SHORT:
+    elif cds_type == CDS_SHORT:
         retval = (<short*>value)[0];
         free(<short*>value)
-    elif type == CDS_INT:
+    elif cds_type == CDS_INT:
         retval = (<int*>value)[0];
         free(<int*>value)
-    elif type == CDS_FLOAT:
+    elif cds_type == CDS_FLOAT:
         retval = (<float*>value)[0];
         free(<float*>value)
-    elif type == CDS_DOUBLE:
+    elif cds_type == CDS_DOUBLE:
         retval = (<double*>value)[0];
         free(<double*>value)
     else:
-        raise ValueError("Unknown CDSDataType %s" % type )
+        raise ValueError("Unknown CDSDataType %s" % cds_type )
     return retval
 
 # Need to research how numpy interacts with Python3 strings
@@ -1326,72 +1325,67 @@ cdef inline object _convert_single(CDSDataType type, void *value):
 # so should still correspond with C strings. Just have to make sure
 # that the data being set for the np array are byte strings from C
 # Unsure if ever setting with Python Strings (unicode for python3)
-cdef inline int cds_type_to_dtype(CDSDataType type) except -1:
+cdef inline int cds_type_to_dtype(CDSDataType cds_type) except -1:
 # Use np.NPY_<type> when calling into numpy C interface
 # i.e. PyArray
-    if type == CDS_NAT:
+    if cds_type == CDS_NAT:
         raise ValueError( "CDS_NAT")
-    elif type == CDS_CHAR:
+    elif cds_type == CDS_CHAR:
         return np.NPY_STRING
-    elif type == CDS_BYTE:
+    elif cds_type == CDS_BYTE:
         return np.NPY_BYTE
-    elif type == CDS_SHORT:
+    elif cds_type == CDS_SHORT:
         return np.NPY_SHORT
-    elif type == CDS_INT:
+    elif cds_type == CDS_INT:
         return np.NPY_INT
-    elif type == CDS_FLOAT:
+    elif cds_type == CDS_FLOAT:
         return np.NPY_FLOAT
-    elif type == CDS_DOUBLE:
+    elif cds_type == CDS_DOUBLE:
         return np.NPY_DOUBLE
     else:
-        raise ValueError("Unknown CDSDataType %s" % type)
+        raise ValueError("Unknown CDSDataType %s" % cds_type)
 
-cdef inline np.dtype cds_type_to_dtype_obj(CDSDataType type):
+cpdef inline np.dtype cds_type_to_dtype_obj(CDSDataType cds_type):
 # Use np.dtype<type> when calling into numpy Python interface
     """Converts a CDSDataType to a dtype instance."""
-    if type == CDS_NAT:
+    if cds_type == CDS_NAT:
         raise ValueError("CDS_NAT")
-    elif type == CDS_CHAR:
+    elif cds_type == CDS_CHAR:
         return np.dtype(np.uint8)
-    elif type == CDS_BYTE:
+    elif cds_type == CDS_BYTE:
         return np.dtype(np.int8)
-    elif type == CDS_SHORT:
+    elif cds_type == CDS_SHORT:
         return np.dtype(np.int16)
-    elif type == CDS_INT:
+    elif cds_type == CDS_INT:
         return np.dtype(np.int32)
-    elif type == CDS_FLOAT:
+    elif cds_type == CDS_FLOAT:
         return np.dtype(np.float32)
-    elif type == CDS_DOUBLE:
+    elif cds_type == CDS_DOUBLE:
         return np.dtype(np.float64)
     else:
-        raise ValueError("Unknown CDSDataType %s" % type)
+        raise ValueError("Unknown CDSDataType %s" % cds_type)
 
 # 'S1' is 1 character byte string, so should be okay, assuming 
 #need to alter np.str though, that will reflect to unicode in Python 3 i believe,
 #just want bytes, do not need np.str since that is unicode
 #used in set_var_data
-cdef inline int dtype_to_cds_type(np.dtype type) except -1:
-    if type == np.dtype(np.uint8):
+cpdef inline int dtype_to_cds_type(np.dtype dtype) except -1:
+    if dtype == np.dtype(np.uint8):
         return CDS_CHAR
-    elif type == np.dtype('S1'):
+    elif dtype == np.dtype('S1'):
         return CDS_CHAR
-    #potentially add this one...
-    #elif type == np.dtype(np.uint8):
-    #    return CDS_CHAR
-    #elif type == np.dtype(np.str):
-    #    return CDS_CHAR
-    elif type == np.dtype(np.int8):
+    elif dtype == np.dtype(np.int8):
         return CDS_BYTE
-    elif type == np.dtype(np.int16):
+    elif dtype == np.dtype(np.int16):
         return CDS_SHORT
-    elif type == np.dtype(np.int32):
+    elif dtype == np.dtype(np.int32):
         return CDS_INT
-    elif type == np.dtype(np.float32):
+    elif dtype == np.dtype(np.float32):
         return CDS_FLOAT
-    elif type == np.dtype(np.float64):
+    elif dtype == np.dtype(np.float64):
         return CDS_DOUBLE
     else:
-        raise ValueError("Unknown dtype for CDSDataType %s" % type)
+        raise ValueError("Unknown dtype %s" % dtype)
 
 # Convert bytes to unicode
 def get_debug_level():
@@ -1438,10 +1432,10 @@ def get_datastream_id(
 
     """
     
-    cdef object b_site = b(site)
-    cdef object b_facility = b(facility)
-    cdef object b_dsc_name = b(dsc_name)
-    cdef object b_dsc_level = b(dsc_level)
+    cdef object b_site = _to_byte_c_string(site)
+    cdef object b_facility = _to_byte_c_string(facility)
+    cdef object b_dsc_name = _to_byte_c_string(dsc_name)
+    cdef object b_dsc_level = _to_byte_c_string(dsc_level)
 
     return dsproc_get_datastream_id(b_site, b_facility, b_dsc_name, b_dsc_level, role)
 
@@ -1467,8 +1461,8 @@ def get_input_datastream_id(object dsc_name, object dsc_level):
     - -1 if an error occurs
 
     """
-    cdef object b_dsc_name = b(dsc_name)
-    cdef object b_dsc_level = b(dsc_level)
+    cdef object b_dsc_name = _to_byte_c_string(dsc_name)
+    cdef object b_dsc_level = _to_byte_c_string(dsc_level)
 
     return dsproc_get_input_datastream_id(b_dsc_name, b_dsc_level)
 
@@ -1526,8 +1520,8 @@ def get_output_datastream_id(object dsc_name, object dsc_level):
 
     """
 
-    cdef object b_dsc_name = b(dsc_name)
-    cdef object b_dsc_level = b(dsc_level)
+    cdef object b_dsc_name = _to_byte_c_string(dsc_name)
+    cdef object b_dsc_level = _to_byte_c_string(dsc_level)
 
     return dsproc_get_output_datastream_id(b_dsc_name, b_dsc_level)
 
@@ -1829,7 +1823,7 @@ def get_transformed_dataset(
     - None if it does not exist
 
     """
-    cdef object b_coordsys_name = b( coordsys_name )   
+    cdef object b_coordsys_name = _to_byte_c_string( coordsys_name )   
 
     cdef cds3.core.Group group
     cdef CDSGroup *cds_group = NULL
@@ -1859,7 +1853,7 @@ def get_dim(cds3.core.Group dataset, object name):
     """
     cdef cds3.core.Dim dim
     cdef CDSDim *cds_dim
-    cdef object b_name = b(name)
+    cdef object b_name = _to_byte_c_string(name)
 
     cds_dim = dsproc_get_dim(dataset.c_ob, b_name)
     if cds_dim == NULL:
@@ -1885,7 +1879,7 @@ def get_dim_length(cds3.core.Group dataset, object name):
     - 0 if the dimension does not exist or has 0 length
     
     """
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
     return dsproc_get_dim_length(dataset.c_ob, b_name)
 
@@ -1912,7 +1906,7 @@ def set_dim_length(cds3.core.Group dataset, object name, size_t length):
     - 0 if data has already been added to a variable using this dimension
 
     """
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
     return dsproc_set_dim_length(dataset.c_ob, b_name, length)
 
@@ -1920,7 +1914,7 @@ def change_att(
             cds3.core.Object parent,
             int          overwrite,
             object       name,
-            CDSDataType  type,
+            CDSDataType  cds_type,
             object       value):
     """Change an attribute for a dataset or variable.
     
@@ -1939,7 +1933,7 @@ def change_att(
         Overwrite flag (1 = TRUE, 0 = FALSE)
     name : object
         Attribute name
-    type : CDSDataType
+    cds_type : CDSDataType
         Attribute data type
     value : object
         Pointer to the attribute value
@@ -1955,14 +1949,14 @@ def change_att(
     """
     # TODO need to used fused types for the 'parent' param and also likely for
     # the conversion of the 'value' param
-    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
+    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
     if value_nd.ndim == 0:
         value_nd = value_nd[None] # add dummy dimension to scalar value
     assert value_nd.ndim == 1
 
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
-    return dsproc_change_att(parent.cds_object, overwrite, b_name, type,
+    return dsproc_change_att(parent.cds_object, overwrite, b_name, cds_type,
             len(value_nd), value_nd.data)
 
 def get_att(cds3.core.Object parent, object name):
@@ -1984,7 +1978,7 @@ def get_att(cds3.core.Object parent, object name):
     cdef cds3.core.Att att
     cdef CDSAtt *cds_att
 
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
     cds_att = dsproc_get_att(parent.cds_object, b_name)
     if cds_att == NULL:
@@ -2022,7 +2016,7 @@ def get_att_text(cds3.core.Object parent, object name):
     cdef char *text
     cdef object retval
 
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
     text = dsproc_get_att_text(parent.cds_object, b_name, &length, NULL)
     if text == NULL:
@@ -2031,7 +2025,7 @@ def get_att_text(cds3.core.Object parent, object name):
     free(text);
     return _to_python_string(retval)
 
-def get_att_value(cds3.core.Object parent, object name, CDSDataType type):
+def get_att_value(cds3.core.Object parent, object name, CDSDataType cds_type):
     """Get a copy of an attribute value from a dataset or variable.
     
     This function will get a copy of an attribute value casted into
@@ -2048,7 +2042,7 @@ def get_att_value(cds3.core.Object parent, object name, CDSDataType type):
         Pointer to the parent CDSGroup or CDSVar
     name : object
         Name of the attribute
-    type : CDSDataType
+    cds_type : CDSDataType
         Data type of the output array
     
     Returns
@@ -2064,16 +2058,16 @@ def get_att_value(cds3.core.Object parent, object name, CDSDataType type):
     cdef np.ndarray value_nd
     cdef np.npy_intp dims
 
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
-    if type == CDS_CHAR:
+    if cds_type == CDS_CHAR:
         return get_att_text(parent, name)
 
-    value = dsproc_get_att_value(parent.cds_object, b_name, type, &length, NULL)
+    value = dsproc_get_att_value(parent.cds_object, b_name, cds_type, &length, NULL)
     if value == NULL:
         return None
 
-    dtype = cds_type_to_dtype(type)
+    dtype = cds_type_to_dtype(cds_type)
     dims = length
     value_nd = np.PyArray_SimpleNewFromData(1, &dims, dtype, value)
 
@@ -2082,7 +2076,7 @@ def get_att_value(cds3.core.Object parent, object name, CDSDataType type):
     return value_nd
 
 def set_att(cds3.core.Object parent, int overwrite, object name,
-        CDSDataType type, object value):
+        CDSDataType cds_type, object value):
     """Set the value of an attribute in a dataset or variable.
     
     This function will define the specified attribute if it does not exist.
@@ -2102,7 +2096,7 @@ def set_att(cds3.core.Object parent, int overwrite, object name,
         Overwrite flag (1 = TRUE, 0 = FALSE)
     name : object
         Attribute name
-    type : CDSDataType
+    cds_type : CDSDataType
         Attribute data type
     value : object
         Pointer to the attribute value
@@ -2117,15 +2111,29 @@ def set_att(cds3.core.Object parent, int overwrite, object name,
 
     """
     cdef int return_value
-    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
-    if value_nd.ndim == 0:
-        value_nd = value_nd[None] # add dummy dimension to a scalar value
-    assert value_nd.ndim == 1
+    cdef np.ndarray value_nd 
+    cdef object byte_value
+    cdef object byte_name = _to_byte_c_string( name )
+    
+    if cds_type == CDS_CHAR:        
+        byte_value = _to_byte_c_string(value)
+        length = len(byte_value)
+        value_nd = np.asarray(byte_value)
+        
+    else:
+        value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
 
-    cdef object b_name = b( name )
+        if value_nd.ndim == 0:
+            value_nd = value_nd[None] # add dummy dimension to a scalar value
 
-    return dsproc_set_att(parent.cds_object, overwrite, b_name, type,
-            len(value_nd), value_nd.data)
+        assert value_nd.ndim == 1
+        
+        length = len(value_nd)
+
+    return_value = dsproc_set_att(parent.cds_object, overwrite, byte_name, cds_type,
+        length, value_nd.data)
+
+    return return_value
 
 def set_att_text(cds3.core.Object parent, object name, object value):
     """Set the value of an attribute in a dataset or variable.
@@ -2153,13 +2161,13 @@ def set_att_text(cds3.core.Object parent, object name, object value):
     - 0 if a memory allocation error occurred
 
     """
-    cdef object b_name = b( name )
-    cdef object b_value = b( value )
+    cdef object b_name = _to_byte_c_string( name )
+    cdef object b_value = _to_byte_c_string( value )
 
     return dsproc_set_att_text(parent.cds_object, b_name, b_value)
 
 def set_att_value(cds3.core.Object parent, object name,
-        CDSDataType type, object value):
+        CDSDataType cds_type, object value):
     """Set the value of an attribute in a dataset or variable.
     
     This function will set the value of an attribute by casting the
@@ -2176,7 +2184,7 @@ def set_att_value(cds3.core.Object parent, object name,
         The parent CDSGroup or CDSVar
     name : object
         Name of the attribute
-    type : CDSDataType
+    cds_type : CDSDataType
         Data type of the specified value
     value : object
         The attribute value
@@ -2191,22 +2199,19 @@ def set_att_value(cds3.core.Object parent, object name,
     """
     cdef np.ndarray value_nd
 
-    if type == CDS_CHAR:
-        # value_nd = np.asarray(list(value), 'S')  # np.str)
-        # length = value_nd.size
+    if cds_type == CDS_CHAR:
         return set_att_text(parent, name, value)
-    else:
-        value_nd = np.asarray(value, cds_type_to_dtype_obj(type))
+    
+    value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
 
     if value_nd.ndim == 0:
         value_nd = value_nd[None] # add dummy dimension to a scalar value
     assert value_nd.ndim == 1
-    if type != CDS_CHAR:
-        length = len(value_nd)
+    length = len(value_nd)
 
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
-    return dsproc_set_att_value(parent.cds_object, b_name, type,
+    return dsproc_set_att_value(parent.cds_object, b_name, cds_type,
             length, value_nd.data)
 
 def clone_var(
@@ -2254,7 +2259,7 @@ def clone_var(
     cdef const char **c_dim_names = NULL
     cdef CDSGroup *cds_group = NULL
 
-    cdef object b_var_name = b( var_name )
+    cdef object b_var_name = _to_byte_c_string( var_name )
 
     cdef object b_dim_names = None
 
@@ -2307,7 +2312,7 @@ def clone_var(
 def define_var(
             cds3.core.Group dataset,
             object name, #string
-            CDSDataType type,
+            CDSDataType cds_type,
             #int ndims, # derived from dim_names
             object dim_names, # should be iterable i.e. 1-d list/tuple
             object long_name="", #string
@@ -2370,7 +2375,7 @@ def define_var(
         Pointer to the dataset
     name : object
         Name of the variable
-    type : CDSDataType
+    cds_type : CDSDataType
         Data type of the variable
     dim_names : object
         Iterable i.e. 1-d list/tuple of dimension names
@@ -2413,24 +2418,24 @@ def define_var(
     cdef char *c_units
    
     # For unicode to bytes conversion 
-    cdef object b_name = b (name )
+    cdef object b_name = _to_byte_c_string(name)
     cdef object b_long_name = None
     cdef object b_standard_name = None
     cdef object b_units = None
     cdef object b_dim_names = [None] * len(dim_names)
     
     if len(long_name) != 0:
-        b_long_name = b( long_name )
+        b_long_name = _to_byte_c_string( long_name )
         c_long_name = b_long_name
     else:
         c_long_name = NULL
     if len(standard_name) != 0:
-        b_standard_name = b( standard_name )
+        b_standard_name = _to_byte_c_string( standard_name )
         c_standard_name = b_standard_name
     else:
         c_standard_name = NULL
     if len(units) != 0:
-        b_units = b( units )
+        b_units = _to_byte_c_string( units )
         c_units = b_units
     else:
         c_units = NULL
@@ -2451,9 +2456,9 @@ def define_var(
         for i in range(len(b_dim_names)):
             c_dim_names[i] = PyString_AsString(b_dim_names[i])
 
-    if type == CDS_NAT:
+    if cds_type == CDS_NAT:
         raise ValueError("CDS_NAT")
-    elif type == CDS_CHAR:
+    elif cds_type == CDS_CHAR:
         if valid_min is not None:
             min_char = valid_min
             min_ptr = &min_char
@@ -2466,7 +2471,7 @@ def define_var(
         if fill_value is not None:
             fill_char = fill_value
             fill_ptr = &fill_char
-    elif type == CDS_BYTE:
+    elif cds_type == CDS_BYTE:
         if valid_min is not None:
             min_byte = valid_min
             min_ptr = &min_byte
@@ -2479,7 +2484,7 @@ def define_var(
         if fill_value is not None:
             fill_byte = fill_value
             fill_ptr = &fill_byte
-    elif type == CDS_SHORT:
+    elif cds_type == CDS_SHORT:
         if valid_min is not None:
             min_short = valid_min
             min_ptr = &min_short
@@ -2492,7 +2497,7 @@ def define_var(
         if fill_value is not None:
             fill_short = fill_value
             fill_ptr = &fill_short
-    elif type == CDS_INT:
+    elif cds_type == CDS_INT:
         if valid_min is not None:
             min_int = valid_min
             min_ptr = &min_int
@@ -2505,7 +2510,7 @@ def define_var(
         if fill_value is not None:
             fill_int = fill_value
             fill_ptr = &fill_int
-    elif type == CDS_FLOAT:
+    elif cds_type == CDS_FLOAT:
         if valid_min is not None:
             min_float = valid_min
             min_ptr = &min_float
@@ -2518,7 +2523,7 @@ def define_var(
         if fill_value is not None:
             fill_float = fill_value
             fill_ptr = &fill_float
-    elif type == CDS_DOUBLE:
+    elif cds_type == CDS_DOUBLE:
         if valid_min is not None:
             min_double = valid_min
             min_ptr = &min_double
@@ -2534,7 +2539,7 @@ def define_var(
     else:
         raise ValueError("invalid CDSType")
 
-    cds_var = dsproc_define_var(dataset.c_ob, b_name, type, len(dim_names),
+    cds_var = dsproc_define_var(dataset.c_ob, b_name, cds_type, len(dim_names),
             c_dim_names, c_long_name, c_standard_name, c_units,
             min_ptr, max_ptr, missing_ptr, fill_ptr)
 
@@ -2764,7 +2769,7 @@ def get_metric_var(cds3.core.Var var, object metric):
     """
     cdef CDSVar *cds_var
     cdef cds3.core.Var metric_var
-    cdef object b_metric = b( metric )
+    cdef object b_metric = _to_byte_c_string( metric )
 
     cds_var = dsproc_get_metric_var(var.c_ob, b_metric)
     if cds_var == NULL:
@@ -2797,7 +2802,7 @@ def get_output_var(int ds_id, object var_name, int obs_index=0):
     """
     cdef CDSVar *cds_var
     cdef cds3.core.Var var
-    cdef object b_var_name = b( var_name)
+    cdef object b_var_name = _to_byte_c_string( var_name)
 
     cds_var = dsproc_get_output_var(ds_id, b_var_name, obs_index)
     if cds_var == NULL:
@@ -2860,7 +2865,7 @@ def get_retrieved_var(object var_name, int obs_index=0):
     """
     cdef CDSVar *cds_var
     cdef cds3.core.Var var
-    cdef object b_var_name = b( var_name) 
+    cdef object b_var_name = _to_byte_c_string( var_name) 
 
     cds_var = dsproc_get_retrieved_var(b_var_name, obs_index)
     if cds_var == NULL:
@@ -2895,7 +2900,7 @@ def get_transformed_var(object var_name, int obs_index=0):
     """
     cdef CDSVar *cds_var
     cdef cds3.core.Var var
-    cdef object b_var_name = b( var_name)
+    cdef object b_var_name = _to_byte_c_string( var_name)
 
     cds_var = dsproc_get_transformed_var(b_var_name, obs_index)
     if cds_var == NULL:
@@ -2932,8 +2937,8 @@ def get_trans_coordsys_var(object coordsys_name, object var_name, int obs_index=
     """
     cdef CDSVar *cds_var
     cdef cds3.core.Var var
-    cdef object b_coordsys_name = b( coordsys_name )
-    cdef object b_var_name = b( var_name )
+    cdef object b_coordsys_name = _to_byte_c_string( coordsys_name )
+    cdef object b_var_name = _to_byte_c_string( var_name )
 
     cds_var = dsproc_get_trans_coordsys_var(b_coordsys_name, b_var_name, obs_index)
     if cds_var == NULL:
@@ -2960,7 +2965,7 @@ def get_var(cds3.core.Group dataset, object name):
     """
     cdef CDSVar *cds_var
     cdef cds3.core.Var var
-    cdef object b_name = b( name )
+    cdef object b_name = _to_byte_c_string( name )
 
     cds_var = dsproc_get_var(dataset.c_ob, b_name)
     if cds_var == NULL:
@@ -3141,7 +3146,7 @@ def get_var_data_index(cds3.core.Var var):
         return None
     return var.get_datap()
 
-def get_var_data(cds3.core.Var var, CDSDataType type, size_t sample_start,
+def get_var_data(cds3.core.Var var, CDSDataType cds_type, size_t sample_start,
         size_t sample_count=0, np.ndarray data=None):
     """Get a copy of the data from a dataset variable.
 
@@ -3159,7 +3164,7 @@ def get_var_data(cds3.core.Var var, CDSDataType type, size_t sample_start,
     ----------
     var : cds3.core.Var
         Pointer to the variable
-    type : CDSDataType
+    cds_type : CDSDataType
         Data type of the output missing_value and data array
     sample_start : size_t
         Start sample (0 based indexing)
@@ -3173,12 +3178,12 @@ def get_var_data(cds3.core.Var var, CDSDataType type, size_t sample_start,
 
     """
     cdef void* datap = NULL
-    cdef void* missing_c = _alloc_single(type)
+    cdef void* missing_c = _alloc_single(cds_type)
     cdef int ndims = var.c_ob.ndims
     cdef size_t sample_size = 0
-    cdef np.dtype dtype = cds_type_to_dtype_obj(type)
+    cdef np.dtype dtype = cds_type_to_dtype_obj(cds_type)
     if sample_count == 0 or data is None:
-        datap = dsproc_get_var_data(var.c_ob, type, sample_start,
+        datap = dsproc_get_var_data(var.c_ob, cds_type, sample_start,
                 &sample_count, missing_c, NULL)
         if datap == NULL:
             return None,None
@@ -3190,16 +3195,16 @@ def get_var_data(cds3.core.Var var, CDSDataType type, size_t sample_start,
         free(dims)
         # allow numpy to reclaim memory when array goes out of scope
         data.base = PyCapsule_New(datap, NULL, <PyCapsule_Destructor>_free)
-        return data, _convert_single(type, missing_c)
+        return data, _convert_single(cds_type, missing_c)
     else:
         sample_size = cds_var_sample_size(var.c_ob)
         assert data.flags['C_CONTIGUOUS']
         assert data.size >= sample_count*sample_size
-        datap = dsproc_get_var_data(var.c_ob, type, sample_start,
+        datap = dsproc_get_var_data(var.c_ob, cds_type, sample_start,
                 &sample_count, missing_c, data.data)
         if datap == NULL:
             return None,None
-        return data, _convert_single(type, missing_c)
+        return data, _convert_single(cds_type, missing_c)
 
 def get_var_missing_values(cds3.core.Var var):
     """Get the missing values for a CDS Variable.
@@ -3231,7 +3236,7 @@ def get_var_missing_values(cds3.core.Var var):
     cdef int retval
     cdef np.npy_intp size
     cdef void *values
-    cdef CDSDataType type = var.c_ob.type
+    cdef CDSDataType cds_type = var.c_ob.type
     cdef np.ndarray array
     retval = dsproc_get_var_missing_values(var.c_ob, &values)
     if retval < 0:
@@ -3241,7 +3246,7 @@ def get_var_missing_values(cds3.core.Var var):
     else:
         size = retval
         array = np.PyArray_SimpleNewFromData(1, &size,
-                cds_type_to_dtype(type), values)
+                cds_type_to_dtype(cds_type), values)
         # allow numpy to reclaim memory when array goes out of scope
         array.base = PyCapsule_New(values, NULL, <PyCapsule_Destructor>_free)
         return array
@@ -3411,12 +3416,12 @@ def set_var_data(
 
     """
     cdef void *data = NULL
-    cdef CDSDataType type
+    cdef CDSDataType cds_type
     cdef void *missing_c = NULL
-    type = <CDSDataType>dtype_to_cds_type(data_nd.dtype)
+    cds_type = <CDSDataType>dtype_to_cds_type(data_nd.dtype)
     if missing_value is not None:
-        missing_c = _alloc_single(type, missing_value)
-    data = dsproc_set_var_data(var.c_ob, type, sample_start, sample_count,
+        missing_c = _alloc_single(cds_type, missing_value)
+    data = dsproc_set_var_data(var.c_ob, cds_type, sample_start, sample_count,
             missing_c, data_nd.data)
     if missing_value is not None:
         free(missing_c)
@@ -3728,7 +3733,7 @@ def set_base_time(cds3.core.Object cds_obj, object long_name, size_t base_time):
     if long_name is None:
         retval = dsproc_set_base_time(cds_obj.cds_object,NULL, base_time)
     else:
-        b_long_name = b( long_name )
+        b_long_name = _to_byte_c_string( long_name )
         retval = dsproc_set_base_time(cds_obj.cds_object, b_long_name, base_time)
     return retval
 
@@ -3829,7 +3834,7 @@ def add_var_output_target(cds3.core.Var var, int ds_id, object var_name):
     - 0 if an error occurred
 
     """
-    cdef object b_var_name = b( var_name )
+    cdef object b_var_name = _to_byte_c_string( var_name )
     return dsproc_add_var_output_target(var.c_ob, ds_id, b_var_name)
 
 def copy_var_tag(cds3.core.Var src_var, cds3.core.Var dest_var):
@@ -3971,14 +3976,14 @@ def get_var_output_targets(cds3.core.Var var):
     return retval
 
 def set_var_coordsys_name(cds3.core.Var var, object coordsys_name):
-    cdef object b_coordsys_name = b( coordsys_name )
+    cdef object b_coordsys_name = _to_byte_c_string( coordsys_name )
     return dsproc_set_var_coordsys_name(var.c_ob, b_coordsys_name)
 
 def set_var_flags(cds3.core.Var var, int flags):
     return dsproc_set_var_flags(var.c_ob, flags)
 
 def set_var_output_target(cds3.core.Var var, int ds_id, object var_name):
-    cdef object b_var_name = b( var_name )
+    cdef object b_var_name = _to_byte_c_string( var_name )
     return dsproc_set_var_output_target(var.c_ob, ds_id, b_var_name)
 
 def unset_var_flags(cds3.core.Var var, int flags):
@@ -4019,36 +4024,36 @@ def dump_dataset(
         object suffix,
         int flags):
 
-    cdef object b_outdir = b( outdir )
-    cdef object b_prefix = b( prefix )
-    cdef object b_suffix = b( suffix )
+    cdef object b_outdir = _to_byte_c_string( outdir )
+    cdef object b_prefix = _to_byte_c_string( prefix )
+    cdef object b_suffix = _to_byte_c_string( suffix )
 
     return dsproc_dump_dataset(dataset.c_ob, b_outdir, b_prefix, file_time, 
             b_suffix, flags)
 
 def dump_output_datasets(object outdir, object suffix, int flags):
-    cdef object b_outdir = b( outdir )
-    cdef object b_suffix = b( suffix )
+    cdef object b_outdir = _to_byte_c_string( outdir )
+    cdef object b_suffix = _to_byte_c_string( suffix )
     return dsproc_dump_output_datasets(b_outdir, b_suffix, flags)
 
 def dump_retrieved_datasets(object outdir, object suffix, int flags):
-    cdef object b_outdir = b( outdir )
-    cdef object b_suffix = b( suffix )
+    cdef object b_outdir = _to_byte_c_string( outdir )
+    cdef object b_suffix = _to_byte_c_string( suffix )
     return dsproc_dump_retrieved_datasets(b_outdir, b_suffix, flags)
 
 def dump_transformed_datasets(object outdir, object suffix, int flags):
-    cdef object b_outdir = b( outdir )
-    cdef object b_suffix = b( suffix )
+    cdef object b_outdir = _to_byte_c_string( outdir )
+    cdef object b_suffix = _to_byte_c_string( suffix )
     return dsproc_dump_transformed_datasets(b_outdir, b_suffix, flags)
 
 def copy_file(object src_file, object dest_file):
-    cdef object b_src_file = b( src_file )
-    cdef object b_dest_file = b( dest_file )
+    cdef object b_src_file = _to_byte_c_string( src_file )
+    cdef object b_dest_file = _to_byte_c_string( dest_file )
     return dsproc_copy_file(b_src_file, b_dest_file)
 
 def move_file(object src_file, object dest_file):
-    cdef object b_src_file = b( src_file )
-    cdef object b_dest_file = b( dest_file )
+    cdef object b_src_file = _to_byte_c_string( src_file )
+    cdef object b_dest_file = _to_byte_c_string( dest_file )
     return dsproc_move_file(b_src_file, b_dest_file)
 
 def execvp(object infile, object inargv, int flags):
@@ -4075,8 +4080,9 @@ def execvp(object infile, object inargv, int flags):
             if i == len(inargv)-1:
                 c_inargv[i] = NULL
 
+    b_infile = _to_byte_c_string(infile)
 
-    return_value = dsproc_execvp(infile, c_inargv, flags)
+    return_value = dsproc_execvp(b_infile, c_inargv, flags)
     free(c_inargv)
     del b_inargv
     return return_value
@@ -4251,7 +4257,7 @@ def set_datastream_file_extension(int ds_id, object extension):
     extenstion : object
         File extension
     """
-    cdef object b_extension = b( extension )
+    cdef object b_extension = _to_byte_c_string( extension )
     dsproc_set_datastream_file_extension(ds_id, b_extension)
 
 def get_datastream_files(int ds_id):
@@ -4340,8 +4346,8 @@ def rename(
         time_t begin_time,
         time_t end_time):
 
-    cdef object b_file_path = b( file_path)
-    cdef object b_file_name = b( file_name)
+    cdef object b_file_path = _to_byte_c_string( file_path)
+    cdef object b_file_name = _to_byte_c_string( file_name)
 
     return dsproc_rename(ds_id, b_file_path, b_file_name, begin_time, end_time)
 
@@ -4354,13 +4360,49 @@ def rename(
 
 def rename_bad(int ds_id, object file_path, object file_name, time_t file_time):
 
-    cdef object b_file_path = b( file_path)
-    cdef object b_file_name = b( file_name)
+    cdef object b_file_path = _to_byte_c_string( file_path)
+    cdef object b_file_name = _to_byte_c_string( file_name)
 
     return dsproc_rename_bad(ds_id, b_file_path, b_file_name, file_time)
 
 def set_rename_preserve_dots(int ds_id, int preserve_dots):
     dsproc_set_rename_preserve_dots(ds_id, preserve_dots)
+
+def set_transform_param(cds3.core.Group group, object name, object param_name, CDSDataType cds_type, size_t length, object value):
+    """Set the value of a transformation parameter.
+
+    Error messages from this function are sent to the message handler
+
+    Parameters
+    ----------
+    group : object
+        Pointer to the CDSGroup 
+    obj_name : object
+        Name of the CDS object
+    param_name : object
+        param_name
+    cds_type : CDSDataType
+        type
+    length : size_t
+        length
+    value : void *
+        value
+
+    Returns
+    -------
+    - 1 if the variable was renamed
+    - 0 if a variable with the new name already exists
+    - 0 if the variable is locked
+    - 0 if the group is locked """
+    cdef object b_name = _to_byte_c_string(name)
+    cdef object b_param_name = _to_byte_c_string(param_name)
+    cdef int retval
+    cdef np.ndarray value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
+    if value_nd.ndim == 0:
+        value_nd = value_nd[None] # add dummy dimension to a scalar value
+    assert value_nd.ndim == 1
+    retval = cds_set_transform_param(group.c_ob, b_name, b_param_name, cds_type, length, value_nd.data)
+    return retval
 
 ##############################################################################
 # ported from dsproc3_internal.h
@@ -4372,7 +4414,7 @@ def initialize(argv, proc_model, proc_version, proc_names):
 
     cdef object b_argv = None
     cdef object b_proc_names = None
-    cdef object b_proc_version = b( proc_version)
+    cdef object b_proc_version = _to_byte_c_string( proc_version)
 
     # To pass a list of strings into C for Python3, you must first
     # copy the list into a list of byte strings, and then assign
@@ -4403,7 +4445,7 @@ def initialize(argv, proc_model, proc_version, proc_names):
         b_argv = [None] * len(argv)
 
         for idx, s in enumerate(argv):
-            b_argv[idx] = b(s)
+            b_argv[idx] = _to_byte_c_string(s)
 
         for idx,s in enumerate(b_argv):
             c_argv[idx] = s
@@ -4416,7 +4458,7 @@ def initialize(argv, proc_model, proc_version, proc_names):
         b_proc_names = [None] * len(proc_names)
 
         for idx, s in enumerate( proc_names ):
-            b_proc_names[idx] = b(s)
+            b_proc_names[idx] = _to_byte_c_string(s)
 
         for idx,s in enumerate(b_proc_names):
             c_proc_names[idx] = s
@@ -4516,6 +4558,22 @@ def set_processing_interval_offset(time_t offset):
     """
     dsproc_set_processing_interval_offset(offset)
 
+def set_datastream_split_tz_offset(int ds_id, int split_tz_offset):
+    """
+    Set the timezone offset to use when splitting files.
+
+    Note that this should be the timezone offset for loaction of the data
+    being processed and is subtracted from the UTC time when determining
+    the time of the next file split.  For example, If a timezone offset
+    of -6 hours is set for SGP data, the files will split at 6:00 a.m. GMT.
+
+    Args:
+        ds_id (int): datastream id
+        split_tz_offset (int): time zone offset in hours
+
+    """
+    dsproc_set_datastream_split_tz_offset(ds_id, split_tz_offset)
+
 def set_retriever_time_offsets(int ds_id, time_t begin_time, time_t end_time):
     """
     Set the time offsets to use when retrieving data.
@@ -4607,7 +4665,7 @@ def get_force_mode():
 
 def set_status(object status):
     """Set the process status"""
-    cdef object b_status = b( status )
+    cdef object b_status = _to_byte_c_string( status )
     dsproc_set_status(b_status)
 
 def init_datastream(
@@ -4665,11 +4723,11 @@ def init_datastream(
 
     """
 
-    cdef object b_site = b(site)
-    cdef object b_facility = b(facility)
-    cdef object b_dsc_name = b(dsc_name)
-    cdef object b_dsc_level = b(dsc_level)
-    cdef object b_path = b(path)
+    cdef object b_site = _to_byte_c_string(site)
+    cdef object b_facility = _to_byte_c_string(facility)
+    cdef object b_dsc_name = _to_byte_c_string(dsc_name)
+    cdef object b_dsc_level = _to_byte_c_string(dsc_level)
+    cdef object b_path = _to_byte_c_string(path)
 
     return dsproc_init_datastream(b_site, b_facility, b_dsc_name, b_dsc_level, 
                  role, b_path, dsformat, flags)
@@ -4755,7 +4813,7 @@ def set_datastream_path(int ds_id, object path):
     - 1 if successful
     - 0 if an error occurred
     """
-    cdef object b_path = b( path)
+    cdef object b_path = _to_byte_c_string( path)
     return(dsproc_set_datastream_path(ds_id, b_path))
 #
 #void    dsproc_unset_datastream_flags(int ds_id, int flags)
@@ -5009,7 +5067,7 @@ def set_input_source(object status):
        will only be set in datasets that have the input_source attribute 
        defined.
     """
-    cdef object b_status = b( status )
+    cdef object b_status = _to_byte_c_string( status )
     dsproc_set_status(b_status)
 
 #int     dsproc_set_runtime_metadata(int ds_id, CDSGroup *cds)
@@ -5080,8 +5138,8 @@ def bad_file_warning(char *file_name, char *format, *args):
 
     #dsproc_error(func, file, line, format, s)
 
-    b_file_name = b( file_name )
-    b_s  = b( s )
+    b_file_name = _to_byte_c_string( file_name )
+    b_s  = _to_byte_c_string( s )
     dsproc_bad_file_warning(func, file, line, b_file_name, b_s )
 #
 #void dsproc_bad_line_warning(
@@ -5151,6 +5209,7 @@ def _ingest_main_loop():
         if nfiles == 0:
             log("No data files found to process in: %s\n",
                _to_python_string( dsproc_datastream_path(dsid) ) )
+            dsproc_set_status(DSPROC_ENODATA)
         return
 
     input_dir = dsproc_datastream_path(dsid)
@@ -5195,57 +5254,64 @@ def _vap_main_loop(int proc_model):
     cdef cds3.core.Group ret_data = cds3.core.Group()
     cdef cds3.core.Group trans_data = cds3.core.Group()
     while dsproc_start_processing_loop(&interval_begin, &interval_end):
+        QuicklookMode = dsproc_get_quicklook_mode()
         # Run the pre_retrieval_hook function
         status = _run_pre_retrieval_hook(interval_begin, interval_end)
         if status == -1: break
         if status ==  0: continue
-        # Retrieve the data for the current processing interval
-        if proc_model & DSP_RETRIEVER:
-            status = dsproc_retrieve_data(
-                    interval_begin, interval_end, &ret_data.c_ob)
-            if status == -1: break
-            if status ==  0: continue
-        # Run the post_retrieval_hook function
-        status = _run_post_retrieval_hook(
-                interval_begin, interval_end, ret_data)
-        if status == -1: break
-        if status ==  0: continue
-        # Merge the observations in the retrieved data
-        if not dsproc_merge_retrieved_data(): break
-        # Run the pre_transform_hook function
-        status = _run_pre_transform_hook(
-                interval_begin, interval_end, ret_data)
-        if status == -1: break
-        if status ==  0: continue
-        # Perform the data transformations for transform VAPs
-        if proc_model & DSP_TRANSFORM:
-            status = dsproc_transform_data(&trans_data.c_ob)
-            if status == -1: break
-            if status ==  0: continue
-        # Run the post_transform_hook function
-        status = _run_post_transform_hook(
-            interval_begin, interval_end, trans_data)
-        if status == -1: break
-        if status ==  0: continue
-        # Create output datasets
-        if not dsproc_create_output_datasets(): break
-        # Run the user's data processing function
-        if trans_data:
-            status = _run_process_data_hook(
-                interval_begin, interval_end, trans_data)
-        else:
-            status = _run_process_data_hook(
-                interval_begin, interval_end, ret_data)
-        if status == -1: break
-        if status ==  0: continue
-        # Store all output datasets
-        if not dsproc_store_output_datasets(): break
-        # Run the quicklook_hook function
-        status = _run_quicklook_hook(
-            interval_begin, interval_end)
-        if status == -1: break
-        if status ==  0: continue
+     
 
+        if QuicklookMode != QUICKLOOK_ONLY:
+            # Retrieve the data for the current processing interval
+            if proc_model & DSP_RETRIEVER:
+                status = dsproc_retrieve_data(
+                        interval_begin, interval_end, &ret_data.c_ob)
+                if status == -1: break
+                if status ==  0: continue
+            # Run the post_retrieval_hook function
+            status = _run_post_retrieval_hook(
+                    interval_begin, interval_end, ret_data)
+            if status == -1: break
+            if status ==  0: continue
+            # Merge the observations in the retrieved data
+            if not dsproc_merge_retrieved_data(): break
+            # Run the pre_transform_hook function
+            status = _run_pre_transform_hook(
+                    interval_begin, interval_end, ret_data)
+            if status == -1: break
+            if status ==  0: continue
+            # Perform the data transformations for transform VAPs
+            if proc_model & DSP_TRANSFORM:
+                status = dsproc_transform_data(&trans_data.c_ob)
+                if status == -1: break
+                if status ==  0: continue
+            # Run the post_transform_hook function
+            status = _run_post_transform_hook(
+                interval_begin, interval_end, trans_data)
+            if status == -1: break
+            if status ==  0: continue
+            # Create output datasets
+            if not dsproc_create_output_datasets(): break
+            # Run the user's data processing function
+            if trans_data:
+                status = _run_process_data_hook(
+                    interval_begin, interval_end, trans_data)
+            else:
+                status = _run_process_data_hook(
+                    interval_begin, interval_end, ret_data)
+            if status == -1: break
+            if status ==  0: continue
+            # Store all output datasets
+            if not dsproc_store_output_datasets(): break
+
+     
+        if QuicklookMode != QUICKLOOK_DISABLE:
+            # Run the quicklook_hook function
+            status = _run_quicklook_hook(
+                interval_begin, interval_end)
+            if status == -1: break
+            if status ==  0: continue
+    
 
 def main(argv, proc_model, proc_version, proc_names=None):
     """Datasystem Process Main Function.

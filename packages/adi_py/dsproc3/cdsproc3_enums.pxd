@@ -108,6 +108,8 @@ cdef extern from "dsproc3.h" nogil:
         DS_ROLLUP_TRANS_QC
         DS_SCAN_MODE
         DS_OBS_LOOP
+        QUICKLOOK_ONLY
+        QUICKLOOK_DISABLE
 
     ctypedef enum DSFormat:
         DSF_NETCDF
