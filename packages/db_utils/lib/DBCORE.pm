@@ -17,6 +17,7 @@ use strict;
 
 use PGSQL;
 use SQLite;
+use JSON::XS qw(decode_json);
 
 use vars qw(%DBArgTypes @DBLoadOrder %DBSPDefs %DBAutoDoc);
 
@@ -103,7 +104,7 @@ sub find_db_connect_file(\%)
         }
     }
 
-    if ("$ENV{'HOME'}/.db_connect") {
+    if (-f "$ENV{'HOME'}/.db_connect") {
         return("$ENV{'HOME'}/.db_connect");
     }
 
@@ -1253,6 +1254,22 @@ sub print_data(\%\%)
                     $sp_data->{$table}));
         }
     }
+}
+
+sub read_json_file($$)
+{
+    my ($self, $file) = @_;
+    my $json;
+
+    unless (open(FH, $file)) {
+        $self->{'Error'} = "Could not open JSON file: $!\n -> $file\n";
+        return(undef);
+    }
+    local $/; # To enable "slurp" mode to read entire file into string variable
+    $json = <FH>;
+    close FH;
+
+    return decode_json($json);
 }
 
 1;

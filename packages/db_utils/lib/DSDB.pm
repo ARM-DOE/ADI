@@ -211,7 +211,7 @@ sub sp_call(\%$$@)
 
 ################################################################################
 #
-#  "Data Factory" procedure for loading data into the database
+#  "Data Factory" procedures for loading data into the database
 #
 
 sub process_data_file(\%$$)
@@ -256,6 +256,49 @@ sub process_data_file(\%$$)
     %DBData = ();
 
     return($retval);
+}
+
+sub process_json_file($$)
+{
+    my ($self, $file) = @_;
+    my $updates;
+    my $update;
+    my $retval;
+    my $query;
+    my $args;
+
+    $updates = $self->{'DBCORE'}->read_json_file($file);
+    unless (defined($updates)) {
+        return(0);
+    }
+
+    foreach $update (@{$updates}) {
+
+        $query = undef;
+        $args = $update->{'args'};
+
+        if (defined($update->{'func'})) {
+            $query = $self->{'DBCORE'}->{'DBH'}->build_query_string({
+                'proc' => $update->{'func'},
+                'args' => $args,
+            });
+        }
+        elsif (defined($update->{'query'})) {
+            $query = $update->{'query'};
+        }
+
+        unless (defined($query) && defined($args)) {
+            $self->{'DBCORE'}->{'Error'} = "Cannot load malformed JSON file: $file";
+            return(0);
+        }
+
+        $retval = $self->{'DBCORE'}->query_scalar($query, $args);
+        unless (defined($retval)) {
+            return(0);
+        }
+    }
+
+    return(1);
 }
 
 ################################################################################

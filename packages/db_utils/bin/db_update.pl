@@ -15,6 +15,7 @@
 use strict;
 
 use DBCORE;
+use DSDB;
 
 use Getopt::Long;
 Getopt::Long::Configure qw(no_ignore_case);
@@ -319,6 +320,74 @@ sub revert_data($)
     return(1);
 }
 
+sub revert_json_file($)
+{
+    my ($file) = @_;
+    my $updates;
+    my $update;
+    my $retval;
+    my $query;
+    my $args;
+
+    print_debug("Reverting JSON File...\n");
+
+    $updates = $gDB->read_json_file($file);
+    unless (defined($updates)) {
+        print_error(__LINE__, $gDB->error());
+        return(0);
+    }
+
+    foreach $update (reverse(@{$updates})) {
+
+        $query = undef;
+
+        if (defined($update->{'undo'})) {
+
+            $args = $update->{'undo'}->{'args'};
+
+            if (defined($update->{'undo'}->{'func'})) {
+                $query = $gDB->{'DBH'}->build_query_string({
+                    'proc' => $update->{'undo'}->{'func'},
+                    'args' => $args,
+                });
+            }
+            elsif (defined($update->{'undo'}->{'query'})) {
+                $query = $update->{'undo'}->{'query'};
+            }
+        }
+        elsif (defined($update->{'func'})) {
+
+            $args = $update->{'args'};
+
+            if ($update->{'func'} =~ m/^define_(.+)$/) {
+                $query = $gDB->{'DBH'}->build_query_string({
+                    'proc' => "delete_$1",
+                    'args' => $args,
+                });
+            }
+            elsif ($update->{'func'} =~ m/^delete_(.+)$/) {
+                $query = $gDB->{'DBH'}->build_query_string({
+                    'proc' => "define_$1",
+                    'args' => $args,
+                });
+            }
+        }
+
+        unless (defined($query) && defined($args)) {
+            print_error(__LINE__, "Cannot revert JSON file: $file\n");
+            return(0);
+        }
+
+        $retval = $gDB->query_scalar($query, $args);
+        unless (defined($retval)) {
+            print_error(__LINE__, $gDB->error());
+            return(0);
+        }
+    }
+
+    return(1);
+}
+
 sub revert_updates_file($)
 {
     my ($file) = @_;
@@ -614,6 +683,26 @@ sub load_data($)
     return(1);
 }
 
+sub load_json_file($)
+{
+    my ($file) = @_;
+    my $retval;
+    my $dsdb;
+    
+    $dsdb = DSDB->new();
+    $dsdb->{'DBCORE'} = $gDB;
+    $dsdb->disable_autocommit();
+
+    print_debug("Loading JSON Updates...\n");
+
+    unless ($dsdb->process_json_file($file)) {
+        print_error(__LINE__, $dsdb->error());
+        return(0);
+    }
+
+    return(1);
+}
+
 sub load_updates_file($)
 {
     my ($file) = @_;
@@ -743,7 +832,7 @@ sub process_updates_file($$$$$$)
 
     if ($extension eq 'data') {
 
-        unless(read_data_file($updates_file)) {
+        unless (read_data_file($updates_file)) {
             return(0);
         }
 
@@ -757,6 +846,14 @@ sub process_updates_file($$$$$$)
                 return(0);
             }
         }
+    }
+    elsif ($extension eq 'json') {
+
+        if ($revert) {
+            return(revert_json_file($updates_file));
+        }
+
+        return(load_json_file($updates_file));
     }
     else {
         if ($revert) {

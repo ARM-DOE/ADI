@@ -110,13 +110,20 @@ if ($opt_delete) {
 else {
     print("Loading $ARGV[0] Data...\n");
 
-    unless ($gDSDB->process_data_file('define', $ARGV[0])) {
-        print($gDSDB->error());
-        myexit(1);
+    if ($ARGV[0] =~ m/\.json$/) {
+        unless ($gDSDB->process_json_file($ARGV[0])) {
+            print($gDSDB->error());
+            myexit(1);
+        }
+    }
+    else {
+        unless ($gDSDB->process_data_file('define', $ARGV[0])) {
+            print($gDSDB->error());
+            myexit(1);
+        }
     }
 }
 
 $gDSDB->commit();
 
 myexit(0);
-
