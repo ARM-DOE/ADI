@@ -874,6 +874,39 @@ IDL_VPTR idl_cds_delete_group(int argc, IDL_VPTR argv[])
 
   return IDL_GettmpLong( cds_delete_group(dataset) );
 }
+/** IDL front end to cds_trim_unlim_dim
+  * 
+  * KLG:   I am intentionally not making this function 
+   *       available to documentation
+  */
+IDL_VPTR idl_cds_trim_unlim_dim(int argc, IDL_VPTR argv[])
+{
+  CDSGroup *dataset;
+  const char *unlim_dim_name;
+  size_t length;
+
+  /* prevent unused parameter compiler warning  */
+  argc = argc;
+
+  if (IS_UNDEF(argv[0])) {
+    dataset=NULL;
+  } else {
+    dataset=(CDSGroup *) IDL_MEMINTScalar(argv[0]);
+  }
+
+  if (IS_UNDEF(argv[1])) {
+    unlim_dim_name=NULL;
+  } else {
+    unlim_dim_name=IDL_VarGetString(argv[1]);
+  }
+
+  length = (size_t) IDL_MEMINTScalar(argv[2]);
+
+  cds_trim_unlim_dim(dataset, unlim_dim_name, length);
+
+  return _GettmpNull();
+
+}
 /** IDL front end to dsproc_dump_output_datasets
   *
   * @param argc - number of arguments
@@ -3667,6 +3700,7 @@ int IDL_Load(void)
     { {idl_dsproc_dataset_name}, "DSPROC_DATASET_NAME", 1, 1, 0, 0 },
     { {idl_dsproc_dump_dataset}, "DSPROC_DUMP_DATASET", 6, 6, 0, 0 },
     { {idl_cds_delete_group}, "CDS_DELETE_GROUP", 1, 1, 0, 0 },
+    { {idl_cds_trim_unlim_dim}, "CDS_TRIM_UNLIM_DIM", 3, 3, 0, 0 },
     { {idl_dsproc_dump_output_datasets}, "DSPROC_DUMP_OUTPUT_DATASETS", 3, 3, 0, 0 },
     { {idl_dsproc_dump_retrieved_datasets}, "DSPROC_DUMP_RETRIEVED_DATASETS", 3, 3, 0, 0 },
     { {idl_dsproc_dump_transformed_datasets}, "DSPROC_DUMP_TRANSFORMED_DATASETS", 3, 3, 0, 0 },

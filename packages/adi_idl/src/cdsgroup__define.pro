@@ -676,6 +676,11 @@ function CDSGroup::delete_group
 
   return, cds_delete_group(*self.p)
 end
+pro CDSGroup::trim_unlim_dim, unlim_dim_name, length
+  compile_opt idl2, logical_predicate
+
+  tmp = cds_trim_unlim_dim(*self.p, unlim_dim_name, length)
+end
 ;+
 ; Overload brackets to return child objects
 ;<br>
