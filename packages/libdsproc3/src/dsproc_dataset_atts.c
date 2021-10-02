@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 81662 $
-*    $Author: ermold $
-*    $Date: 2017-10-27 16:09:46 +0000 (Fri, 27 Oct 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -503,8 +493,13 @@ int dsproc_set_att_value_if_null(
     CDSAtt *att = cds_get_att(parent, name);
     int     status;
 
-    if (att && att->length == 0) {
-    
+    if (!att) return(1);
+
+    if ( att->length == 0 ||
+        (att->type   == CDS_CHAR &&
+         att->length == 1 &&
+         att->value.cp[0] == '\0')) {
+
         att->def_lock = 0;
 
         status = cds_set_att_value(att, type, length, value);
@@ -552,7 +547,12 @@ int dsproc_set_att_text_if_null(
     char   *string;
     size_t  length;
 
-    if (att && att->length == 0) {
+    if (!att) return(1);
+
+    if ( att->length == 0 ||
+        (att->type   == CDS_CHAR &&
+         att->length == 1 &&
+         att->value.cp[0] == '\0')) {
 
         att->def_lock = 0;
 

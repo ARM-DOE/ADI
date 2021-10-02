@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 81662 $
-*    $Author: ermold $
-*    $Date: 2017-10-27 16:09:46 +0000 (Fri, 27 Oct 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -339,6 +329,8 @@ const char *dsproc_get_site(void);
 const char *dsproc_get_facility(void);
 const char *dsproc_get_name(void);
 
+int dsproc_estimate_timezone(int *tz_offset);
+
 /*@}*/
 
 /******************************************************************************/
@@ -368,34 +360,6 @@ typedef enum {
 
 } LogInterval;
 
-/**
- *  Output File Splitting Mode.
- */
-typedef enum {
-
-    SPLIT_ON_STORE  = 0, /**< Always create a new file when data is stored.   */
-
-    SPLIT_ON_HOURS  = 1, /**< Split start is the hour of the day for the first
-                              split [0-23], and split interval is in hours.   */
-
-    SPLIT_ON_DAYS   = 2, /**< Split start is the day of the month for the first
-                              split [1-31], and split interval is in days.    */
-
-    SPLIT_ON_MONTHS = 3, /**< Split start is the month of the year for the first
-                              split [1-12], and split interval is in months.  */
-
-    SPLIT_NONE      = 4  /**< Always append output to the previous file
-                              unless otherwise specified in the call to
-                              dsproc_store_dataset. */
-
-} SplitMode;
-
-void    dsproc_set_datastream_split_mode(
-            int       ds_id,
-            SplitMode split_mode,
-            double    split_start,
-            double    split_interval);
-
 void    dsproc_set_log_interval(LogInterval interval, int use_begin_time);
 void    dsproc_set_processing_interval_offset(time_t offset);
 
@@ -421,6 +385,28 @@ typedef enum {
     DSR_OUTPUT =  2  /**< output datastream */
 
 } DSRole;
+
+/**
+ *  Output File Splitting Mode.
+ */
+typedef enum {
+
+    SPLIT_ON_STORE  = 0, /**< Always create a new file when data is stored.   */
+
+    SPLIT_ON_HOURS  = 1, /**< Split start is the hour of the day for the first
+                              split [0-23], and split interval is in hours.   */
+
+    SPLIT_ON_DAYS   = 2, /**< Split start is the day of the month for the first
+                              split [1-31], and split interval is in days.    */
+
+    SPLIT_ON_MONTHS = 3, /**< Split start is the month of the year for the first
+                              split [1-12], and split interval is in months.  */
+
+    SPLIT_NONE      = 4  /**< Always append output to the previous file
+                              unless otherwise specified in the call to
+                              dsproc_store_dataset. */
+
+} SplitMode;
 
 int     dsproc_get_datastream_id(
             const char *site,
@@ -448,6 +434,14 @@ const char *dsproc_datastream_class_name(int ds_id);
 const char *dsproc_datastream_class_level(int ds_id);
 const char *dsproc_datastream_path(int ds_id);
 
+void    dsproc_set_datastream_split_mode(
+            int       ds_id,
+            SplitMode split_mode,
+            double    split_start,
+            double    split_interval);
+
+void    dsproc_set_datastream_split_tz_offset(int ds_id, int split_tz_offset);
+
 /*@}*/
 
 /******************************************************************************/
@@ -472,6 +466,12 @@ void    dsproc_free_file_list(char **file_list);
 
 int     dsproc_get_datastream_files(int ds_id, char ***file_list);
 
+time_t  dsproc_get_file_name_time(int ds_id, const char *file_name);
+
+void    dsproc_set_datastream_file_extension(
+            int         ds_id,
+            const char *extension);
+
 int     dsproc_set_datastream_path(int ds_id, const char *path);
 
 void    dsproc_set_file_name_compare_function(
@@ -482,9 +482,10 @@ void    dsproc_set_file_name_time_function(
             int      ds_id,
             time_t (*function)(const char *));
 
-void    dsproc_set_datastream_file_extension(
-            int         ds_id,
-            const char *extension);
+int     dsproc_set_file_name_time_patterns(
+            int          ds_id,
+            int          npatterns,
+            const char **patterns);
 
 /*@}*/
 
@@ -495,6 +496,12 @@ void    dsproc_set_datastream_file_extension(
 /*@{*/
 
 const char *dsproc_dataset_name(CDSGroup *dataset);
+
+int         dsproc_get_dataset_location(
+                CDSGroup *dataset,
+                double   *lat,
+                double   *lon,
+                double   *alt);
 
 const char *dsproc_get_dataset_version(
                 CDSGroup *dataset,
@@ -863,6 +870,18 @@ int dsproc_solar_position(
         double *refraction,
         double *azimuth,
         double *distance);
+
+int dsproc_solar_positions(
+        size_t   ntimes,
+        time_t  *times,
+        double   latitude, 
+        double   longitude,
+        double **ap_ra,
+        double **ap_dec,
+        double **altitude,
+        double **refraction,
+        double **azimuth,
+        double **distance);
 
 /*@}*/
 
@@ -1474,6 +1493,8 @@ int         dsproc_parse_csv_record(CSVParser *csv, char *linep, int flags);
 int         dsproc_print_csv(FILE *fp, CSVParser *csv);
 int         dsproc_print_csv_header(FILE *fp, CSVParser *csv);
 int         dsproc_print_csv_record(FILE *fp, CSVParser *csv);
+
+void        dsproc_reset_csv_time_patterns(CSVParser *csv);
 
 int         dsproc_set_csv_column_name(
                 CSVParser  *csv,

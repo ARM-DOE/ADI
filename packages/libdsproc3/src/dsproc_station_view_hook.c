@@ -1,27 +1,16 @@
 /*******************************************************************************
- *
- *  Your copyright notice
- *
- ********************************************************************************
- *
- *  Author:
- *     name:  Tim Shippert
- *     phone: 509-375-5997
- *     email: tim.shippert@pnnl.gov
- *
- ********************************************************************************
- *
- *  REPOSITORY INFORMATION:
- *    $Revision: 80630 $
- *    $Author: shippert $
- *    $Date: 2017-09-18 17:27:51 +0000 (Mon, 18 Sep 2017) $
- *    $State: Exp $
- *
- ********************************************************************************
- *
- *  NOTE: DOXYGEN is used to generate documentation for this file.
- *
- *******************************************************************************/
+*
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
+*
+********************************************************************************
+*
+*  Author:
+*     name:  Tim Shippert
+*     phone: 509-375-5997
+*     email: tim.shippert@pnnl.gov
+*
+*******************************************************************************/
 
 /** @file dsproc_station_view_hook.c
  *  Post-transform hook used to convert fields to station view
@@ -71,10 +60,6 @@ int dsproc_station_view_hook(
     return(0);
   }
 
-  user_data  = user_data;
-  begin_date = begin_date;
-  end_date   = end_date;
-  
   // First of all, I need to find out what fields are going to be
   // converted.  The obvious solution is a trans parameter, but we might
   // also look for fields with a common structure like foo_C1, foo_E13,

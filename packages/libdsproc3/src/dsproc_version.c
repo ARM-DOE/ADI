@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 81662 $
-*    $Author: ermold $
-*    $Date: 2017-10-27 16:09:46 +0000 (Fri, 27 Oct 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 

@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 80311 $
-*    $Author: ermold $
-*    $Date: 2017-08-31 22:40:18 +0000 (Thu, 31 Aug 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -46,6 +36,51 @@ static char  *_InputFilesString = (char *)NULL;
 
 /** Number of input files specified on the command line. */
 static int    _NumInputFiles    = 0;
+
+/** Structure used to pass data to the _dsproc_file_name_compare via qsort. */
+typedef struct QsortData {
+    DSDir *dir;
+    int    err_count;
+} QsortData;
+
+/** Global qsort data used when sorting raw files when a user specifies
+ *  a file name time pattern or function. */
+static QsortData _QsortData;
+
+/**
+ *  Qsort compare function used to sort files in chronological order.
+ *
+ *  @param  str1  void pointer to pointer to file name 1
+ *  @param  str2  void pointer to pointer to file name 2
+ *
+ *  @retval  1  str1 >  str2
+ *  @retval  0  str1 == str2
+ *  @retval -1  str1 <  str2
+ */
+static int _dsproc_file_name_compare(
+    const void *str1,
+    const void *str2)
+{
+    const char *s1  = *(const char **)str1;
+    const char *s2  = *(const char **)str2;
+    time_t      t1  = _dsproc_get_file_name_time(_QsortData.dir, s1);
+    time_t      t2  = _dsproc_get_file_name_time(_QsortData.dir, s2);
+
+    if (t1 <= 0 || t2 <= 0) {
+
+        /* sort invalid file names at the end of the list */
+
+        if (t1 > 0) return(-1);
+        if (t2 > 0) return(1);
+
+        return(strcmp(s1, s2));
+    }
+
+    if (t1 < t2) { return(-1); }
+    if (t1 > t2) { return(1);  }
+
+    return(strcmp(s1, s2));
+}
 
 /**
  *  Static: Close all datastream files.
@@ -293,7 +328,7 @@ static int _dsproc_find_file_index(
 }
 
 /**
- *  Static: Get the timestamp in a file name.
+ *  Static: Get the timestamp from an ARM datastream file name.
  *
  *  This function assumes the file name format is:
  *
@@ -302,8 +337,9 @@ static int _dsproc_find_file_index(
  *  @param  file_name - the file name
  *
  *  @retval time  timestamp from the file name
+ *  @retval 0     invalid file name format
  */
-static time_t _dsproc_get_file_name_time(const char *file_name)
+static time_t _dsproc_get_ARM_file_name_time(const char *file_name)
 {
     struct tm  gmt;
     char      *timestamp;
@@ -327,7 +363,11 @@ static time_t _dsproc_get_file_name_time(const char *file_name)
     gmt.tm_year -= 1900;
     gmt.tm_mon--;
 
-    file_time  = mktime(&gmt);
+    file_time = mktime(&gmt);
+    if (file_time == (time_t)-1) {
+        return(0);
+    }
+
     file_time -= timezone;
 
     return(file_time);
@@ -386,7 +426,7 @@ static int _dsproc_refresh_dsfile_info(DSFile *dsfile)
         sync = (dsfile->ncid && !(dsfile->mode & NC_WRITE)) ? 1 : 0;
 
         if (!_dsproc_open_dsfile(dsfile, 0)) {
-            return(-1);
+            return(0);
         }
 
         if (sync) {
@@ -419,7 +459,7 @@ static int _dsproc_refresh_dsfile_info(DSFile *dsfile)
                 dsfile->full_path);
 
             dsproc_set_status(DSPROC_ENCREAD);
-            return(-1);
+            return(0);
         }
 
         /* Read in the time values */
@@ -439,7 +479,7 @@ static int _dsproc_refresh_dsfile_info(DSFile *dsfile)
                 dsfile->full_path);
 
             dsproc_set_status(DSPROC_ENCREAD);
-            return(-1);
+            return(0);
         }
     }
 
@@ -733,6 +773,10 @@ void _dsproc_free_dsdir(DSDir *dir)
         if (dir->path)     free(dir->path);
         if (dir->patterns) relist_free(dir->patterns);
 
+        if (dir->file_name_time_patterns) {
+            retime_list_free(dir->file_name_time_patterns);
+        }
+
         free(dir);
     }
 }
@@ -962,7 +1006,7 @@ int _dsproc_find_dsfiles(
 }
 
 /**
- *  Private: Find the next file that starts after the specified time.
+ *  Private: Find the next file that starts on or after the specified time.
  *
  *  If an error occurs in this function it will be appended to the log and
  *  error mail messages, and the process status will be set appropriately.
@@ -1029,9 +1073,9 @@ int _dsproc_find_next_dsfile(
         file_begin = (*dsfile)->timevals[0];
 
         /* We want the first file with a start time
-        *  after the search start time */
+        *  on or after the search start time */
 
-        if (TV_GT(file_begin, *search_start)) {
+        if (TV_GTEQ(file_begin, *search_start)) {
             return(1);
         }
 
@@ -1068,6 +1112,9 @@ int _dsproc_get_dsdir_files(DSDir *dir, char ***files)
     char           *extp;
     int             found_version;
     int             fi;
+    int             err_count;
+
+    int  (*file_name_compare)(const void *, const void *);
 
     /* Initialize output */
 
@@ -1261,27 +1308,182 @@ int _dsproc_get_dsdir_files(DSDir *dir, char ***files)
     dir->stats = dir_stats;
     *files     = dir->files;
 
-    if (!dir->nfiles) {
-        return(0);
+    if (dir->nfiles < 2) {
+        return(dir->nfiles);
     }
 
     /* If versioned files were found,
-    * filter the lower versioned files from the list */
+     * filter the lower versioned files from the list */
 
     if (found_version) {
+        /* The _dsproc_filter_versioned_files function requires that the
+         * files are sorted alphanumerically */
+
         qsort(dir->files, dir->nfiles, sizeof(char *), qsort_strcmp);
         dir->nfiles = _dsproc_filter_versioned_files(dir->nfiles, dir->files);
     }
 
+    /* Determine the file_name_compare function to use to sort the file list */
+
+    if (dir->file_name_compare) {
+        /* User specified file_name_compare function */
+        file_name_compare = dir->file_name_compare;
+    }
+    else if (dir->file_name_time_patterns) {
+        /* User specified file_name_time_patterns */
+        file_name_compare = _dsproc_file_name_compare;
+    }
+    else if (dir->file_name_time) {
+
+        if (dir->file_name_time == _dsproc_get_ARM_file_name_time) {
+            /* Default for files with standard arm names */
+            file_name_compare = qsort_strcmp;
+        }
+        else {
+            /* User specified file_name_time function */
+            file_name_compare = _dsproc_file_name_compare;
+        }
+    }
+    else {
+
+        if ((dir->ds->role == DSR_INPUT) &&
+            (dir->ds->dsc_level[0] == '0')) {
+
+            /* Default for 0-level input raw files */
+            file_name_compare = qsort_numeric_strcmp;
+        }
+        else {
+            /* Default for files with standard arm names.
+             * We should never get here because in this case the
+             * dir->file_name_time function should have already
+             * been set to _dsproc_get_ARM_file_name_time(). */
+            file_name_compare = qsort_strcmp;
+        }
+    }
+
     /* Sort the file list if necessary */
 
-    if (dir->file_name_compare &&
-        (!found_version || dir->file_name_compare != qsort_strcmp)) {
+    if (file_name_compare == _dsproc_file_name_compare) {
 
-        qsort(dir->files, dir->nfiles, sizeof(char *), dir->file_name_compare);
+        _QsortData.dir = dir;
+        _QsortData.err_count = 0;
+
+        qsort(dir->files, dir->nfiles, sizeof(char *), file_name_compare);
+
+        err_count = _QsortData.err_count;
+
+        _QsortData.dir = (DSDir *)NULL;
+        _QsortData.err_count = 0;
+
+        if (err_count) {
+
+            ERROR( DSPROC_LIB_NAME,
+                "Could not sort file list for %s datastream '%s'\n"
+                " -> could not get time for one or more file names\n",
+                _dsproc_dsrole_to_name(dir->ds->role), dir->ds->name);
+
+            dsproc_set_status("Could Not Sort File List");
+
+            return(-1);
+        }
+    }
+    else if (!found_version || file_name_compare != qsort_strcmp) {
+        qsort(dir->files, dir->nfiles, sizeof(char *), file_name_compare);
     }
 
     return(dir->nfiles);
+}
+
+/**
+ *  Private: Get the time from a file name.
+ *
+ *  For 0-level input datastreams this function requires that
+ *  the file name time patterns have been specified using the
+ *  dsproc_set_file_name_time_patterns() function, or a file name time
+ *  function has been specified using dsproc_set_file_name_time_function().
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  dir        pointer to the datastream's DSDir structure
+ *  @param  file_name  file name to parse the time from
+ *
+ *  @retval  time  seconds since 1970
+ *  @retval   0    a file name time pattern or function has not been specified,
+ *                 invalid file name format, or a regex pattern matching error occurred
+ */
+time_t _dsproc_get_file_name_time(
+    DSDir      *dir,
+    const char *file_name)
+{
+    time_t      secs1970 = 0;
+    RETimeRes   result;
+    int         status;
+    const char *errmsg;
+
+    if (dir->file_name_time_patterns) {
+
+        status = retime_list_execute(
+            dir->file_name_time_patterns, file_name, &result);
+
+        if (status < 0) {
+            errmsg = "invalid file name time pattern specified";
+            goto ERROR_EXIT;
+        }
+
+        if (status == 0) {
+            errmsg = "invalid file name format";
+            goto ERROR_EXIT;
+        }
+
+        secs1970 = retime_get_secs1970(&result);    
+
+        if (secs1970 <= 0) {
+            errmsg = "invalid file name format";
+            goto ERROR_EXIT;
+        }
+
+        return(secs1970);
+    }
+    else if (dir->file_name_time) {
+
+        secs1970 = dir->file_name_time(file_name);
+
+        if (secs1970 == 0) {
+            errmsg = "invalid file name format";
+            goto ERROR_EXIT;
+        }
+    }
+    else {
+        errmsg = "a file name time pattern has not been specified";
+        goto ERROR_EXIT;
+    }
+
+    return(secs1970);
+
+ERROR_EXIT:
+
+    if (_QsortData.dir) {
+        _QsortData.err_count += 1;
+    }
+
+    if (_QsortData.err_count <= 11) {
+
+        ERROR( DSPROC_LIB_NAME,
+            "Could not get time from file name: %s\n"
+            " -> %s for %s datastream '%s'\n",
+            file_name, errmsg, _dsproc_dsrole_to_name(dir->ds->role), dir->ds->name);
+
+        if (_QsortData.err_count > 10) {
+            ERROR( DSPROC_LIB_NAME,
+                "File name compare error count > 10\n"
+                " -> suppressing file name compare error messages\n");
+        }
+
+        dsproc_set_status("Could Not Get Time From File Name");
+    }
+
+    return(0);
 }
 
 /**
@@ -1455,20 +1657,84 @@ void dsproc_close_untouched_files(void)
 }
 
 /**
- *  Free a null terminated list of file names.
+ *  Set the maximum number of files that can be held open.
  *
- *  @param  file_list - null terminated list of file names
+ *  The default is to only allow a maximum of 64 files to be open at the same
+ *  time per datastream. This function and be used to change this default.
+ *
+ *  @param  ds_id    - datastream ID
+ *  @param  max_open - the maximum number of open files
  */
-void dsproc_free_file_list(char **file_list)
+void dsproc_set_max_open_files(int ds_id, int max_open)
 {
-    int fi;
+    DataStream *ds  = _DSProc->datastreams[ds_id];
+    DSDir      *dir = ds->dir;
 
-    if (file_list) {
-        for (fi = 0; file_list[fi]; ++fi) {
-            free(file_list[fi]);
+    dir->max_open = max_open;
+}
+
+/*******************************************************************************
+ *  Public Functions
+ */
+
+/**
+ *  Add datastream file patterns.
+ *
+ *  This function adds file patterns to look for when creating the list of
+ *  files in the datastream directory. By default all files in the directory
+ *  will be listed.
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  ds_id       - datastream ID
+ *  @param  npatterns   - number of file patterns
+ *  @param  patterns    - list of extended regex file patterns (man regcomp)
+ *  @param  ignore_case - ingnore case in file patterns
+ *
+ *  @return
+ *    - 1 if successful
+ *    - 0 if an error occurred
+ */
+int dsproc_add_datastream_file_patterns(
+    int          ds_id,
+    int          npatterns,
+    const char **patterns,
+    int          ignore_case)
+{
+    DataStream *ds  = _DSProc->datastreams[ds_id];
+    DSDir      *dir = ds->dir;
+    int         i;
+
+    if (msngr_debug_level || msngr_provenance_level) {
+
+        if (npatterns == 1) {
+
+            DEBUG_LV1( DSPROC_LIB_NAME,
+                "%s: Adding %s datastream file pattern: '%s'\n",
+                ds->name, _dsproc_dsrole_to_name(ds->role), patterns[0]);
         }
-        free(file_list);
+        else {
+
+            DEBUG_LV1( DSPROC_LIB_NAME,
+                "%s: Adding %s datastream file patterns:\n",
+                ds->name, _dsproc_dsrole_to_name(ds->role));
+
+            for (i = 0; i < npatterns; i++) {
+
+                DEBUG_LV1( DSPROC_LIB_NAME,
+                    " - '%s'\n", patterns[i]);
+            }
+        }
     }
+
+    if (!_dsproc_add_dsdir_patterns(
+        dir, npatterns, patterns, ignore_case)) {
+
+        return(0);
+    }
+
+    return(1);
 }
 
 /**
@@ -1673,13 +1939,36 @@ RETURN_NOT_FOUND:
 }
 
 /**
+ *  Free a null terminated list of file names.
+ *
+ *  @param  file_list - null terminated list of file names
+ */
+void dsproc_free_file_list(char **file_list)
+{
+    int fi;
+
+    if (file_list) {
+        for (fi = 0; file_list[fi]; ++fi) {
+            free(file_list[fi]);
+        }
+        free(file_list);
+    }
+}
+
+/**
  *  Get the list of files in a datastream directory.
  *
  *  By default the returned list will be sorted using the
- *  qsort_numeric_strcmp() function for input datastreams with a datalevel
- *  starting with a 0. The qsort_strcmp() function will be used for all other
- *  datastreams. A different file name compare function can be set using
- *  dsproc_set_file_name_compare_function().
+ *  qsort_numeric_strcmp() function for 0-level input datastreams and the
+ *  qsort_strcmp() function will be used for all other datastreams.
+ *
+ *  For 0-level input datastreams, a different file name compare function can
+ *  be set using the dsproc_set_file_name_compare_function() function.
+ *  Alternatively the file name time pattern(s) can be specified with the
+ *  dsproc_set_file_name_time_patterns() function.  If a file name time
+ *  pattern is specified it will be used to sort the files in chronological
+ *  order.  If both the file name compare function and file name time patterns
+ *  are specified, the file name compare function will take precedence.
  *
  *  The memory used by the returned file list is dynamically allocated and
  *  and must be freed using the dsproc_free_file_list() function.
@@ -1759,6 +2048,52 @@ int dsproc_get_datastream_files(
     }
 
     return(nfiles);
+}
+
+/**
+ *  Get the time from a file name.
+ *
+ *  For 0-level input datastreams this function requires that
+ *  the file name time patterns have been specified using the
+ *  dsproc_set_file_name_time_patterns() function, or a file name time
+ *  function has been specified using dsproc_set_file_name_time_function().
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  ds_id      datastream ID
+ *  @param  file_name  file name to parse the time from
+ *
+ *  @retval  time  seconds since 1970
+ *  @retval   0    a file name time pattern or function has not been specified,
+ *                 invalid file name format, or a regex pattern matching error occurred
+ */
+time_t dsproc_get_file_name_time(int ds_id, const char *file_name)
+{
+    DataStream *ds = _DSProc->datastreams[ds_id];
+    return(_dsproc_get_file_name_time(ds->dir, file_name));
+}
+
+/**
+ *  Set the datastream file extension.
+ *
+ *  @param  ds_id     - datastream ID
+ *  @param  extension - file extension
+ */
+void dsproc_set_datastream_file_extension(
+    int         ds_id,
+    const char *extension)
+{
+    DataStream *ds   = _DSProc->datastreams[ds_id];
+    const char *extp = extension;
+
+    while (*extp == '.') extp++;
+
+    DEBUG_LV1( DSPROC_LIB_NAME,
+        "%s: Setting datastream file extension to: '%s'\n",
+        ds->name, extp);
+
+    strncpy((char *)ds->extension, extp, 63);
 }
 
 /**
@@ -1860,6 +2195,7 @@ int dsproc_set_datastream_path(int ds_id, const char *path)
     }
 
     ds->dir = _dsproc_create_dsdir(path);
+    ds->dir->ds = ds;
 
     if (free_path) {
         free((void *)path);
@@ -1876,15 +2212,9 @@ int dsproc_set_datastream_path(int ds_id, const char *path)
     if ((ds->role == DSR_INPUT) &&
         (ds->dsc_level[0] == '0')) {
 
-        /* Set the default file name compare function */
-
-        dsproc_set_file_name_compare_function(ds_id, qsort_numeric_strcmp);
+        /* Raw input datastream */
     }
     else {
-
-        /* Set the default file name compare function */
-
-        dsproc_set_file_name_compare_function(ds_id, qsort_strcmp);
 
         /* Set datastream file pattern */
 
@@ -1910,30 +2240,23 @@ int dsproc_set_datastream_path(int ds_id, const char *path)
 
         /* Set function used to get the time from the file name */
 
-        dsproc_set_file_name_time_function(ds_id, _dsproc_get_file_name_time);
+        dsproc_set_file_name_time_function(ds_id, _dsproc_get_ARM_file_name_time);
     }
 
     return(1);
 }
 
 /**
- *  Set the function used to parse the time from a file name.
- *
- *  @param  ds_id    - datastream ID
- *  @param  function - the function used to parse the time from a file name
- */
-void dsproc_set_file_name_time_function(
-    int      ds_id,
-    time_t (*function)(const char *))
-{
-    DataStream *ds  = _DSProc->datastreams[ds_id];
-    DSDir      *dir = ds->dir;
-
-    dir->file_name_time = function;
-}
-
-/**
  *  Set the file name compare function used to sort the file list.
+ *
+ *  Alternatively the file name time pattern(s) can be specified using
+ *  dsproc_set_file_name_time_patterns(), or a file_name_time function
+ *  can be specified using dsproc_set_file_name_time_function(). If more
+ *  than one are specified the order of precedence is:
+ *
+ *      file_name_compare function
+ *      file name time patterns
+ *      file_name_time function
  *
  *  @param  ds_id    - datastream ID
  *  @param  function - the file name compare function used to sort the file list
@@ -1950,198 +2273,108 @@ void dsproc_set_file_name_compare_function(
 }
 
 /**
- *  Set the maximum number of files that can be held open.
+ *  Set the function used to parse the time from a file name.
  *
- *  The default is to only allow a maximum of 64 files to be open at the same
- *  time per datastream. This function and be used to change this default.
+ *  The file_name_time function will also be used to sort the list of files in
+ *  the datastream directory. Alternatively a file_name_compare function can be
+ *  specified using dsproc_set_file_name_compare_function(), or the file name
+ *  time pattern(s) can be specified using dsproc_set_file_name_time_patterns().
+ *  If more than one are specified the order of precedence is:
+ *
+ *      file_name_compare function
+ *      file name time patterns
+ *      file_name_time function
  *
  *  @param  ds_id    - datastream ID
- *  @param  max_open - the maximum number of open files
+ *  @param  function - The function used to parse the time from a file name.
+ *                     This function must return the time in seconds since 1970,
+ *                     or 0 for invalid file name format.
  */
-void dsproc_set_max_open_files(int ds_id, int max_open)
+void dsproc_set_file_name_time_function(
+    int      ds_id,
+    time_t (*function)(const char *))
 {
     DataStream *ds  = _DSProc->datastreams[ds_id];
     DSDir      *dir = ds->dir;
 
-    dir->max_open = max_open;
+    dir->file_name_time = function;
 }
 
-/*******************************************************************************
- *  Public Functions
- */
-
 /**
- *  Add datastream file patterns.
+ *  Set the file name time pattern(s) used to parse the time from a file name.
  *
- *  This function adds file patterns to look for when creating the list of
- *  files in the datastream directory. By default all files in the directory
- *  will be listed.
+ *  The file name time pattern(s) will also be used to sort the list of files in
+ *  the datastream directory. Alternatively a file_name_compare function can be
+ *  specified using dsproc_set_file_name_compare_function(), or a file_name_time
+ *  function can be specified using dsproc_set_file_name_time_function(). If more
+ *  than one are specified the order of precedence is:
  *
- *  If an error occurs in this function it will be appended to the log and
- *  error mail messages, and the process status will be set appropriately.
+ *      file_name_compare function
+ *      file name time patterns
+ *      file_name_time function
  *
- *  @param  ds_id       - datastream ID
- *  @param  npatterns   - number of file patterns
- *  @param  patterns    - list of extended regex file patterns (man regcomp)
- *  @param  ignore_case - ingnore case in file patterns
+ *  The file name time pattern(s) contain a mixture of regex (see regex(7)) and
+ *  time format codes similar to the strptime function. The time format codes
+ *  recognized by this function begin with a % and are followed by one of the
+ *  following characters:
+ *
+ *    - 'C'  century number (year/100) as a 2-digit integer
+ *    - 'd'  day number in the month (1-31).
+ *    - 'e'  day number in the month (1-31).
+ *    - 'h'  hour * 100 + minute (0-2359)
+ *    - 'H'  hour (0-23)
+ *    - 'j'  day number in the year (1-366).
+ *    - 'm'  month number (1-12)
+ *    - 'M'  minute (0-59)
+ *    - 'n'  arbitrary whitespace
+ *    - 'o'  time offset in seconds
+ *    - 'p'  AM or PM
+ *    - 'q'  Mac-Time: seconds since 1904-01-01 00:00:00 +0000 (UTC)
+ *    - 's'  seconds since Epoch, 1970-01-01 00:00:00 +0000 (UTC)
+ *    - 'S'  second (0-60; 60 may occur for leap seconds)
+ *    - 't'  arbitrary whitespace
+ *    - 'y'  year within century (0-99)
+ *    - 'Y'  year with century as a 4-digit integer
+ *    - '%'  a literal "%" character
+ * 
+ *  An optional 0 character can be used between the % and format code to
+ *  specify that the number must be zero padded. For example, '%0d' specifies
+ *  that the day range is 01 to 31.
+ *
+ *  Multiple patterns can be provided and will be checked in the specified order.
+ *
+ *  Examples:
+ *
+ *    - "%Y%0m%0d\\.%0H%0M%0S\\.[a-z]$" would match *20150923.072316.csv
+ *    - "%Y-%0m-%0d_%0H:%0M:%0S\\.dat"  would match *2015-09-23_07:23:16.dat
+ *
+ *  @param  ds_id     - datastream ID
+ *  @param  npatterns - number of pattern strings in the list
+ *  @param  patterns  - list of file name time patterns
  *
  *  @return
  *    - 1 if successful
- *    - 0 if an error occurred
+ *    - 0 if a regex compile error occurred
  */
-int dsproc_add_datastream_file_patterns(
+int dsproc_set_file_name_time_patterns(
     int          ds_id,
     int          npatterns,
-    const char **patterns,
-    int          ignore_case)
+    const char **patterns)
 {
     DataStream *ds  = _DSProc->datastreams[ds_id];
     DSDir      *dir = ds->dir;
-    int         i;
 
-    if (msngr_debug_level || msngr_provenance_level) {
+    dir->file_name_time_patterns = retime_list_compile(npatterns, patterns, 0);
 
-        if (npatterns == 1) {
+    if (!dir->file_name_time_patterns) {
 
-            DEBUG_LV1( DSPROC_LIB_NAME,
-                "%s: Adding %s datastream file pattern: '%s'\n",
-                ds->name, _dsproc_dsrole_to_name(ds->role), patterns[0]);
-        }
-        else {
+        ERROR( DSPROC_LIB_NAME,
+            "Could not compile list of file name time patterns for %s\n",
+            ds->name);
 
-            DEBUG_LV1( DSPROC_LIB_NAME,
-                "%s: Adding %s datastream file patterns:\n",
-                ds->name, _dsproc_dsrole_to_name(ds->role));
-
-            for (i = 0; i < npatterns; i++) {
-
-                DEBUG_LV1( DSPROC_LIB_NAME,
-                    " - '%s'\n", patterns[i]);
-            }
-        }
-    }
-
-    if (!_dsproc_add_dsdir_patterns(
-        dir, npatterns, patterns, ignore_case)) {
-
+        dsproc_set_status("Could not compile list of file name time patterns");
         return(0);
     }
 
     return(1);
-}
-
-/**
- *  Set the datastream file extension.
- *
- *  @param  ds_id     - datastream ID
- *  @param  extension - file extension
- */
-void dsproc_set_datastream_file_extension(
-    int         ds_id,
-    const char *extension)
-{
-    DataStream *ds   = _DSProc->datastreams[ds_id];
-    const char *extp = extension;
-
-    while (*extp == '.') extp++;
-
-    DEBUG_LV1( DSPROC_LIB_NAME,
-        "%s: Setting datastream file extension to: '%s'\n",
-        ds->name, extp);
-
-    strncpy((char *)ds->extension, extp, 63);
-}
-
-/**
- *  Set the file splitting mode for output files.
- *
- *  Default for VAPs: always create a new file when data is stored
- *
- *    - split_mode     = SPLIT_ON_STORE
- *    - split_start    = ignored
- *    - split_interval = ignored
- *
- *  Default for Ingests: daily files that split at midnight
- *
- *    - split_mode     = SPLIT_ON_HOURS
- *    - split_start    = 0
- *    - split_interval = 24
- *
- *  @param  ds_id          - datastream ID
- *  @param  split_mode     - the file splitting mode (see SplitMode)
- *  @param  split_start    - the start of the split interval (see SplitMode)
- *  @param  split_interval - the split interval (see SplitMode)
- */
-void dsproc_set_datastream_split_mode(
-    int       ds_id,
-    SplitMode split_mode,
-    double    split_start,
-    double    split_interval)
-{
-    DataStream *ds = _DSProc->datastreams[ds_id];
-
-    if (msngr_debug_level || msngr_provenance_level) {
-
-        switch (split_mode) {
-
-            case SPLIT_ON_STORE:
-
-                DEBUG_LV1( DSPROC_LIB_NAME,
-                    "%s: Setting datastream file splitting mode:\n"
-                    " -> always create a new file when data is stored\n",
-                    ds->name);
-
-                break;
-
-            case SPLIT_ON_HOURS:
-
-                DEBUG_LV1( DSPROC_LIB_NAME,
-                    "%s: Setting datastream file splitting mode:\n"
-                    "  - split_start:    hour %g\n"
-                    "  - split_interval: %g hours\n",
-                    ds->name, split_start, split_interval);
-
-                break;
-
-            case SPLIT_ON_DAYS:
-
-                DEBUG_LV1( DSPROC_LIB_NAME,
-                    "%s: Setting datastream file splitting mode:\n"
-                    "  - split_start:    day %g\n"
-                    "  - split_interval: %g days\n",
-                    ds->name, split_start, split_interval);
-
-                break;
-
-            case SPLIT_ON_MONTHS:
-
-                DEBUG_LV1( DSPROC_LIB_NAME,
-                    "%s: Setting datastream file splitting mode:\n"
-                    "  - split_start:    month %g\n"
-                    "  - split_interval: %g months\n",
-                    ds->name, split_start, split_interval);
-
-                break;
-
-            case SPLIT_NONE:
-
-                DEBUG_LV1( DSPROC_LIB_NAME,
-                    "%s: Setting datastream file splitting mode:\n"
-                    " -> always append output to the previous file unless otherwise\n"
-                    " -> specified in the call to dsproc_store_dataset.\n",
-                    ds->name);
-
-                break;
-
-            default:
-
-                DEBUG_LV1( DSPROC_LIB_NAME,
-                    "%s: Invalid file splitting mode: %d\n",
-                    ds->name, split_mode);
-        }
-    }
-
-    ds->split_mode     = split_mode;
-    ds->split_start    = split_start;
-    ds->split_interval = split_interval;
 }

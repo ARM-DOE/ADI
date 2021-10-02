@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2012 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 80275 $
-*    $Author: ermold $
-*    $Date: 2017-08-28 18:38:53 +0000 (Mon, 28 Aug 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -564,6 +554,13 @@ int _dsproc_custom_qc_hook(
 /*******************************************************************************
  *  Internal Functions Visible To The Public
  */
+
+/** Used by binding layers to signal that a quicklook function has been set.
+ */
+void dsproc_show_quicklook_hook_options(void)
+{
+    _HasQuicklookFunction = 1;
+}
 
 /*******************************************************************************
  *  Public Functions

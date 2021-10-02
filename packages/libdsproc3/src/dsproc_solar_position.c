@@ -1,3 +1,10 @@
+/*******************************************************************************
+*
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
+*
+*******************************************************************************/
+
 /** @file dsproc_solar_position.c
  *  Functions to calculate position of the sun
  */
@@ -44,7 +51,7 @@ double acos(),
  *         U.S.A.
  */
 
-static int daynum(int year, int month, int day)
+static int _daynum(int year, int month, int day)
 {
   static int begmonth[13] = {0,0,31,59,90,120,151,181,212,243,273,304,334};
   int dnum,
@@ -177,8 +184,6 @@ static int solarposition(
         double *azimuth,
         double *distance)
 {
-  int    daynum();        /* Computes a sequential daynumber during a year. */
-
   int    daynumber,       /* Sequential daynumber during a year. */
          delta_days,      /* Whole days since 2000 January 0. */
          delta_years;     /* Whole years since 2000. */
@@ -227,7 +232,7 @@ static int solarposition(
       if (month < 1 || month > 12 || day < 0.0 || day > 32.0)
         return (-1);
 
-      daynumber = daynum(year, month, (int)day);
+      daynumber = _daynum(year, month, (int)day);
     }
     else
     {
@@ -470,6 +475,9 @@ static int solarposition(
 *  alt == -1 to zero at alt == -2.  This eliminates the discontinuity at alt
 *  == -1, and might even be kinda scientifically justified.
 *
+*  If an error occurs in this function it will be appended to the log and
+*  error mail messages, and the process status will be set appropriately.
+*
 *  @param  secs1970   - Seconds since 1970 UTC
 *  @param  latitude   - Observation site geographic latitude. 
 *                       [degrees.fraction, North positive]
@@ -558,6 +566,150 @@ int dsproc_solar_position(
     if (distance)   *distance   = _distance;
 
     /* return 1 for success, 0 for bad input */
-    if (status != 0) return(0);
+    if (status != 0) {
+
+        ERROR( DSPROC_LIB_NAME,
+            "Solar position input parameter(s) out of range:\n"
+            "   -> time (UTC): %ld\n"
+            "   -> latitude:   %g\n"
+            "   -> longitude:  %g\n",
+            secs1970, latitude, longitude);
+
+        dsproc_set_status("Could Not Calculate Solar Position");
+        return(0);
+    }
+
     return(1);
+}
+
+/**
+*  Calculate solar positions for an array of times.
+*
+*  See dsproc_solar_position() for description of outputs.
+*
+*  All output arguments can be NULL if the values are not needed.
+*
+*  The memory used by the output arrays are dynamically allocated
+*  and must be freed by the calling process.
+*
+*  If an error occurs in this function it will be appended to the log and
+*  error mail messages, and the process status will be set appropriately.
+*
+*  @param  ntimes     - Number of times
+*  @param  times      - Array of times in seconds since 1970 UTC
+*  @param  latitude   - Observation site geographic latitude. 
+*                       [degrees.fraction, North positive]
+*  @param  longitude  - Observation site geographic longitude. 
+*                       [degrees.fraction, East positive]
+*  @param  ap_ra      - output: pointer to array of apparent solar right ascensions.
+*  @param  ap_dec     - output: pointer to array of apparent solar declinations.
+*  @param  altitude   - output: pointer to array of solar altitudes.
+*  @param  refraction - output: pointer to array of refraction corrections.
+*  @param  azimuth    - output: pointer to array of solar azimuths. 
+*  @param  distance   - output: pointer to array of distances of Sun from Earth.
+*
+*  @return
+*    -  1 if successful
+*    -  0 if an input parameter is out of bounds,
+*         or a memory allocation error occurs
+*/
+int dsproc_solar_positions(
+        size_t   ntimes,
+        time_t  *times,
+        double   latitude, 
+        double   longitude,
+        double **ap_ra,
+        double **ap_dec,
+        double **altitude,
+        double **refraction,
+        double **azimuth,
+        double **distance)
+{
+    double    day, day_fraction;
+    int       year, month, hour, min, sec;
+    struct tm gmt;
+    double    _ap_ra, _ap_dec, _altitude, _refraction, _azimuth, _distance;
+    size_t    alloc_size;
+    int       status;
+    size_t    oi, ti;
+
+    double **outpp;
+    double **outputs[] = {
+        ap_ra, ap_dec, altitude, refraction, azimuth, distance};
+
+    /* Initialize output pointers to NULL */
+
+    for (oi = 0; oi < 6; ++oi) {
+        outpp = outputs[oi];
+        if (outpp) {
+            *outpp = (double *)NULL;
+        }
+    }
+
+    /* Allocate memory for outout arrays */
+
+    alloc_size = ntimes * sizeof(double);
+
+    for (oi = 0; oi < 6; ++oi) {
+        outpp = outputs[oi];
+        if (outpp) {
+             *outpp = (double *)malloc(alloc_size);
+             if (!*outpp) goto ERROR_EXIT;
+        }
+    }
+
+    for (ti = 0; ti < ntimes; ++ti) {
+
+        /* Convert secs1970 into appropriate year, month, day */
+
+        gmtime_r(&times[ti], &gmt);
+        year  = gmt.tm_year + 1900;
+        month = gmt.tm_mon + 1;
+        day   = (double)gmt.tm_mday;
+        hour  = gmt.tm_hour;
+        min   = gmt.tm_min;
+        sec   = gmt.tm_sec;
+
+        /* Convert hour, minute, seconds into fraction of day */
+        day_fraction = (double)hour/24.0
+                     + (double)min/1440.0
+                     + (double)sec/86400.0; 
+
+        day = day + day_fraction;
+
+        /* Calculate solar position */
+
+        _ap_ra    = _ap_dec     = 0.0;
+        _altitude = _refraction = 0.0;
+        _azimuth  = _distance   = 0.0;
+
+        status = solarposition(
+            year, month, day, 0.0, latitude, longitude,
+            &_ap_ra, &_ap_dec, &_altitude, &_refraction, &_azimuth, &_distance);
+
+        if (status != 0) {
+            goto ERROR_EXIT;
+        }
+
+        if (ap_ra)      (*ap_ra)[ti]      = _ap_ra;
+        if (ap_dec)     (*ap_dec)[ti]     = _ap_dec;
+        if (altitude)   (*altitude)[ti]   = _altitude;
+        if (refraction) (*refraction)[ti] = _refraction;
+        if (azimuth)    (*azimuth)[ti]    = _azimuth;
+        if (distance)   (*distance)[ti]   = _distance;
+    }
+
+    return(1);
+
+ERROR_EXIT:
+
+    for (oi = 0; oi < 6; ++oi) {
+        outpp = outputs[oi];
+        if (outpp && *outpp) {
+            free(*outpp);
+            *outpp = (double *)NULL;
+        }
+    }
+
+    return(0);
 }

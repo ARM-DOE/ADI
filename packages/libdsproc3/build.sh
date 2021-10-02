@@ -4,6 +4,15 @@
 
 script_name=$0
 
+# Set libdir
+
+UNAME=`uname`
+if [ "$UNAME" == "Darwin" ]; then
+    default_libdir="lib"
+else
+    default_libdir="lib64"
+fi
+
 usage()
 {
     cat <<EOM
@@ -22,7 +31,7 @@ OPTIONS
                   default: \$ADI_HOME or \$ADI_PREFIX
 
   --libdir=path   absolute path to the library installation directory
-                  default: \$prefix/lib64
+                  default: \$prefix/$default_libdir
 
   --destdir=path  absolute path prepended to prefix 
                   used to perform a staged installation
@@ -90,7 +99,7 @@ if [ ! $prefix ]; then
 fi
 
 if [ ! $libdir ]; then
-    libdir="$prefix/lib64"
+    libdir="$prefix/$default_libdir"
 fi
 
 # Function to echo and run commands

@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2014 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 57300 $
-*    $Author: ermold $
-*    $Date: 2014-10-06 20:03:42 +0000 (Mon, 06 Oct 2014) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -548,7 +538,7 @@ unsigned int dsproc_get_qc_assessment_mask(
         nfound,
         max_bit_num);
 
-    if (!nfound) {
+    if (*nfound == 0) {
 
         dataset = (CDSGroup *)qc_var->parent;
 
@@ -671,6 +661,44 @@ unsigned int dsproc_get_missing_value_bit_flag(
         "Value is equal to the _FillValue",
         "value = _FillValue",
         "value == _FillValue"
+    };
+    int ndescs = sizeof(descs)/sizeof(const char *);
+
+    int index = dsproc_find_bit_description(ndescs, descs, bit_ndescs, bit_descs);
+
+    unsigned int bit_flag = 0;
+
+    if (index >= 0) {
+        bit_flag = 1 << index;
+    }
+
+    return(bit_flag);
+}
+
+/**
+ *  Get bit flag for the solar obstruction check.
+ *
+ *  This function will search for a bit description that begins with
+ *  one of the following strings:
+ * 
+ *    - "Instrument shaded, solar position is within region defined by solar_obstruction_azimuth_range and solar_obstruction_elevation_range"
+ *
+ *  Note: Use dsproc_get_qc_bit_descriptions() to get the list of bit
+ *  descriptions for a QC variable.
+ *
+ *  @param  bit_ndescs - number of bit dscriptions
+ *  @param  bit_descs  - list of bit dscriptions
+ *
+ *  @return
+ *    - bit flag
+ *    - 0 if not found
+ */
+unsigned int dsproc_get_solar_obstruction_bit_flag(
+    int          bit_ndescs,
+    const char **bit_descs)
+{
+    const char *descs[] = {
+        "Instrument shaded, solar position is within region defined by solar_obstruction_azimuth_range and solar_obstruction_elevation_range"
     };
     int ndescs = sizeof(descs)/sizeof(const char *);
 

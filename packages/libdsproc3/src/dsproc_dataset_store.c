@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 81662 $
-*    $Author: ermold $
-*    $Date: 2017-10-27 16:09:46 +0000 (Fri, 27 Oct 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -58,12 +48,13 @@ static time_t _dsproc_get_next_split_time(
     DataStream *ds,
     time_t      prev_time)
 {
-    int       split_mode     = ds->split_mode;
-    double    split_start    = ds->split_start;
-    double    split_interval = ds->split_interval;
-    time_t    next_start     = 0;
-    time_t    split_time     = 0;
-    time_t    interval       = 0;
+    int       split_mode      = ds->split_mode;
+    double    split_start     = ds->split_start;
+    double    split_interval  = ds->split_interval;
+    double    split_tz_offset = ds->split_tz_offset * 3600;
+    time_t    next_start      = 0;
+    time_t    split_time      = 0;
+    time_t    interval        = 0;
     struct tm gmt;
 
     if (split_mode == SPLIT_ON_STORE ||
@@ -114,19 +105,19 @@ static time_t _dsproc_get_next_split_time(
             gmt.tm_mon = 0;
         }
 
-        split_time = timegm(&gmt);
+        split_time = timegm(&gmt) - split_tz_offset;
 
         if (split_time > prev_time) {
 
             gmt.tm_year--;
 
             next_start = split_time;
-            split_time = timegm(&gmt);
+            split_time = timegm(&gmt) - split_tz_offset;
         }
         else {
             gmt.tm_year++;
 
-            next_start = timegm(&gmt);
+            next_start = timegm(&gmt) - split_tz_offset;
 
             gmt.tm_year--;
         }
@@ -143,7 +134,7 @@ static time_t _dsproc_get_next_split_time(
                 gmt.tm_year++;
             }
 
-            split_time = timegm(&gmt);
+            split_time = timegm(&gmt) - split_tz_offset;
         }
     }
     else if (split_mode == SPLIT_ON_DAYS) {
@@ -162,7 +153,7 @@ static time_t _dsproc_get_next_split_time(
         /* get the starting split time */
 
         gmt.tm_mday = 1;
-        split_time  = timegm(&gmt);
+        split_time  = timegm(&gmt) - split_tz_offset;
 
         if (split_start > 0.0) {
             split_time += (time_t)((split_start * 86400.0) + 0.5);
@@ -179,7 +170,7 @@ static time_t _dsproc_get_next_split_time(
             }
 
             next_start = split_time;
-            split_time = timegm(&gmt);
+            split_time = timegm(&gmt) - split_tz_offset;
 
             if (split_start > 0.0) {
                 split_time += (time_t)((split_start * 86400.0) + 0.5);
@@ -195,7 +186,7 @@ static time_t _dsproc_get_next_split_time(
                 gmt.tm_year++;
             }
 
-            next_start = timegm(&gmt);
+            next_start = timegm(&gmt) - split_tz_offset;
 
             if (split_start > 0.0) {
                 next_start += (time_t)((split_start * 86400.0) + 0.5);
@@ -221,7 +212,7 @@ static time_t _dsproc_get_next_split_time(
 
         /* get the starting split time */
 
-        split_time = timegm(&gmt);
+        split_time = timegm(&gmt) - split_tz_offset;
 
         if (split_start > 0.0) {
             split_time += (time_t)((split_start * 3600.0) + 0.5);
@@ -233,7 +224,7 @@ static time_t _dsproc_get_next_split_time(
             split_time -= 86400;
         }
         else {
-            next_start += 86400;;
+            next_start += 86400;
         }
 
         /* find the next split time */

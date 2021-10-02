@@ -1,25 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2013 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
-*  Authors:
+*  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 71740 $
-*    $Author: ermold $
-*    $Date: 2016-06-30 19:55:27 +0000 (Thu, 30 Jun 2016) $
-*    $State:$
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -835,6 +824,8 @@ int dsproc_load_csv_file(CSVParser *csv, const char *path, const char *name)
     int      nlines;
     int      li;
 
+    char     newline_char;
+
     /* Initialize the CSVParser structure if necessary */
 
     if (csv->nlines != 0) {
@@ -954,12 +945,21 @@ int dsproc_load_csv_file(CSVParser *csv, const char *path, const char *name)
     chrp = csv->file_data;
     csv->lines[0] = chrp;
 
+    /* Check if this is a format that only uses
+     * carriage returns instead of newline characters. */
+
+    newline_char = '\n';
+
+    if (!strchr(chrp, '\n') && strchr(chrp, '\r')) {
+        newline_char = '\r';
+    }
+
     li = 1;
-    while ((chrp = dsproc_find_csv_delim(chrp, '\n'))) {
+    while ((chrp = dsproc_find_csv_delim(chrp, newline_char))) {
 
         if (chrp != csv->file_data) {
 
-            /* Handle carriage returns */
+            /* Handle carriage return before newline */
 
             if (*(chrp - 1) == '\r') {
                 *(chrp - 1) = '\0';
@@ -1139,10 +1139,6 @@ int dsproc_parse_csv_record(CSVParser *csv, char *linep, int flags)
     int      fi;
     int      status;
 
-    /* prevent unused parameter warning */
-
-    flags = flags;
-
     /* Get pointer to the current line if linep is NULL */
 
     if (!linep) {
@@ -1204,6 +1200,37 @@ int dsproc_parse_csv_record(CSVParser *csv, char *linep, int flags)
     csv->nrecs += 1;
 
     return(1);
+}
+
+/**
+ *  Reset time patterns in a CSVParser.
+ *
+ *  @param  csv  pointer to the CSVParser
+ */
+void dsproc_reset_csv_time_patterns(CSVParser *csv)
+{
+    int i;
+
+    if (csv) {
+
+        if (csv->tc_names) {
+            for (i = 0; i < csv->ntc; ++i) {
+                free(csv->tc_names[i]);
+            }
+            free(csv->tc_names);
+            csv->tc_names = (char **)NULL;
+        }
+
+        if (csv->tc_patterns) {
+            for (i = 0; i < csv->ntc; ++i) {
+                retime_list_free(csv->tc_patterns[i]);
+            }
+            free(csv->tc_patterns);
+            csv->tc_patterns = (RETimeList **)NULL;
+        }
+
+        csv->ntc = 0;
+    }
 }
 
 /**

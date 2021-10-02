@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2012 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 52850 $
-*    $Author: ermold $
-*    $Date: 2014-02-26 18:48:45 +0000 (Wed, 26 Feb 2014) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -367,6 +357,97 @@ const char *dsproc_dataset_name(CDSGroup *dataset)
     }
 
     return(dataset->name);
+}
+
+/**
+ *  Get the values of the lat, lon, and alt variables in a dataset.
+ *
+ *  All output arguments can be NULL if the values are not needed.
+ * 
+ *  An error message will be generated if an output argument is not NULL
+ *  and the associated variable does not exist in the dataset.
+ *
+ *  \param   dataset  pointer to the dataset
+ *  \param   lat      output: latitude
+ *  \param   lon      output: longitude
+ *  \param   alt      output: altitude
+ *
+ *  \retval  1  if successful
+ *  \retval  0  if an error occurred
+ */
+int dsproc_get_dataset_location(
+    CDSGroup *dataset,
+    double   *lat,
+    double   *lon,
+    double   *alt)
+{
+    CDSVar *var;
+    size_t  length;
+
+    /* Get latitude */
+
+    if (lat) {
+
+        if (!(var = dsproc_get_var(dataset, "lat"))) {
+
+            ERROR( DSPROC_LIB_NAME,
+                "Could not get latitude from dataset: %s\n"
+                " -> 'lat' variable does not exist\n",
+                dataset->name);
+
+            dsproc_set_status(DSPROC_EREQVAR);
+            return(0);
+        }
+
+        length = 1;
+        if (!dsproc_get_var_data(var, CDS_DOUBLE, 0, &length, NULL, lat)) {
+            return(0);
+        }
+    }
+
+    /* Get longitude */
+
+    if (lon) {
+
+        if (!(var = dsproc_get_var(dataset, "lon"))) {
+
+            ERROR( DSPROC_LIB_NAME,
+                "Could not get longitude from dataset: %s\n"
+                " -> 'lon' variable does not exist\n",
+                dataset->name);
+
+            dsproc_set_status(DSPROC_EREQVAR);
+            return(0);
+        }
+
+        length = 1;
+        if (!dsproc_get_var_data(var, CDS_DOUBLE, 0, &length, NULL, lon)) {
+            return(0);
+        }
+    }
+
+    /* Get altitude */
+
+    if (alt) {
+
+        if (!(var = dsproc_get_var(dataset, "alt"))) {
+
+            ERROR( DSPROC_LIB_NAME,
+                "Could not get altitude from dataset: %s\n"
+                " -> 'alt' variable does not exist\n",
+                dataset->name);
+
+            dsproc_set_status(DSPROC_EREQVAR);
+            return(0);
+        }
+
+        length = 1;
+        if (!dsproc_get_var_data(var, CDS_DOUBLE, 0, &length, NULL, alt)) {
+            return(0);
+        }
+    }
+
+    return(1);
 }
 
 /**

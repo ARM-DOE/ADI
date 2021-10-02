@@ -1,24 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2012 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Author:
 *     name:  Brian Ermold
-*     phone: (509) 375-5950
-*     email: brian.ermold@pnnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 77126 $
-*    $Author: ermold $
-*    $Date: 2017-03-13 22:38:51 +0000 (Mon, 13 Mar 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
+*     phone: (509) 375-2277
+*     email: brian.ermold@pnl.gov
 *
 *******************************************************************************/
 
@@ -362,6 +352,7 @@ static MapData *_dsproc_init_data_map(
     size_t   nbytes;
     int      status;
     int      copy_flags;
+    int      copy_flags_glatts;
     CDSAtt  *att;
 
     const char *dim_names[] = { "time" };
@@ -371,6 +362,15 @@ static MapData *_dsproc_init_data_map(
     }
     else {
         copy_flags = CDS_EXCLUSIVE;
+    }
+
+    if (dynamic_dod == 2) {
+        /* We do not want to copy all global attributes to
+         * the output dataset if the dynamic_dod mode == 2 */
+        copy_flags_glatts = CDS_EXCLUSIVE;
+    }
+    else {
+        copy_flags_glatts = copy_flags;
     }
 
     /* Check if the data mapping has already been initialized for this
@@ -407,7 +407,7 @@ static MapData *_dsproc_init_data_map(
      * been set for this datastream */
 
     if (!cds_copy_atts(
-        in->dataset, out->dataset, NULL, NULL, copy_flags)) {
+        in->dataset, out->dataset, NULL, NULL, copy_flags_glatts)) {
 
         dsproc_set_status(DSPROC_ECDSCOPY);
         return((MapData *)NULL);

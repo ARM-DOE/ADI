@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 77183 $
-*    $Author: ermold $
-*    $Date: 2017-03-22 20:03:54 +0000 (Wed, 22 Mar 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -344,6 +334,416 @@ DSFormat _dsproc_name_to_dsformat(const char *name)
     return(format);
 }
 
+/**
+ *  Private: Free the OutputInterval entries in the global _DSProc structure.
+ */
+void _dsproc_free_output_intervals(void)
+{
+    OutputInterval *outint = _DSProc->output_intervals;
+    OutputInterval *next;
+
+    while (outint) {
+        if (outint->dsc_name)  free(outint->dsc_name);
+        if (outint->dsc_level) free(outint->dsc_level);
+        next = outint->next;
+        free(outint);
+        outint = next;
+    }
+
+    _DSProc->output_intervals  = (OutputInterval *)NULL;
+}
+
+/**
+ *  Private: Get an OutputInterval entry from the global _DSProc structure.
+ *   
+ *  @param  dsc_name  - datastream class name
+ *  @param  dsc_level - datastream class level
+ *
+ *  @return
+ *    - outint pointer to the OutputInterval structure
+ *    - NULL if not found
+ */
+OutputInterval *_dsproc_get_output_interval(
+    const char *dsc_name,
+    const char *dsc_level)
+{
+    OutputInterval *outint;
+
+    for (outint = _DSProc->output_intervals; outint; outint = outint->next) {
+
+        /* Check if datastream class names match */
+
+        if (!dsc_name) {
+            if (outint->dsc_name) {
+                continue;
+            }
+        }
+        else if (!outint->dsc_name) {
+            continue;
+        }
+        else if (strcmp(dsc_name, outint->dsc_name) != 0) {
+            continue;
+        }
+
+        /* Check if datastream class levels match */
+
+        if (!dsc_level) {
+            if (outint->dsc_level) {
+                continue;
+            }
+        }
+        else if (!outint->dsc_level) {
+            continue;
+        }
+        else if (strcmp(dsc_level, outint->dsc_level) != 0) {
+            continue;
+        }
+
+        /* Datastream class name and level match */
+        break;
+    }
+
+    return(outint);
+}
+
+/**
+ *  Private: Add an output interval to the global _DSProc structure.
+ *   
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  dsc_name        - datastream class name
+ *  @param  dsc_level       - datastream class level
+ *  @param  split_mode      - the file splitting mode
+ *  @param  split_start     - start of the split interval
+ *  @param  split_interval  - split interval
+ *  @param  split_tz_offset - time zone offset
+ *
+ *  @return
+ *    - 1 if successful
+ *    - 0 memory allocation failure
+ */
+int _dsproc_add_output_interval(
+    const char *dsc_name,
+    const char *dsc_level,
+    SplitMode   split_mode,
+    double      split_start,
+    double      split_interval,
+    int         split_tz_offset)
+{
+    OutputInterval *outint;
+
+    /* Check if an entry for this datastream class already exists */
+
+    outint = _dsproc_get_output_interval(dsc_name, dsc_level);
+
+    if (!outint) {
+
+        outint = (OutputInterval *)calloc(1, sizeof(OutputInterval));
+        if (!outint) goto MEMORY_ERROR;
+
+        if (dsc_name) {
+            outint->dsc_name = strdup(dsc_name);
+            if (!outint->dsc_name) goto MEMORY_ERROR;
+        }
+
+        if (dsc_level) {
+            outint->dsc_level = strdup(dsc_level);
+            if (!outint->dsc_level) goto MEMORY_ERROR;
+        }
+
+        outint->next = _DSProc->output_intervals;
+        _DSProc->output_intervals = outint;
+    }
+
+    outint->split_mode      = split_mode;
+    outint->split_start     = split_start;
+    outint->split_interval  = split_interval;
+    outint->split_tz_offset = split_tz_offset;
+
+    return(1);
+
+MEMORY_ERROR:
+
+    if (outint) free(outint);
+    ERROR( DSPROC_LIB_NAME,
+        "Memory allocation error adding new output interval entry\n");
+    dsproc_set_status(DSPROC_ENOMEM);
+    return(0);
+}
+
+/**
+ *  Private: Parse output interval(s) string.
+ *
+ *  The format of the input string is:
+ * 
+ *  [name.level-]hourly|daily|monthly|yearly[-utc|local]
+ *
+ *  Additional entries can be added by separating them with commas.
+ *   
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  string - string containing the output interval information
+ *
+ *  @return
+ *    - 1 if successful
+ *    - 0 invalid output interval format or memory allocation failure
+ */
+int _dsproc_parse_output_interval_string(const char *string)
+{
+    DSClass   **ds_classes;
+    int         nclasses;
+    int         dsci;
+
+    char       *str_copy = (char *)NULL;
+
+    int         max_entries = 64;
+    char       *entries[max_entries];
+    int         nentries;
+    char       *entry;
+    char       *entry_copy = (char *)NULL;
+    int         ei;
+
+    int         max_parts = 3;
+    char       *parts[3];
+    int         nparts;
+    char       *part;
+    int         pi;
+
+    char       *dotp;
+    char       *dsc_name;
+    char       *dsc_level;
+    SplitMode   split_mode;
+    double      split_start;
+    double      split_interval;
+    int         split_local;
+    int         split_tz_offset;
+
+    if (!string || *string == '\0') {
+        return(1);
+    }
+
+    /* Get list of output datastream class so we can 
+     * verify the entries in the output insterval string. */
+
+    nclasses = dsproc_get_output_ds_classes(&ds_classes);
+    if (nclasses < 0) return(0);
+
+    /* Parse the output interval string */
+
+    DEBUG_LV1( DSPROC_LIB_NAME,
+        "Parsing output interval string: '%s'\n", string);
+
+    str_copy = strdup(string);
+    if (!str_copy) goto MEMORY_ERROR;
+
+    nentries = dsproc_split_csv_string(str_copy, ',', max_entries, entries);
+    if (nentries > max_entries) {
+
+        ERROR( DSPROC_LIB_NAME,
+            "Too many output intervals specified in string: %s\n"
+            " - maximum number is 64 but found %d\n",
+            string, nentries);
+
+        dsproc_set_status("Exceeded Maximum Number of Output Interval Specifications");
+        free(str_copy);
+        return(0);
+    }
+
+    /* Loop over the entries in the output interval string */
+
+    for (ei = 0; ei < nentries; ++ei) {
+
+        entry = entries[ei];
+
+        if (entry_copy) free(entry_copy);
+        entry_copy = strdup(entry);
+        if (!entry_copy) goto MEMORY_ERROR;
+
+        DEBUG_LV1( DSPROC_LIB_NAME,
+            "  - parsing: '%s'\n", entry);
+
+        /* Parse the output interval entry, it should have the form:
+         *
+         * [name.level-]hourly|daily|monthly|yearly[-utc|local] */
+
+        nparts = dsproc_split_csv_string(entry_copy, '-', max_parts, parts);
+        if (nparts > max_parts) goto INVALID_ENTRY;
+
+        dsc_name        = (char *)NULL;
+        dsc_level       = (char *)NULL;
+        split_mode      = (SplitMode)-1;
+        split_local     = 0;
+        split_tz_offset = 0;
+
+        for (pi = 0; pi < nparts; pi++) {
+
+            part = parts[pi];
+
+            if (strcmp(part, "hourly") == 0) {
+                split_mode     = SPLIT_ON_HOURS;
+                split_start    = 0;
+                split_interval = 1;
+            }
+            else if (strcmp(part, "daily") == 0) {
+                split_mode     = SPLIT_ON_HOURS;
+                split_start    = 0;
+                split_interval = 24;
+            }
+            else if (strcmp(part, "monthly") == 0) {
+                split_mode     = SPLIT_ON_MONTHS;
+                split_start    = 1;
+                split_interval = 1;
+            }
+            else if (strcmp(part, "yearly") == 0) {
+                split_mode     = SPLIT_ON_MONTHS;
+                split_start    = 1;
+                split_interval = 12;
+            }
+            else if (strcmp(part, "always")   == 0 ||
+                     strcmp(part, "on_store") == 0) {
+                split_mode     = SPLIT_ON_STORE;
+                split_start    = 0;
+                split_interval = 0;
+            }
+            else if (strcmp(part, "never") == 0 ||
+                     strcmp(part, "none")  == 0) {
+                split_mode     = SPLIT_NONE;
+                split_start    = 0;
+                split_interval = 0;
+            }
+            else if (strcmp(part, "utc") == 0) {
+                split_local = 0;
+            }
+            else if (strcmp(part, "local") == 0) {
+                split_local = 1;
+            }
+            else if ( (dotp = strchr(part, '.')) ) {
+
+                *dotp     = '\0';
+                dsc_name  = part;
+                dsc_level = dotp + 1;
+
+                /* Check for valid output datastream class */
+
+                for (dsci = 0; dsci < nclasses; dsci++) {
+
+                    if (strcmp(dsc_name, ds_classes[dsci]->name) == 0 &&
+                        strcmp(dsc_level, ds_classes[dsci]->level) == 0) {
+                        break;
+                    }
+                }
+
+                if (dsci == nclasses) {
+
+                    /* not a valid output datastream class */
+
+                    ERROR( DSPROC_LIB_NAME,
+                        "Invalid datastream class '%s.%s' in output interval string: '%s'\n",
+                        dsc_name, dsc_level, string);
+
+                    dsproc_set_status("Invalid Datastream Class in Output Interval String");
+                    free(str_copy);
+                    free(entry_copy);
+                    return(0);
+                }
+            }
+            else {
+                ERROR( DSPROC_LIB_NAME,
+                    "Invalid entry '%s' in output interval string: '%s'\n",
+                    part, entry);
+
+                dsproc_set_status("Invalid Entry in Output Interval String");
+
+                free(entry_copy);
+                free(str_copy);
+                return(0);
+            }
+        }
+
+        if (split_mode == (SplitMode)-1) {
+            goto INVALID_ENTRY;
+        }
+
+        /* Add entry to array of output interval structures in _DSProc struct */
+
+        if (split_local) {
+            if (dsproc_estimate_timezone(&split_tz_offset) < 0) {
+                free(str_copy);
+                free(entry_copy);
+                return(0);
+            }
+        }
+
+        if (msngr_debug_level || msngr_provenance_level) {
+
+            const char *db_split_mode;
+            const char *db_dsc_name;
+            const char *db_dsc_level;
+
+            db_dsc_name  = (dsc_name)  ? dsc_name  : "<null>";
+            db_dsc_level = (dsc_level) ? dsc_level : "<null>";
+
+            switch (split_mode) {
+                case SPLIT_ON_STORE:  db_split_mode = "on store"; break;
+                case SPLIT_ON_HOURS:  db_split_mode = "hourly";   break;
+                case SPLIT_ON_DAYS:   db_split_mode = "daily";    break;
+                case SPLIT_ON_MONTHS: db_split_mode = "monthly";  break;
+                case SPLIT_NONE:      db_split_mode = "none";     break;
+                default:              db_split_mode = "<not set>";
+            }
+
+            DEBUG_LV1( DSPROC_LIB_NAME,
+                "      - dsc_name:        '%s'\n"
+                "      - dsc_level:       '%s'\n"
+                "      - split_mode:      '%s'\n"
+                "      - split_start:     '%g'\n"
+                "      - split_interval:  '%g'\n"
+                "      - split_tz_offset: '%d'\n",
+                db_dsc_name, db_dsc_level, db_split_mode,
+                split_start, split_interval, split_tz_offset);
+        }
+
+        if (!_dsproc_add_output_interval(dsc_name, dsc_level,
+            split_mode, split_start, split_interval, split_tz_offset)) {
+
+            free(str_copy);
+            free(entry_copy);
+            return(0);
+        }
+    }
+
+    free(str_copy);
+    if (entry_copy) free(entry_copy);
+    return(1);
+
+MEMORY_ERROR:
+
+    ERROR( DSPROC_LIB_NAME,
+        "Could not parse output interval string: %s\n"
+        " -> memory allocation error\n",
+        string);
+
+    dsproc_set_status(DSPROC_ENOMEM);
+
+    if (str_copy)   free(str_copy);
+    if (entry_copy) free(entry_copy);
+    return(0);
+
+INVALID_ENTRY:
+
+    ERROR( DSPROC_LIB_NAME,
+        "Invalid entry '%s' in output interval string: '%s'\n",
+        entry, string);
+
+    dsproc_set_status("Invalid Entry in Output Interval String");
+
+    free(entry_copy);
+    free(str_copy);
+    return(0);
+}
+
 /** @publicsection */
 
 /*******************************************************************************
@@ -405,6 +805,8 @@ int dsproc_init_datastream(
     const char  *role_name;
     int          ds_id;
     int          status;
+
+    OutputInterval *outint;
 
     if (!site)     site     = _DSProc->site;
     if (!facility) facility = _DSProc->facility;
@@ -496,11 +898,31 @@ int dsproc_init_datastream(
 
         /* Set datastream file splitting mode */
 
-        if (_DSProc->model & DSP_INGEST) {
-            dsproc_set_datastream_split_mode(ds_id, SPLIT_ON_HOURS, 0.0, 24.0);
+        outint = _dsproc_get_output_interval(dsc_name, dsc_level);
+        if (!outint) {
+            outint = _dsproc_get_output_interval(NULL, NULL);
+        }
+
+        if (outint) {
+            dsproc_set_datastream_split_mode(
+                ds_id,
+                outint->split_mode,
+                outint->split_start,
+                outint->split_interval);
+
+            if (outint->split_tz_offset) {
+                dsproc_set_datastream_split_tz_offset(
+                    ds_id, outint->split_tz_offset);
+            }
         }
         else {
-            dsproc_set_datastream_split_mode(ds_id, SPLIT_ON_STORE, 0.0, 0.0);
+            /* Set default split mode */
+            if (_DSProc->model & DSP_INGEST) {
+                dsproc_set_datastream_split_mode(ds_id, SPLIT_ON_HOURS, 0.0, 24.0);
+            }
+            else {
+                dsproc_set_datastream_split_mode(ds_id, SPLIT_ON_STORE, 0.0, 0.0);
+            }
         }
 
         /* Set the default preserve dots value for renaming raw files */
@@ -1430,6 +1852,122 @@ const char *dsproc_datastream_path(int ds_id)
     }
 
     return((const char *)ds->dir->path);
+}
+
+/**
+ *  Set the file splitting mode for output files.
+ *
+ *  Default for VAPs: always create a new file when data is stored
+ *
+ *    - split_mode     = SPLIT_ON_STORE
+ *    - split_start    = ignored
+ *    - split_interval = ignored
+ *
+ *  Default for Ingests: daily files that split at midnight
+ *
+ *    - split_mode     = SPLIT_ON_HOURS
+ *    - split_start    = 0
+ *    - split_interval = 24
+ *
+ *  @param  ds_id          - datastream ID
+ *  @param  split_mode     - the file splitting mode (see SplitMode)
+ *  @param  split_start    - the start of the split interval (see SplitMode)
+ *  @param  split_interval - the split interval (see SplitMode)
+ */
+void dsproc_set_datastream_split_mode(
+    int       ds_id,
+    SplitMode split_mode,
+    double    split_start,
+    double    split_interval)
+{
+    DataStream *ds = _DSProc->datastreams[ds_id];
+
+    if (msngr_debug_level || msngr_provenance_level) {
+
+        switch (split_mode) {
+
+            case SPLIT_ON_STORE:
+
+                DEBUG_LV1( DSPROC_LIB_NAME,
+                    "%s: Setting datastream file splitting mode:\n"
+                    " -> always create a new file when data is stored\n",
+                    ds->name);
+
+                break;
+
+            case SPLIT_ON_HOURS:
+
+                DEBUG_LV1( DSPROC_LIB_NAME,
+                    "%s: Setting datastream file splitting mode:\n"
+                    "  - split_start:    hour %g\n"
+                    "  - split_interval: %g hours\n",
+                    ds->name, split_start, split_interval);
+
+                break;
+
+            case SPLIT_ON_DAYS:
+
+                DEBUG_LV1( DSPROC_LIB_NAME,
+                    "%s: Setting datastream file splitting mode:\n"
+                    "  - split_start:    day %g\n"
+                    "  - split_interval: %g days\n",
+                    ds->name, split_start, split_interval);
+
+                break;
+
+            case SPLIT_ON_MONTHS:
+
+                DEBUG_LV1( DSPROC_LIB_NAME,
+                    "%s: Setting datastream file splitting mode:\n"
+                    "  - split_start:    month %g\n"
+                    "  - split_interval: %g months\n",
+                    ds->name, split_start, split_interval);
+
+                break;
+
+            case SPLIT_NONE:
+
+                DEBUG_LV1( DSPROC_LIB_NAME,
+                    "%s: Setting datastream file splitting mode:\n"
+                    " -> always append output to the previous file unless otherwise\n"
+                    " -> specified in the call to dsproc_store_dataset.\n",
+                    ds->name);
+
+                break;
+
+            default:
+
+                DEBUG_LV1( DSPROC_LIB_NAME,
+                    "%s: Invalid file splitting mode: %d\n",
+                    ds->name, split_mode);
+        }
+    }
+
+    ds->split_mode     = split_mode;
+    ds->split_start    = split_start;
+    ds->split_interval = split_interval;
+}
+
+/**
+ *  Set the timezone offset to use when splitting files.
+ *
+ *  Note that this should be the timezone offset for loaction of the data
+ *  being processed and is subtracted from the UTC time when determining
+ *  the time of the next file split.  For example, If a timezone offset
+ *  of -6 hours is set for SGP data, the files will split at 6:00 a.m. GMT.
+ *
+ *  @param  ds_id           - datastream ID
+ *  @param  split_tz_offset - time zone offset (in hours)
+ */
+void dsproc_set_datastream_split_tz_offset(int ds_id, int split_tz_offset)
+{
+    DataStream *ds = _DSProc->datastreams[ds_id];
+
+    DEBUG_LV1( DSPROC_LIB_NAME,
+        "%s: Setting timezone offset for file splitting to: %d hours\n",
+        ds->name, split_tz_offset);
+
+    ds->split_tz_offset = split_tz_offset;
 }
 
 /**

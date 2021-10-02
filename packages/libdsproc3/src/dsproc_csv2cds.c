@@ -1,25 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2013 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
-*  Authors:
+*  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 67119 $
-*    $Author: ermold $
-*    $Date: 2016-01-27 19:22:37 +0000 (Wed, 27 Jan 2016) $
-*    $State:$
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -609,6 +598,9 @@ for (ri = 0; ri < csv_count; ++ri) {
                 cds_missing.vp,          // void *  in_map,
                 cds_missing.vp,          // void *  out_map,
                 NULL, NULL, NULL, NULL);
+        
+            cds_free_unit_converter(unit_converter);
+            unit_converter = (CDSUnitConverter)NULL;
         }
 
         if (cds_missing.vp) free(cds_missing.vp);

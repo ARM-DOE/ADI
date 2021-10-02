@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 80275 $
-*    $Author: ermold $
-*    $Date: 2017-08-28 18:38:53 +0000 (Mon, 28 Aug 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -34,6 +24,8 @@
 /** Macro to copy a string if the source string is not null. */
 #define STRDUP_FAILED(s1,s2) ( s2 && !( s1 = strdup(s2) ) )
 
+
+typedef struct OutputInterval OutputInterval;
 typedef struct DataStream DataStream;
 
 void _dsproc_trim_version(char *version);
@@ -121,6 +113,10 @@ typedef struct DSProc {
 
     CDSGroup    *trans_data;     /**< input data transformed to user specs   */
     CDSGroup    *trans_params;   /**< user defined transformation params     */
+
+    /* Output Intervals */
+
+    OutputInterval *output_intervals;
 
 } DSProc;
 
@@ -288,6 +284,7 @@ typedef struct {
  */
 struct DSDir {
 
+    DataStream *ds;          /**< pointer to the parent datastrem      */
     char       *path;        /**< path to the directory                */
     struct stat stats;       /**< directory stats                      */
 
@@ -313,6 +310,9 @@ struct DSDir {
 
     /** function used to get the time from the file name */
     time_t (*file_name_time)(const char *);
+
+    /** List of compiled regex file name time patterns */
+    RETimeList *file_name_time_patterns;
 };
 
 int     _dsproc_add_dsdir_patterns(
@@ -344,6 +344,10 @@ int     _dsproc_find_next_dsfile(
             DSFile   **dsfile);
 
 int     _dsproc_get_dsdir_files(DSDir *dir, char ***files);
+
+time_t  _dsproc_get_file_name_time(
+            DSDir      *dir,
+            const char *file_name);
 
 int     _dsproc_open_dsfile(DSFile *file, int mode);
 
@@ -471,9 +475,10 @@ struct DataStream {
 
     /* output file splitting mode */
 
-    SplitMode   split_mode;     /**< splitting mode (see SplitMode)           */
-    double      split_start;    /**< the start of the split interval          */
-    double      split_interval; /**< split interval                           */
+    SplitMode   split_mode;      /**< splitting mode (see SplitMode)           */
+    double      split_start;     /**< the start of the split interval          */
+    double      split_interval;  /**< split interval                           */
+    int         split_tz_offset; /**< time zone offset                         */
 
     /* additional rename raw options */
 
@@ -506,6 +511,33 @@ const char *_dsproc_dsrole_to_name(DSRole role);
 const char *_dsproc_dsformat_to_name(DSFormat format);
 DSFormat    _dsproc_name_to_dsformat(const char *name);
 
+/* Output intervals set from process definition in PCM */
+
+struct OutputInterval {
+    char      *dsc_name;        /**< datastream class name         */
+    char      *dsc_level;       /**< datastream class level        */
+    SplitMode  split_mode;      /**< the file splitting mode       */
+    double     split_start;     /**< start of the split interval   */
+    double     split_interval;  /**< split interval                */
+    int        split_tz_offset; /**< time zone offset (in hours)   */
+    OutputInterval *next;       /**< next structure in linked list */
+};
+
+int _dsproc_add_output_interval(
+        const char *dsc_name,
+        const char *dsc_level,
+        SplitMode   split_mode,
+        double      split_start,
+        double      split_interval,
+        int         split_tz_offset);
+
+void _dsproc_free_output_intervals(void);
+
+OutputInterval *_dsproc_get_output_interval(
+            const char *dsc_name,
+            const char *dsc_level);
+
+int _dsproc_parse_output_interval_string(const char *string);
 
 /*@}*/
 

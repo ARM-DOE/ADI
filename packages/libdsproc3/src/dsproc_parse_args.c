@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2012 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 81663 $
-*    $Author: ermold $
-*    $Date: 2017-10-27 16:24:06 +0000 (Fri, 27 Oct 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -66,6 +56,7 @@ struct {
     { 'R',  "reprocess"          },
     { '\0', "asynchronous"       },
     { '\0', "disable-db-updates" },
+    { '\0', "disable-email"      },
     { '\0', "dynamic-dods"       },
     { '\0', "files"              },
     { '\0', "log-dir"            },
@@ -508,6 +499,9 @@ static int _dsproc_parse_common_long_option(
     else if (strcmp(opt, "--disable-db-updates") == 0) {
         dsproc_disable_db_updates();
     }
+    else if (strcmp(opt, "--disable-email") == 0) {
+        dsproc_disable_mail_messages();
+    }
     else if (strcmp(opt, "--dynamic-dods") == 0) {
         dsproc_set_dynamic_dods_mode(1);
     }
@@ -665,6 +659,8 @@ static void _dsproc_print_advanced_options(FILE *output_stream, int type)
 "                        from storing runtime status information in the\n"
 "                        database. This can be used to run processes that are\n"
 "                        using a read-only database.\n"
+"\n"
+"  --disable-email       Disable email messages.\n"
 "\n"
 "  --dynamic-dods        Allows DODs to be automatically generated and/or\n"
 "                        updated using the information from the input datasets\n"

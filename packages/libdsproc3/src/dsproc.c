@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 80903 $
-*    $Author: ermold $
-*    $Date: 2017-10-02 16:05:06 +0000 (Mon, 02 Oct 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -1039,6 +1029,23 @@ static int _dsproc_init(void)
         return(0);
     }
 
+    /************************************************************
+    * Get the output interval(s)
+    *************************************************************/
+
+    status = dsproc_get_config_value("output_interval", &config_value);
+
+    if (status == 1) {
+        status = _dsproc_parse_output_interval_string(config_value);
+        free(config_value);
+        if (status == 0) {
+            return(0);
+        }
+    }
+    else if (status < 0) {
+        return(0);
+    }
+
     return(1);
 }
 
@@ -1708,6 +1715,8 @@ void _dsproc_destroy(void)
             free(_DSProc->datastreams);
         }
 
+        if (_DSProc->output_intervals) _dsproc_free_output_intervals();
+
         free(_DSProc);
 
         _DSProc = (DSProc *)NULL;
@@ -1935,6 +1944,8 @@ time_t dsproc_get_data_interval(void)
  *  @return
  *    - 0 = disabled
  *    - 1 = enabled
+ *    - 2 = enabled, but do not copy global attributes
+ *          from input datasets to output datasets.
  *
  *  @see dsproc_set_dynamic_dods_mode()
  */
@@ -2412,7 +2423,12 @@ int dsproc_is_fatal(int last_errno)
  *  and/or modified using all variables and associated attributes that
  *  are mapped to it.
  *
- *  @param  mode - dynamic dods mode (0 = disabled, 1 = enabled)
+ *  @param  mode - dynamic dods mode:
+ *                   - 0 = disabled
+ *                   - 1 = enabled
+ *                   - 2 = enabled, but do not copy global attributes
+ *                         from input datasets to output datasets.
+ *
  *
  *  @see dsproc_get_dynamic_dods_mode()
  */
@@ -4055,4 +4071,58 @@ const char *dsproc_get_type(void)
 const char *dsproc_get_version(void)
 {
     return(_DSProc->version);
+}
+
+/**
+ *  Estimate timezone offset from longitude of process.
+ *
+ *  This function will generate a warning if the longitude of the
+ *  process is specified as missing (-9999) in the database.
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  tz_offset - output: timezone offset (in hours) 
+ *                              estimated from the process location
+ *
+ *  @return
+ *    -  1  Successful
+ *    -  0  Longitude of the process is specified as missing (-9999) in the database.
+ *    - -1  Memory allocation error
+ */
+int dsproc_estimate_timezone(int *tz_offset)
+{
+    ProcLoc *proc_loc;
+    double   lon;
+
+    *tz_offset = 0;
+
+    if (dsproc_get_location(&proc_loc) <= 0) {
+        ERROR( DSPROC_LIB_NAME,
+            "Could not estimate timezone from process location\n"
+            " -> memory allocation error getting process location\n");
+        dsproc_set_status(DSPROC_ENOMEM);
+        return(-1);
+    }
+
+    if (proc_loc->lon < -360) {
+        WARNING( DSPROC_LIB_NAME,
+            "Could not estimate timezone from process location\n"
+            " -> process longitude in database is: %g\n", proc_loc->lon);
+        return(0);
+    }
+
+    lon = proc_loc->lon;
+
+    if (lon > 0) {
+        lon -= 360.0;
+    }
+
+    *tz_offset = (int)(lon/15.0);
+
+    if (lon < -180) {
+        *tz_offset += 24;
+    }
+
+    return(1);
 }

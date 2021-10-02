@@ -1,28 +1,18 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
 *  Authors:
+*     name:  Brian Ermold
+*     phone: (509) 375-2277
+*     email: brian.ermold@pnl.gov
+*
 *     name:  Krista Gaustad
 *     phone: (509) 375-5950
 *     email: krista.gaustad@pnl.gov
-*
-*     name:  Brian Ermold
-*     phone: (509) 375-5950
-*     email: brian.ermold@pnnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 77184 $
-*    $Author: ermold $
-*    $Date: 2017-03-22 20:14:32 +0000 (Wed, 22 Mar 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -507,14 +497,14 @@ static int _dsproc_init_ret_dsfile(
 
     /* Fix time units that are not recognized by UDUNITS  */
 
-    bt_status = 0;
+    bt_status = -1;
     units_att = cds_get_att(time_var, "units");
 
     if (units_att &&
         units_att->type == CDS_CHAR) {
 
         bt_status = cds_validate_time_units(units_att->value.cp);
-        if (bt_status < 0) {
+        if (bt_status < -1) {
 
             ERROR( DSPROC_LIB_NAME,
                 "Could not validate time units in input file: %s\n",
@@ -525,7 +515,7 @@ static int _dsproc_init_ret_dsfile(
         }
     }
 
-    if (bt_status == 0) {
+    if (bt_status < 0) {
 
         /* Get units string using base_time */
 
@@ -1475,6 +1465,10 @@ static int _dsproc_retrieve_variable(
     * and it is not already defined.  We also want to be careful *not*
     * to create a missing_value attribute for qc and coordinate variables.
     *
+    * This has been updated to only create the missing_value attribute if a
+    * non-standard missing value attribute was found, and will no longer create
+    * a missing_value attribute with a value equal to the default fill value.
+    *
     * This logic is only enabled when we are in dynamic DOD mode.
     * Otherwise, missing values should be mapped to the correct
     * value specified in the output DODs.
@@ -1487,7 +1481,7 @@ static int _dsproc_retrieve_variable(
             strcmp(obs_var->name, "base_time")   != 0        &&
             strcmp(obs_var->name, "time_offset") != 0) {
 
-            if (!cds_create_missing_value_att(obs_var, 0)) {
+            if (!cds_create_missing_value_att(obs_var, 1)) {
 
                 ERROR( DSPROC_LIB_NAME,
                     "Could not create missing value attribute for: %s\n",

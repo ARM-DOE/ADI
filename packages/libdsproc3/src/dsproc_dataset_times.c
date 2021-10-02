@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 13753 $
-*    $Author: ermold $
-*    $Date: 2012-05-18 17:05:48 +0000 (Fri, 18 May 2012) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -63,7 +53,7 @@ extern DSProc *_DSProc; /**< Internal DSProc structure */
  *
  *  @return
  *    - base time in seconds since 1970 UTC
- *    - 0 if not found
+ *    - -1 if not found
  */
 time_t dsproc_get_base_time(void *cds_object)
 {

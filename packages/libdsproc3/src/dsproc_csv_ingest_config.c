@@ -1,25 +1,14 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2013 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
-*  Authors:
+*  Author:
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 68036 $
-*    $Author: ermold $
-*    $Date: 2016-03-13 22:21:35 +0000 (Sun, 13 Mar 2016) $
-*    $State:$
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -673,8 +662,6 @@ static int _csv_load_conf_file(
     char       *out_name;
     int         reload;
     int         ki;
-
-    flags = flags; // prevent "unused parameter" compiler warning
 
     DSPROC_DEBUG_LV1("Reading Configuration File: %s/%s\n", path, name);
 
@@ -1537,7 +1524,7 @@ void dsproc_clear_csv_time_column_patterns(CSVConf *conf)
 }
 
 /**
- *  Free memory used by a CSVConf structure.
+ *  Configure file time and time column patterns for a CSVParser.
  *
  *  @param  conf  pointer to CSVConf structure
  *  @param  csv   pointer to CSVParser
@@ -1566,6 +1553,8 @@ int dsproc_configure_csv_parser(CSVConf *conf, CSVParser *csv)
     }
 
     if (conf->time_ncols) {
+
+        dsproc_reset_csv_time_patterns(csv);
 
         for (i = 0; i < conf->time_ncols; ++i) {
 
@@ -1617,8 +1606,6 @@ CSV2CDSMap *dsproc_create_csv_to_cds_map(
     int          nmissings;
     const char **missings;
     int          fi, mi, mvi, ti;
-
-    flags = flags;
 
     /* Allocate memory for the variable data map */
 

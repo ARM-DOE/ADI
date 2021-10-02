@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 80275 $
-*    $Author: ermold $
-*    $Date: 2017-08-28 18:38:53 +0000 (Mon, 28 Aug 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -93,8 +83,6 @@ int dsproc_execvp(
     int      exit_value;
     int      signal_number;
     int      core_dumped;
-
-    flags = flags;
 
     /************************************************************
     *  Create log message
@@ -306,10 +294,7 @@ int dsproc_run_dq_inspector(
     int         exit_value;
     int         i, j;
 
-    // prevent "unused argument" compiler warning
-    flags = flags;
-
-    command     = "/apps/tool/bin/dq_inspector";
+    command     = "dq_inspector";
     datastream  = dsproc_datastream_name(dsid);
     read_path   = getenv("DATASTREAM_DATA");
 

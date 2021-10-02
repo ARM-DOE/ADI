@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 64431 $
-*    $Author: ermold $
-*    $Date: 2015-10-09 19:38:11 +0000 (Fri, 09 Oct 2015) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -36,6 +26,55 @@ extern DSProc *_DSProc; /**< Internal DSProc structure */
 /*******************************************************************************
  *  Static Functions Visible Only To This Module
  */
+
+
+/**
+ *  Static: Get a unique destination file name.
+ *
+ *  This function will incrementally append ',#' to the end of the destination
+ *  file name until a unique name is found.
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  src_file  - full path to the input file
+ *  @param  dest_file - input/output: full path to the output file
+ *
+ *  @return
+ *    - 1 if successful
+ *    - 0 if an error occurred
+ */
+static int _dsproc_get_unique_file_name(
+    const char *src_file,
+    char       *dest_file)
+{
+    char *vp = dest_file + strlen(dest_file);
+    int   v;
+
+    for (v = 1; ; ++v) {
+
+        sprintf(vp, ",%d", v);
+
+        if (access(dest_file, F_OK) != 0) {
+
+            if (errno == ENOENT) {
+                break;
+            }
+            else {
+
+                ERROR( DSPROC_LIB_NAME,
+                    "Could not determine unique name for destination file.\n"
+                    "Access error checking for existance of file: %s\n"
+                    " -> %s\n", dest_file, strerror(errno));
+
+                dsproc_set_status(DSPROC_EACCESS);
+                return(0);
+            }
+        }
+    }
+
+    return(1);
+}
 
 /**
  *  Static: Rename a data file.
@@ -366,13 +405,27 @@ static int _dsproc_rename(
 
             /* The MD5s do not match */
 
-            ERROR( DSPROC_LIB_NAME,
-                "%s"
-                " -> source and destination files have different MD5s\n",
-                rename_error);
+            if (!force_mode) {
+                ERROR( DSPROC_LIB_NAME,
+                    "%s"
+                    " -> source and destination files have different MD5s\n",
+                    rename_error);
 
-            dsproc_set_status(DSPROC_EMD5CHECK);
-            return(0);
+                dsproc_set_status(DSPROC_EMD5CHECK);
+                return(0);
+            }
+            else {
+
+                WARNING( DSPROC_LIB_NAME,
+                    "%s"
+                    " -> source and destination files have different MD5s\n"
+                    " -> force option enabled: determining unique file name\n",
+                    rename_error);
+
+                if (!_dsproc_get_unique_file_name(src_file, dest_file)) {
+                    return(0);
+                }
+            }
         }
     }
     else if (errno != ENOENT) {

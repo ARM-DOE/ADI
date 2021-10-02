@@ -1,6 +1,7 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
@@ -8,17 +9,6 @@
 *     name:  Brian Ermold
 *     phone: (509) 375-2277
 *     email: brian.ermold@pnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 80311 $
-*    $Author: ermold $
-*    $Date: 2017-08-31 22:40:18 +0000 (Thu, 31 Aug 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -48,6 +38,8 @@ void dsproc_initialize(
         const char  *proc_version,
         int          nproc_names,
         const char **proc_names);
+
+void dsproc_show_quicklook_hook_options(void);
 
 int dsproc_start_processing_loop(
         time_t *interval_begin,
@@ -489,6 +481,16 @@ int dsproc_qc_limit_checks(
         int     min_flag,
         int     max_flag);
 
+int dsproc_qc_solar_obstruction_check(
+        size_t  ntimes,
+        time_t *times,
+        double *azimuths,
+        double *elevations,
+        CDSVar *qc_var);
+
+int dsproc_qc_solar_obstruction_checks(
+        CDSGroup   *dataset);
+
 int dsproc_qc_time_checks(
         CDSVar    *time_var,
         CDSVar    *qc_time_var,
@@ -500,14 +502,6 @@ int dsproc_qc_time_checks(
 int dsproc_standard_qc_checks(
         int         ds_id,
         CDSGroup   *dataset);
-
-int dsproc_solar_position_qc_check(
-        CDSGroup   *dataset,
-        int         solar_flag);
-
-int dsproc_qc_solar_position(
-    CDSVar *qc_var,
-    int     solar_flag);
 
 /*@}*/
 
@@ -665,6 +659,10 @@ int     dsproc_get_qc_bit_descriptions(
             const char  ***descs);
 
 unsigned int dsproc_get_missing_value_bit_flag(
+            int          bit_ndescs,
+            const char **bit_descs);
+
+unsigned int dsproc_get_solar_obstruction_bit_flag(
             int          bit_ndescs,
             const char **bit_descs);
 

@@ -1,28 +1,18 @@
 /*******************************************************************************
 *
-*  COPYRIGHT (C) 2010 Battelle Memorial Institute.  All Rights Reserved.
+*  Copyright © 2014, Battelle Memorial Institute
+*  All rights reserved.
 *
 ********************************************************************************
 *
-*  Author:
+*  Authors:
+*     name:  Brian Ermold
+*     phone: (509) 375-2277
+*     email: brian.ermold@pnl.gov
+*
 *     name:  Krista Gaustad
 *     phone: (509) 375-5950
 *     email: krista.gaustad@pnl.gov
-*
-*     name:  Brian Ermold
-*     phone: (509) 375-5950
-*     email: brian.ermold@pnnl.gov
-*
-********************************************************************************
-*
-*  REPOSITORY INFORMATION:
-*    $Revision: 76935 $
-*    $Author: ermold $
-*    $Date: 2017-02-24 17:26:14 +0000 (Fri, 24 Feb 2017) $
-*
-********************************************************************************
-*
-*  NOTE: DOXYGEN is used to generate documentation for this file.
 *
 *******************************************************************************/
 
@@ -2402,8 +2392,11 @@ static int _dsproc_transform_variable(
             if (param_length > 0) {
                 if (strcmp(param_value, "TRANS_CARACENA") == 0) {
                     is_caracena = 1;
+                    do_transform = 1;
                 }
-                do_transform = 1;
+                else if (strcmp(param_value, "TRANS_PASSTHROUGH") != 0) {
+                    do_transform = 1;
+                }
             }
 
             param_length = 256;
@@ -2416,8 +2409,11 @@ static int _dsproc_transform_variable(
             if (param_length > 0) {
                 if (strcmp(param_value, "TRANS_CARACENA") == 0) {
                     is_caracena = 1;
+                    do_transform = 1;
                 }
-                do_transform = 1;
+                else if (strcmp(param_value, "TRANS_PASSTHROUGH") != 0) {
+                    do_transform = 1;
+                }
             }
 
             /* If we have already determined that a transformation
@@ -2470,7 +2466,13 @@ static int _dsproc_transform_variable(
             "transform", CDS_CHAR, &param_length, param_value);
 
         if (param_length > 0) {
-            do_transform = 1;
+            if (strcmp(param_value, "TRANS_CARACENA") == 0) {
+                is_caracena = 1;
+                do_transform = 1;
+            }
+            else if (strcmp(param_value, "TRANS_PASSTHROUGH") != 0) {
+                do_transform = 1;
+            }
         }
     }
 
@@ -2831,7 +2833,7 @@ int dsproc_is_transform_qc_var(CDSVar *qc_var)
     for (ai = 3; gTransQCAtts[ai].name; ++ai) {
 
         name = gTransQCAtts[ai].name;
-        if (strstr(name, "description") != 0) continue;
+        if (strstr(name, "description") == NULL) continue;
 
         /* Bits 10 and higher were added later so we only check
         *  the first 9 to maintain backward compatibility. */
@@ -2985,6 +2987,9 @@ int dsproc_transform_data(
 
 /* BDE OBS UPDATE: For now we are only supporting the cases where
  * all observations in the retrieved data could be merged */
+
+// BDE FIXME: Need to move this check so it is only performed is a
+// variable from this dataset is being transformed.
 
 if (ret_ds_group->ngroups > 1) {
 
