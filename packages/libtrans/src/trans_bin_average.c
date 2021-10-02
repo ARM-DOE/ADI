@@ -593,7 +593,7 @@ int bin_average(core_s cs) {
       // output to missing and set QC_OUTSIDE_RANGE
       output[j]=output_missing_value;
       stdev[j]=output_missing_value;
-      coverage[j]=output_missing_value;
+      coverage[j]=0;
       qc_set(qc_output[j], QC_OUTSIDE_RANGE);
       qc_set(qc_output[j], QC_BAD);
     } else if (sum_weight == 0) {
@@ -603,7 +603,7 @@ int bin_average(core_s cs) {
       //target_start[j],target_end[j]);
       output[j]=output_missing_value;
       stdev[j]=output_missing_value;
-      coverage[j]=output_missing_value;
+      coverage[j]=0;
       qc_set(qc_output[j], QC_ALL_BAD_INPUTS);
       qc_set(qc_output[j], QC_BAD);
     } else {

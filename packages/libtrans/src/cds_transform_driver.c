@@ -1231,8 +1231,25 @@ int cds_transform_driver(CDSVar *invar, CDSVar *qc_invar, CDSVar *outvar, CDSVar
 
   // Now, finally, add in cell_transforms att
   char *cell_transform;
+  CDSAtt *cell_transform_att;
+
+  // If the cell_transform attribute exists set it
   if ((cell_transform=trans_build_param_att(outvar->name)) != NULL) {
-    cds_define_att_text(outvar, "cell_transform", "%s", cell_transform);
+    cell_transform_att = cds_get_att(outvar,"cell_transform");
+    // If the cell_transform attribute exists change its value
+    // value is from the input datastream.
+    if (cell_transform_att != NULL) 
+       if(cds_change_att_text(cell_transform_att, cell_transform) == 0){ 
+           ERROR(TRANS_LIB_NAME, "Problem changing cell_transform att for var %s\n",
+	         outvar->name);
+           return(-1);
+       }
+    // Otherwise create and set the attribute
+    if (cds_define_att_text(outvar, "cell_transform", "%s", cell_transform) == NULL) {
+           ERROR(TRANS_LIB_NAME, "Problem defining cell_transform att for var %s\n",
+	         outvar->name);
+           return(-1);
+    }
     free(cell_transform);
     trans_destroy_param_list();
   }
