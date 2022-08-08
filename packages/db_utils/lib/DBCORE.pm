@@ -200,7 +200,7 @@ sub connect
             $self->{'DBAlias'} = $href->{'DBAlias'};
         }
 
-        if ($href->{'DBConnFile'}) {
+        if ($href->{'DBConnFile'} && (-f $href->{'DBConnFile'})) {
             $self->{'DBConnFile'} = $href->{'DBConnFile'};
         }
         else {
