@@ -10,12 +10,27 @@ endif
 
 # Set environment variables used by applications
 
-setenv DSUTIL_HOME     "$ADI_PREFIX"
+setenv DSDB_HOME       "$ADI_PREFIX"
 setenv DB_CONNECT_PATH "$ADI_PREFIX/etc"
 
 # Alias used to strip a path from a "PATH" environment variable
 
 alias strip_path 'tr ":" "\n" | grep -v ^\!*$ | tr "\n" ":" | sed ''s/:\$//'''
+
+# Add ADI bin directory to PATH
+
+set ADI_BINDIR = "$ADI_PREFIX/bin"
+
+if ( ! $?PATH ) then
+    setenv PATH "$ADI_BINDIR"
+else
+    setenv PATH `echo $PATH | strip_path $ADI_BINDIR`
+    if ( "$PATH" == "" ) then
+        setenv PATH "$ADI_BINDIR"
+    else
+        setenv PATH "${ADI_BINDIR}:$PATH"
+    endif
+endif
 
 # Add ADI pkgconfig path to PKG_CONFIG_PATH
 

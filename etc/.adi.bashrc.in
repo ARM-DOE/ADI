@@ -10,7 +10,7 @@ fi
 
 # Set environment variables used by applications
 
-export DSUTIL_HOME="$ADI_PREFIX"
+export DSDB_HOME="$ADI_PREFIX"
 export DB_CONNECT_PATH="$ADI_PREFIX/etc"
 
 # Function to strip a path from a "PATH" environment variable
@@ -37,6 +37,11 @@ function prepend_path() {
 
     echo $path
 }
+
+# Add ADI bin directory to PATH
+
+ADI_BINDIR="$ADI_PREFIX/bin"
+export PATH=$(prepend_path "$PATH" "$ADI_BINDIR")
 
 # Add ADI pkgconfig path to PKG_CONFIG_PATH
 
