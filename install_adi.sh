@@ -490,6 +490,23 @@ else
     install_in_file "$indir/$infile" "$outdir/$outfile" 0644
 fi
 
+# Install .adi.data-env.* files
+
+for infile in .adi.data-env.cshrc .adi.data-env.bashrc; do
+
+    outfile=$infile
+
+    echo ""
+    if [ -e "$outdir/$outfile" ]; then
+        echo "skipping: $indir/$infile"
+        echo " -> previously installed file already exists: $outdir/$outfile"
+    else
+        echo "installing: $outfile"
+        run "cp $infile $outfile"
+        run "chmod 0644 '$outfile'"
+    fi
+done
+
 # Create the $prefix/var/adi directory if it doesn't exist
 
 outdir="$prefix/var/adi"
