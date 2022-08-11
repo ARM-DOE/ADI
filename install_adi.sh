@@ -501,9 +501,9 @@ for infile in .adi.data-env.cshrc .adi.data-env.bashrc; do
         echo "skipping: $indir/$infile"
         echo " -> previously installed file already exists: $outdir/$outfile"
     else
-        echo "installing: $outfile"
-        run "cp $infile $outfile"
-        run "chmod 0644 '$outfile'"
+        echo "installing: $outdir/$outfile"
+        run "cp $indir/$infile $outdir/$outfile"
+        run "chmod 0644 $outdir/$outfile"
     fi
 done
 
