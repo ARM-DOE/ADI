@@ -1,0 +1,13 @@
+# Default environment for developing ADI Python apps
+
+name: adi_py
+channels:
+  - arm-doe
+  - conda-forge
+dependencies:
+  - python=3.9
+  - adi_py
+  - act-atmos
+  - pip=22.3.1
+  - pip:
+    - numpy==1.23.1

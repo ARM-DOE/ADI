@@ -26,9 +26,10 @@ class SpecialXrAttributes:
     SOURCE_VAR_NAME = '__source_var_name'
     COORDINATE_SYSTEM = '__coordsys_name'
     OUTPUT_TARGETS = '__output_targets'
-    DATASTREAM_NAME = '__datastream_name'
+    DATASTREAM_DSID = '__datastream_dsid'
     DATASET_TYPE = '__dataset_type'
     OBS_INDEX = '__obs_index'
+
 
 class ADIAtts:
     MISSING_VALUE = 'missing_value'
@@ -64,4 +65,3 @@ class ADIDatasetType(Enum):
     RETRIEVED = 1
     TRANSFORMED = 2
     OUTPUT = 3
-

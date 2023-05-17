@@ -3,12 +3,15 @@
 
 from __future__ import print_function
 
+from typing import List
+
 import sys
 import time
 from math import modf
 
 # Cython modules
 from libc.stdlib cimport malloc,free
+from libc.stdio cimport printf
 from cpython.ref cimport PyObject
 from cpython.unicode cimport PyUnicode_AsEncodedString
 from cpython.pycapsule cimport PyCapsule_GetPointer
@@ -242,6 +245,7 @@ def error(object status, object format, *args):
     string will be used.
 
     """
+    if format == None:  format = status
     s=format
     file,line,func=__line()
     if args:
@@ -1279,6 +1283,10 @@ cdef inline void* _alloc_single(CDSDataType cds_type, object initial_value=None)
         retval = malloc(sizeof(int))
         if initial_value is not None:
             (<int*>retval)[0] = initial_value
+    elif cds_type == CDS_INT64:
+        retval = malloc(sizeof(long long))
+        if initial_value is not None:
+            (<long long*>retval)[0] = initial_value
     elif cds_type == CDS_FLOAT:
         retval = malloc(sizeof(float))
         if initial_value is not None:
@@ -1309,6 +1317,9 @@ cdef inline object _convert_single(CDSDataType cds_type, void *value):
     elif cds_type == CDS_INT:
         retval = (<int*>value)[0];
         free(<int*>value)
+    elif cds_type == CDS_INT64:
+        retval = (<long long*>value)[0];
+        free(<long long*>value)
     elif cds_type == CDS_FLOAT:
         retval = (<float*>value)[0];
         free(<float*>value)
@@ -1338,6 +1349,8 @@ cdef inline int cds_type_to_dtype(CDSDataType cds_type) except -1:
         return np.NPY_SHORT
     elif cds_type == CDS_INT:
         return np.NPY_INT
+    elif cds_type == CDS_INT64:
+        return np.NPY_INT64
     elif cds_type == CDS_FLOAT:
         return np.NPY_FLOAT
     elif cds_type == CDS_DOUBLE:
@@ -1358,6 +1371,8 @@ cpdef inline np.dtype cds_type_to_dtype_obj(CDSDataType cds_type):
         return np.dtype(np.int16)
     elif cds_type == CDS_INT:
         return np.dtype(np.int32)
+    elif cds_type == CDS_INT64:
+        return np.dtype(np.int64)
     elif cds_type == CDS_FLOAT:
         return np.dtype(np.float32)
     elif cds_type == CDS_DOUBLE:
@@ -1380,9 +1395,13 @@ cpdef inline int dtype_to_cds_type(np.dtype dtype) except -1:
         return CDS_SHORT
     elif dtype == np.dtype(np.int32):
         return CDS_INT
+    elif dtype == np.dtype(np.int64):
+        return CDS_INT64
     elif dtype == np.dtype(np.float32):
         return CDS_FLOAT
     elif dtype == np.dtype(np.float64):
+        return CDS_DOUBLE
+    elif np.issubdtype(dtype, np.datetime64):
         return CDS_DOUBLE
     else:
         raise ValueError("Unknown dtype %s" % dtype)
@@ -1694,6 +1713,98 @@ def dataset_name(cds3.core.Group dataset):
     if retval == NULL:
         return None
     return _to_python_string( retval )
+
+def getopt(object option):
+    """Get a user defined command line option.
+    
+    Parameters
+    ----------
+    option : const char *
+       The short or long option. 
+    
+    Returns
+    -------
+    - 1 if the option was specified on the command line
+    - value if the option was specified on the command line and one was provided
+    - None if the option was not specified on the command line
+
+    """
+
+    cdef object b_option
+    cdef char *strval=NULL
+    cdef int retval
+    cdef object retstr
+
+    b_option = _to_byte_c_string( option )
+
+    retval = dsproc_getopt(b_option, &strval)
+    if retval == 0:
+        return None
+    if strval != NULL:
+        retstr = strval
+        return _to_python_string(retstr)
+    else:
+        return retval
+
+def setopt(
+    object short_opt=None,
+    object long_opt=None,
+    object arg_name=None,
+    object opt_desc=None):
+    """ Set user defined command line option.
+    This function must be called before calling dsproc_main.
+
+    Parameters
+    ----------
+    short_opt : object
+        Short options are single letters and are prefixed by a single 
+        dash on the command line. Multiple short options can be grouped 
+        behind a single dash. 
+        Specify None for this argument if a short option should not be used.
+    long_opt : object 
+        Long options are prefixed by two consecutive dashes on the command line. 
+        Specify None for this argument if a long option should not be used.
+    arg_name : object 
+        A single word description of the option argument to be used in the help message. 
+        Specify None if this option does not take an argument on the command line. 
+    opt_desc : object 
+        A brief description of the option to be used in the help message.
+    
+    Returns
+    -------
+    - 1 if successful
+    - 0 if the option has already been used or an error occurs.
+
+    """
+    cdef object b_short_opt
+    cdef char c_short_opt
+    cdef object b_long_opt
+    cdef char *c_long_opt
+    cdef object b_arg_name
+    cdef char *c_arg_name
+    cdef object b_opt_desc
+    cdef char *c_opt_desc
+
+    if short_opt is not None:
+       b_short_opt = _to_byte_c_string(short_opt)
+       c_short_opt = b_short_opt[0] #how to specify char of length 1
+    if long_opt is not None:
+       b_long_opt = _to_byte_c_string(long_opt)
+       c_long_opt = b_long_opt
+    else:
+       c_long_opt = NULL
+    if arg_name is not None:
+       b_arg_name = _to_byte_c_string(arg_name)
+       c_arg_name = b_arg_name
+    else:
+       c_arg_name = NULL
+
+    b_opt_desc = _to_byte_c_string(opt_desc)
+
+    if short_opt is not None:
+        return dsproc_setopt(c_short_opt, c_long_opt, c_arg_name, b_opt_desc)
+    else:
+        return dsproc_setopt('\0', c_long_opt, c_arg_name, b_opt_desc)
 
 def use_nc_extension():
     """ Set the default NetCDF file extension to 
@@ -2410,6 +2521,7 @@ def define_var(
     cdef signed char min_byte, max_byte, missing_byte, fill_byte
     cdef short min_short, max_short, missing_short, fill_short
     cdef int min_int, max_int, missing_int, fill_int
+    cdef long long min_long, max_long, missing_long, fill_long
     cdef float min_float, max_float, missing_float, fill_float
     cdef double min_double, max_double, missing_double, fill_double
     cdef const char **c_dim_names = <const_char**>malloc(len(dim_names) * sizeof(char*))
@@ -2510,6 +2622,19 @@ def define_var(
         if fill_value is not None:
             fill_int = fill_value
             fill_ptr = &fill_int
+    elif cds_type == CDS_INT64:
+        if valid_min is not None:
+            min_long = valid_min
+            min_ptr = &min_long
+        if valid_max is not None:
+            max_long = valid_max
+            max_ptr = &max_long
+        if missing_value is not None:
+            missing_long = missing_value
+            missing_ptr = &missing_long
+        if fill_value is not None:
+            fill_long = fill_value
+            fill_ptr = &fill_long
     elif cds_type == CDS_FLOAT:
         if valid_min is not None:
             min_float = valid_min
@@ -3369,6 +3494,7 @@ def init_var_data_index(
         return None
     return var.get_datap(sample_start)
 
+
 def set_var_data(
             cds3.core.Var var,
             size_t sample_start,
@@ -4154,10 +4280,8 @@ def run_dq_inspector(int ds_id, time_t begin_time,
         Beginning of the time range to search
     end_time : time_t
         End of the time range to search
-
     input_args : object
-        List of command line arguments for dq_inspector. 
-        This list must be terminated with a None value.
+        List of command line arguments for dq_inspector.
     flag : int
         Control flag.  Set to 0 to maintain backward 
         compatibility.
@@ -4168,11 +4292,15 @@ def run_dq_inspector(int ds_id, time_t begin_time,
     - -1  if the process could not be executed
 
     """
+    
+    if len(input_args) != 0 and input_args[-1] != None:
+        input_args = input_args + [None]
+
     cdef int return_value
 
     cdef const char **c_input_args = <const_char**>malloc(len(input_args) * sizeof(char*))
 
-    cdef object b_input_args = [None] * len(input_args)
+    cdef object b = None
 
     # String processing varies depending on which Python version is run
     # The PyString_AsString is different with different functionality depending on the Python version. See imports.
@@ -4186,21 +4314,15 @@ def run_dq_inspector(int ds_id, time_t begin_time,
     else:
         # Python Major Version 3
         for i in range(len(input_args)):
-            if i == len(input_args)-1:
-                break
-            else:
-                b_input_args[i] = PyUnicode_AsEncodedString(input_args[i], "UTF-8","strict")
-
-        for i in range(len(input_args)):
-            if i == len(input_args)-1:
+            if i == len(input_args) - 1:
                 c_input_args[i] = NULL
-            else:
-                c_input_args[i] = PyString_AsString(b_input_args[i])
-
-    return_value = dsproc_run_dq_inspector(ds_id, begin_time,
-       end_time, c_input_args, flag)
+                break
+            b = PyUnicode_AsEncodedString(input_args[i], "UTF-8", "strict")
+            c_input_args[i] = PyString_AsString(b)
+    
+    return_value = dsproc_run_dq_inspector(ds_id, begin_time, end_time, c_input_args, flag)
     free(c_input_args)
-    del b_input_args
+    del b
     return return_value
 
 def add_datastream_file_patterns(int ds_id, object patterns, int ignore_case):
@@ -4242,6 +4364,92 @@ def add_datastream_file_patterns(int ds_id, object patterns, int ignore_case):
 
     return_value = dsproc_add_datastream_file_patterns(ds_id, len(patterns),
             c_patterns, ignore_case)
+    free(c_patterns)
+    del b_patterns
+    return return_value
+
+def set_file_name_time_patterns(int ds_id, object patterns):
+    """
+    Set the file name time pattern(s) used to parse the time from a file name.
+
+    The file name time pattern(s) will also be used to sort the list of files in the datastream directory. 
+    Alternatively a file_name_compare function can be specified using dsproc_set_file_name_compare_function() (not implemented in Python), 
+    or a file_name_time function can be specified using dsproc_set_file_name_time_function()  (not implemented in Python). 
+    If more than one are specified the order of precedence is:
+
+    ```
+    file_name_compare function
+    file name time patterns
+    file_name_time function
+    ```
+
+    The file name time pattern(s) contain a mixture of regex (see regex(7)) and time format codes similar to the 
+    strptime function. The time format codes recognized by this function begin with a % and are followed by one 
+    of the following characters:
+
+    * 'C' century number (year/100) as a 2-digit integer
+    * 'd' day number in the month (1-31).
+    * 'e' day number in the month (1-31).
+    * 'h' hour * 100 + minute (0-2359)
+    * 'H' hour (0-23)
+    * 'j' day number in the year (1-366).
+    * 'm' month number (1-12)
+    * 'M' minute (0-59)
+    * 'n' arbitrary whitespace
+    * 'o' time offset in seconds
+    * 'p' AM or PM
+    * 'q' Mac-Time: seconds since 1904-01-01 00:00:00 +0000 (UTC)
+    * 's' seconds since Epoch, 1970-01-01 00:00:00 +0000 (UTC)
+    * 'S' second (0-60; 60 may occur for leap seconds)
+    * 't' arbitrary whitespace
+    * 'y' year within century (0-99)
+    * 'Y' year with century as a 4-digit integer
+    * '' a literal "%" character
+
+    An optional 0 character can be used between the % and format code to specify that the number must 
+    be zero padded. For example, '%0d' specifies that the day range is 01 to 31.
+
+    Multiple patterns can be provided and will be checked in the specified order.
+
+    Examples:
+
+    * "%Y%0m%0d\\.%0H%0M%0S\\.[a-z]$" would match *20150923.072316.csv
+    * "%Y-%0m-%0d_%0H:%0M:%0S\\.dat" would match *2015-09-23_07:23:16.dat
+    
+    Parameters
+    ----------
+    ds_id : int
+        Datastream ID
+    patterns : object
+        List of extened regex time patterns
+
+    Returns
+    -------
+    - 1 if successful
+    - 0 if a regex compile error occurred
+    """
+    cdef int return_value
+
+    cdef const char **c_patterns = <const_char**>malloc(len(patterns) * sizeof(char*))
+
+    cdef object b_patterns = [None] * len(patterns)
+
+    # String processing varies depending on which Python version is run
+    # The PyString_AsString is different with different functionality depending on the Python version. See imports.
+    if sys.version_info[0] < 3:
+        # Python Major Version 2
+        for i in range(len(patterns)):
+            c_patterns[i] = PyString_AsString(patterns[i])
+    else:
+        # Python Major Version 3
+        for i in range(len(patterns)):
+            b_patterns[i] = PyUnicode_AsEncodedString(patterns[i], "UTF-8","strict")
+
+        for i in range(len(patterns)):
+            c_patterns[i] = PyString_AsString(b_patterns[i])
+
+    return_value = dsproc_set_file_name_time_patterns(ds_id, len(patterns),
+            c_patterns)
     free(c_patterns)
     del b_patterns
     return return_value
@@ -4573,6 +4781,65 @@ def set_datastream_split_tz_offset(int ds_id, int split_tz_offset):
 
     """
     dsproc_set_datastream_split_tz_offset(ds_id, split_tz_offset)
+
+def get_missing_value_bit_flag(object bit_descs) -> int:
+    """
+    Get bit flag for the missing_value check.
+
+    This function will search for a bit description that begins with one of the following strings:
+
+     - "Value is equal to missing_value"
+     - "Value is equal to the missing_value"
+     - "value = missing_value"
+     - "value == missing_value"
+
+     - "Value is equal to missing value"
+     - "Value is equal to the missing value"
+     - "value = missing value"
+     - "value == missing value"
+
+     - "Value is equal to _FillValue"
+     - "Value is equal to the _FillValue"
+     - "value = _FillValue"
+     - "value == _FillValue"
+
+    Note: Use dsproc_get_qc_bit_descriptions() to get the list of bit descriptions for a QC variable.
+
+    Parameters
+    ----------
+    bit_descs : List[str]
+        List of bit descriptions to search for missing value.
+
+    Returns:
+        Bit flag starting from 1 or 0 if not found.
+    """
+
+    # We are converting the python List[str] into a char** variable that we can pass to c function
+    ndescs = len(bit_descs)
+    c_descs = <const_char**> malloc(ndescs * sizeof(char *))
+    for idx in range(ndescs):
+        byte_c_str = _to_byte_c_string(bit_descs[idx])
+        c_descs[idx] = byte_c_str
+
+    return dsproc_get_missing_value_bit_flag(ndescs, c_descs)
+
+def get_qc_bit_descriptions(cds3.core.Var var):
+    """
+    Return a List[str] containing the bit descriptions for the given QC variable
+    """
+    # Create an empty char** and pass the address in as a parameter
+    cdef const char** c_bit_descs = NULL
+    ndescs = dsproc_get_qc_bit_descriptions(var.c_ob, &c_bit_descs)
+
+    if ndescs < 0:
+        return []
+
+    else:
+        bit_descs: List[str] = []
+        for idx in range(ndescs):
+            bit_descs.append(_to_python_string(c_bit_descs[idx]))
+        free(c_bit_descs)
+        return bit_descs
 
 def set_retriever_time_offsets(int ds_id, time_t begin_time, time_t end_time):
     """
@@ -5141,6 +5408,7 @@ def bad_file_warning(char *file_name, char *format, *args):
     b_file_name = _to_byte_c_string( file_name )
     b_s  = _to_byte_c_string( s )
     dsproc_bad_file_warning(func, file, line, b_file_name, b_s )
+
 #
 #void dsproc_bad_line_warning(
 #        char *sender,
@@ -5166,6 +5434,75 @@ def bad_file_warning(char *file_name, char *format, *args):
 #        char *facility,
 #        char *name,
 #        char *level)
+
+def set_coordsys_trans_param(
+        object coordsys_name,
+        object field_name,
+        object param_name,
+        CDSDataType cds_type,
+        object value):
+    """Set the value of a coordinate system transformation parameter.
+
+    Parameters
+    ----------
+    coordsys_name :  object
+        The name of the coordinate system
+    field_name : object
+        Name of the field
+    param_name : object
+        Name of the transform parameter
+    value : object
+        The parameter value
+
+    Returns
+    -------
+    - 1 if successful
+    - 0 if the attribute does not exist
+    """
+
+    cdef np.ndarray value_nd
+    cdef object byte_value
+    cdef object b_coordsys_name = _to_byte_c_string( coordsys_name )
+    cdef object b_field_name = _to_byte_c_string( field_name )
+    cdef object b_param_name = _to_byte_c_string( param_name )
+    cdef char c_value
+
+    if cds_type == CDS_CHAR:
+        byte_value = _to_byte_c_string(value)
+        length = len(byte_value)
+        if length == 1:
+            value_nd = np.asarray(byte_value[0]) 
+            return dsproc_set_coordsys_trans_param(b_coordsys_name, b_field_name,
+              b_param_name, cds_type, length, value_nd.data)
+        else:
+            value_nd = np.asarray(byte_value)
+            return dsproc_set_coordsys_trans_param(b_coordsys_name, b_field_name,
+               b_param_name, cds_type, length, value_nd.data)
+
+    value_nd = np.asarray(value, cds_type_to_dtype_obj(cds_type))
+    if value_nd.ndim == 0:
+        value_nd = value_nd[None] # add dummy dimension to a scalar value
+    assert value_nd.ndim == 1
+    length = len(value_nd)
+
+    return dsproc_set_coordsys_trans_param(b_coordsys_name, b_field_name,
+            b_param_name, cds_type, length, value_nd.data)
+
+def delete_group(cds3.core.Group dataset):
+    """Delete a dataset.
+    
+    Parameters
+    ----------
+    dataset : cds3.core.Group
+        Pointer to the dataset
+    
+    Returns
+    -------
+    - 1 if successful
+    - 0 if the group is locked or parent group is locked
+
+    """
+    return cds_delete_group(dataset.c_ob)
 
 def _ingest_main_loop():
     cdef int       ndsid

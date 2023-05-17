@@ -8,19 +8,19 @@ Important:
     only need to override the hook methods that are required for your
     process.
 -----------------------------------------------------------------------"""
-import warnings
-
 import numpy as np
 import os
 import re
 import sys
+import warnings
 import xarray as xr
 from time import gmtime, strftime
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Union, Optional
 
 from .constants import ADIDatasetType, ADIAtts, SpecialXrAttributes, SplitMode, TransformAttributes
 from .logger import ADILogger
-from .utils import get_dataset_id, get_xr_dataset, sync_xr_dataset, get_datastream_files, adi_hook_exception_handler
+from .utils import get_datastream_id, get_xr_datasets, sync_xr_dataset, get_datastream_files, adi_hook_exception_handler, \
+    DatastreamIdentifier
 
 try:
     import dsproc3 as dsproc
@@ -159,59 +159,295 @@ class Process:
         return dsproc.get_facility()
 
     @staticmethod
-    def get_retrieved_dataset(input_datastream_name: str) -> Union[xr.Dataset, List[xr.Dataset]]:
+    def get_dsid(datastream_name: str, site: str = None, facility: str = None,
+                 dataset_type: ADIDatasetType = None) -> Optional[int]:
         """-----------------------------------------------------------------------
-        Get an ADI retrieved dataset converted to an xarray.Dataset.
+        Gets the corresponding dataset id for the given datastream (input or output)
+
+        Args:
+            datastream_name (str):  The name of the datastream to find
+
+            site (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Site is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by site.
+
+            facility (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Facility is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by facility.
+
+            dataset_type (ADIDatasetType):
+                The type of the dataset to convert (RETRIEVED, TRANSFORMED, OUTPUT)
+
+        Returns:
+            Optional[int]: The dataset id or None if not found
+        -----------------------------------------------------------------------"""
+        return get_datastream_id(datastream_name, site=site, facility=facility, dataset_type=dataset_type)
+
+    @staticmethod
+    def get_retrieved_dataset(
+        input_datastream_name: str,
+        site: Optional[str] = None,
+        facility: Optional[str] = None,
+    ) -> Optional[xr.Dataset]: 
+        """-----------------------------------------------------------------------
+        Get an ADI retrieved dataset converted to an xr.Dataset.
+
+        Note: This method will return at most a single xr.Dataset. If you expect
+        multiple datasets, or would like to handle cases where multiple dataset files
+        may be retrieved, please use the `Process.get_retrieved_datasets()` function.
 
         Args:
             input_datastream_name (str):
                 The name of one of the process' input datastreams as specified in the PCM.
 
+            site (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Site is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by site.
+
+            facility (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Facility is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by facility.
+
         Returns:
-            Union[xr.Dataset,  List[xr.Dataset]]:  Most of the time, return a single xr.Dataset.
-            If the process is using file-based processing or if there are multiple
-            files for the same datastream and a dimensionality conflict prevented the files
-            from being merged, then return a List[XArray.Dataset], one for each file.
+            xr.Dataset | None: Returns a single xr.Dataset, or None if no retrieved datasets
+                exist for the specified datastream / site / facility.
         -----------------------------------------------------------------------"""
-        return get_xr_dataset(ADIDatasetType.RETRIEVED, input_datastream_name)
+        datasets = Process.get_retrieved_datasets(
+            input_datastream_name=input_datastream_name,
+            site=site,
+            facility=facility,
+        )
+        datasets = get_xr_datasets(
+            ADIDatasetType.RETRIEVED,
+            datastream_name=input_datastream_name,
+            site=site,
+            facility=facility,
+        )
+        if not datasets:
+            return None
+        if len(datasets) > 1:
+            raise Exception(f'Datastream "{input_datastream_name}" contains more than one observation (i.e., file)'
+                            f' of data.  Please use the  get_retrieved_datasets() method to get the full list of Xarray'
+                            f' datasets (one for each file).')
+        return datasets[0]
 
     @staticmethod
-    def get_transformed_dataset(input_datastream_name: str,
-                                coordinate_system_name: str) -> Union[xr.Dataset, List[xr.Dataset]]:
+    def get_retrieved_datasets(
+        input_datastream_name: str,
+        site: Optional[str] = None,
+        facility: Optional[str] = None,
+    ) -> List[xr.Dataset]:
         """-----------------------------------------------------------------------
-        Get an ADI transformed dataset converted to an xarray.Dataset.
+        Get the ADI retrieved datasets converted to a list of xarray Datasets.
 
         Args:
-            input_datastream_name (str):  The name of one of the process' input
-                datastreams as specified in the PCM.
+            input_datastream_name (str):
+                The name of one of the process' input datastreams as specified in the PCM.
 
-            coordsys_name (str):  A coordinate system specified in the PCM or None
-                if no coordinate system was specified.
+            site (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Site is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by site.
+
+            facility (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Facility is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by facility.
 
         Returns:
-            Union[xr.Dataset,  List[xr.Dataset]]:  Most of the time, return a single xr.Dataset.
-            If the process is using file-based processing or if there are multiple
-            files for the same datastream and a dimensionality conflict prevented the files
-            from being merged, then return a List[XArray.Dataset], one for each file.
+            List[xr.Dataset]: Returns a list of xr.Datasets. If no retrieved datasets
+                exist for the specified datastream / site / facility / coord system
+                then the list will be empty.
         -----------------------------------------------------------------------"""
-        return get_xr_dataset(ADIDatasetType.TRANSFORMED, input_datastream_name, coordinate_system_name)
+        return get_xr_datasets(
+            ADIDatasetType.RETRIEVED,
+            datastream_name=input_datastream_name,
+            site=site,
+            facility=facility,
+        )
 
     @staticmethod
-    def get_output_dataset(output_datastream_name: str) -> Union[xr.Dataset, List[xr.Dataset]]:
+    def get_retrieved_dataset_by_dsid(dsid: int) -> Optional[xr.Dataset]:
+        datasets = get_xr_datasets(ADIDatasetType.RETRIEVED, dsid=dsid)
+        if not datasets:
+            return None
+        if len(datasets) > 1:
+            raise Exception(f'Datastream "{dsid}" contains more than one observation (i.e., file) of data.  '
+                            f'Please use the get_retrieved_datasets_by_dsid() method to get the full list of Xarray'
+                            f' datasets (one for each file).')
+        return datasets[0]
+    
+    @staticmethod
+    def get_retrieved_datasets_by_dsid(dsid: int) -> List[xr.Dataset]:
+        return get_xr_datasets(ADIDatasetType.RETRIEVED, dsid=dsid)
+
+    @staticmethod
+    def get_transformed_dataset(
+        input_datastream_name: str,
+        coordinate_system_name: str,
+        site: Optional[str] = None,
+        facility: Optional[str] = None,
+    ) -> Optional[xr.Dataset]: 
         """-----------------------------------------------------------------------
-        Get an ADI output dataset converted to an xarray.Dataset.
+        Get an ADI transformed dataset converted to an xr.Dataset.
+
+        Note: This method will return at most a single xr.Dataset. If you expect
+        multiple datasets, or would like to handle cases where multiple dataset files
+        may be retrieved, please use the `Process.get_retrieved_datasets()` function.
+
+        Args:
+            input_datastream_name (str):
+                The name of one of the process' input datastreams as specified in the PCM.
+
+            coordinate_system_name (str):  
+                A coordinate system specified in the PCM or None if no coordinate system was
+                specified.
+
+            site (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Site is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by site.
+
+            facility (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Facility is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by facility.
+
+        Returns:
+            xr.Dataset | None: Returns a single xr.Dataset, or None if no transformed
+                datasets exist for the specified datastream / site / facility / coord system.
+        -----------------------------------------------------------------------"""
+        datasets = Process.get_transformed_datasets(
+            input_datastream_name=input_datastream_name,
+            coordinate_system_name=coordinate_system_name,
+            site=site,
+            facility=facility,
+        )
+        if not datasets:
+            return None
+        if len(datasets) > 1:
+            raise Exception(f'Datastream "{input_datastream_name}" contains more than one observation (i.e., file)'
+                            f' of data.  Please use the get_transformed_datasets() method to get the full list of Xarray'
+                            f' datasets (one for each file).')
+        return datasets[0]
+
+    @staticmethod
+    def get_transformed_datasets(
+        input_datastream_name: str,
+        coordinate_system_name: str,
+        site: Optional[str] = None,
+        facility: Optional[str] = None,
+    ) -> List[xr.Dataset]: 
+        """-----------------------------------------------------------------------
+        Get an ADI transformed dataset converted to an xr.Dataset.
+
+        Args:
+            input_datastream_name (str):
+                The name of one of the process' input datastreams as specified in the PCM.
+
+            coordinate_system_name (str):  
+                A coordinate system specified in the PCM or None if no coordinate system was
+                specified.
+
+            site (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Site is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by site.
+
+            facility (str):
+                Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+                Facility is only required if the retrieval rules in the PCM specify two different
+                rules for the same datastream that differ by facility.
+
+        Returns:
+            List[xr.Dataset]: Returns a list of xr.Datasets. If no transformed datasets
+                exist for the specified datastream / site / facility / coord system
+                then the list will be empty.
+        -----------------------------------------------------------------------"""
+        return get_xr_datasets(
+            ADIDatasetType.TRANSFORMED,
+            datastream_name=input_datastream_name,
+            coordsys_name=coordinate_system_name,
+            site=site,
+            facility=facility,
+        )
+
+    @staticmethod
+    def get_transformed_dataset_by_dsid(dsid: int, coordinate_system_name: str) -> Optional[xr.Dataset]:
+        datasets = get_xr_datasets(ADIDatasetType.TRANSFORMED, dsid=dsid, coordsys_name=coordinate_system_name)
+        if not datasets:
+            return None
+        if len(datasets) > 1:
+            raise Exception(f'Datastream "{dsid}" contains more than one observation (i.e., file) of data.  '
+                            f'Please use the  get_transformed_datasets_by_dsid() method to get the full list of Xarray'
+                            f' datasets (one for each file).')
+        return datasets[0]
+
+    @staticmethod
+    def get_transformed_datasets_by_dsid(dsid: int, coordinate_system_name: str) -> List[xr.Dataset]:
+        return get_xr_datasets(ADIDatasetType.TRANSFORMED, dsid=dsid, coordsys_name=coordinate_system_name)
+
+    @staticmethod
+    def get_output_dataset(output_datastream_name: str) -> Optional[xr.Dataset]: 
+        """-----------------------------------------------------------------------
+        Get an ADI output dataset converted to an xr.Dataset.
+
+        Note: This method will return at most a single xr.Dataset. If you expect
+        multiple datasets, or would like to handle cases where multiple dataset files
+        may be retrieved, please use the `Process.get_retrieved_datasets()` function.
 
         Args:
             output_datastream_name (str):
                 The name of one of the process' output datastreams as specified in the PCM.
 
         Returns:
-            Union[xr.Dataset,  List[xr.Dataset]]:  Most of the time, return a single xr.Dataset.
-            If the process is using file-based processing or if there are multiple
-            files for the same datastream and a dimensionality conflict prevented the files
-            from being merged, then return a List[XArray.Dataset], one for each file.
+            xr.Dataset | None: Returns a single xr.Dataset, or None if no output
+                datasets exist for the specified datastream / site / facility / coord system.
         -----------------------------------------------------------------------"""
-        return get_xr_dataset(ADIDatasetType.OUTPUT, output_datastream_name)
+        datasets = Process.get_output_datasets(output_datastream_name)
+        if not datasets:
+            return None
+        if len(datasets) > 1:
+            raise Exception(f'Datastream "{output_datastream_name}" contains more than one observation (i.e., file)'
+                            f' of data.  Please use the  get_output_datasets() method to get the full list of Xarray'
+                            f' datasets (one for each file).')
+        return datasets[0]
+
+   
+    @staticmethod
+    def get_output_datasets(output_datastream_name: str) -> List[xr.Dataset]: 
+        """-----------------------------------------------------------------------
+        Get an ADI output dataset converted to an xr.Dataset.
+        
+        Args:
+            output_datastream_name (str):
+                The name of one of the process' output datastreams as specified in the PCM.
+
+        Returns:
+            List[xr.Dataset]: Returns a list of xr.Datasets. If no output datasets
+                exist for the specified datastream / site / facility / coord system
+                then the list will be empty.
+        -----------------------------------------------------------------------"""
+        return get_xr_datasets(ADIDatasetType.OUTPUT, datastream_name=output_datastream_name)
+
+    @staticmethod
+    def get_output_dataset_by_dsid(dsid: int) -> Optional[xr.Dataset]:
+        datasets = get_xr_datasets(ADIDatasetType.OUTPUT,  dsid=dsid)
+        if not datasets:
+            return None
+        if len(datasets) > 1:
+            raise Exception(f'Datastream "{dsid}" contains more than one observation (i.e., file) of data.  '
+                            f'Please use the get_output_datasets_by_dsid() method to get the full list of Xarray'
+                            f' datasets (one for each file).')
+        return datasets[0]
+    
+    @staticmethod
+    def get_output_datasets_by_dsid(dsid: int) -> List[xr.Dataset]:
+        return get_xr_datasets(ADIDatasetType.OUTPUT,  dsid=dsid)
 
     @staticmethod
     def sync_datasets(*args: xr.Dataset):
@@ -247,11 +483,74 @@ class Process:
                 sync_xr_dataset(xr_dataset)
 
     @staticmethod
+    def set_datastream_flags(dsid: int, flags: int):
+        """-----------------------------------------------------------------------
+        Apply a set of ADI control flags to a datastream as identified by the
+        dsid.  Multiple flags can be combined together using a bitwise OR (e.g.,
+        dsproc.DS_STANDARD_QC | dsproc.DS_FILTER_NANS). The allowed flags are
+        identified below:
+
+        - dsproc.DS_STANDARD_QC     = Apply standard QC before storing a dataset.
+    
+        - dsproc.DS_FILTER_NANS     = Replace NaN and Inf values with missing values
+                                      before storing a dataset.
+    
+        - dsproc.DS_OVERLAP_CHECK   = Check for overlap with previously processed data.
+                                      This flag will be ignored and the overlap check
+                                      will be skipped if reprocessing mode is enabled,
+                                      or asynchronous processing mode is enabled.
+    
+        - dsproc.DS_PRESERVE_OBS    = Preserve distinct observations when retrieving
+                                      data. Only observations that start within the
+                                      current processing interval will be read in.
+    
+        - dsproc.DS_DISABLE_MERGE   = Do not merge multiple observations in retrieved
+                                      data. Only data for the current processing interval
+                                      will be read in.
+    
+        - dsproc.DS_SKIP_TRANSFORM  = Skip the transformation logic for all variables
+                                      in this datastream.
+    
+        - dsproc.DS_ROLLUP_TRANS_QC = Consolidate the transformation QC bits for all
+                                      variables when mapped to the output datasets.
+    
+        - dsproc.DS_SCAN_MODE       = Enable scan mode for datastream that are not
+                                      expected to be continuous. This prevents warning
+                                      messages from being generated when data is not
+                                      found within a processing interval. Instead, a
+                                      message will be written to the log file indicating
+                                      that the procesing interval was skipped.
+    
+        - dsproc.DS_OBS_LOOP        = Loop over observations instead of time intervals.
+                                      This also sets the DS_PRESERVE_OBS flag.
+    
+        - dsproc.DS_FILTER_VERSIONED_FILES = Check for files with .v# version extensions
+                                             and filter out lower versioned files. Files
+                                             without a version extension take precedence.
+
+        Call self.get_dsid() to obtain the dsid value for a specific datastream.
+        If the flags value is < 0, then the following default flags will be set:
+        - dsprc.DS_STANDARD_QC              'b' level datastreams
+        - dsproc.DS_FILTER_NANS             'a' and 'b' level datastreams
+        - dsproc.DS_OVERLAP_CHECK           all output datastreams
+        - dsproc.DS_FILTER_VERSIONED_FILES  input datastreams that are not level '0'
+
+        Args:
+            dsid (int):  Datastream ID
+            flags (int): Flags to set
+
+        Returns:
+            int: The processing modelj (see dsproc.ProcModel cdeftype)
+        -----------------------------------------------------------------------"""
+        dsproc.set_datastream_flags(dsid, flags)
+
+    @staticmethod
     def get_datastream_files(datastream_name: str, begin_date: int, end_date: int) -> List[str]:
         """-----------------------------------------------------------------------
         See :func:`.utils.get_datastream_files`
         -----------------------------------------------------------------------"""
-        return get_datastream_files(datastream_name, begin_date, end_date)
+        dsid = get_datastream_id(datastream_name)
+        return get_datastream_files(dsid, begin_date, end_date)
 
     @staticmethod
     def get_nsamples(xr_var: xr.DataArray) -> int:
@@ -628,13 +927,13 @@ class Process:
         return xr_var
 
     @staticmethod
-    def find_retrieved_variable(retrieved_variable_name) -> str:
+    def find_retrieved_variable(retrieved_variable_name) -> Optional[DatastreamIdentifier]:
         """-----------------------------------------------------------------------
-        Find the input datastream name where the given retrieved variable came
+        Find the input datastream where the given retrieved variable came
         from.  We may need this if there are complex retrieval rules and the
         given variable may be retrieved from different datastreams depending
         upon the site/facility where this process runs.  We need to get the
-        datastream name so we can load the correct xarray dataset if we need
+        DatastreamIdentifier so we can load the correct xarray dataset if we need
         to modify the data values.
 
         Args:
@@ -642,18 +941,22 @@ class Process:
                 find
 
         Returns:
-            The name of the datastream that contains this retrieved variable's
-            data or None if the retrieved variable was not found in any datastreams.
+            A DatastreamIdentifier containing all the information needed to look
+            up the given dataset or None if the retrieved variable was not found.
         -----------------------------------------------------------------------"""
-        datastream_name = None
+
         adi_var = dsproc.get_retrieved_var(retrieved_variable_name, 0)
         if adi_var is not None:
             dsid = dsproc.get_source_ds_id(adi_var)
             level = dsproc.datastream_class_level(dsid)
             cls = dsproc.datastream_class_name(dsid)
             datastream_name = f"{cls}.{level}"
+            site = dsproc.datastream_site(dsid)
+            fac = dsproc.datastream_facility(dsid)
 
-        return datastream_name
+            return DatastreamIdentifier(datastream_name=datastream_name, site=site, facility=fac, dsid=dsid)
+
+        return None
 
     @staticmethod
     def add_qc_variable(dataset: xr.Dataset, variable_name: str):
@@ -863,7 +1166,7 @@ class Process:
             variable_name_in_datastream = variable.name
         output_targets = variable.attrs.get(SpecialXrAttributes.OUPUT_TARGETS)
         output_targets = {} if output_targets is None else output_targets
-        dsid = get_dataset_id(output_datastream_name)
+        dsid = get_datastream_id(output_datastream_name)
         output_targets[dsid] = variable_name_in_datastream
 
         variable.attrs[SpecialXrAttributes.OUPUT_TARGETS] = output_targets
@@ -911,7 +1214,7 @@ class Process:
             split_interval (int): Depends on the split_mode selected
 
         -----------------------------------------------------------------------"""
-        dsid = get_dataset_id(output_datastream_name)
+        dsid = get_datastream_id(output_datastream_name)
         dsproc.set_datastream_split_mode(dsid, split_mode.value, split_start, split_interval)
 
     @staticmethod
@@ -933,7 +1236,7 @@ class Process:
                 ends
 
         -----------------------------------------------------------------------"""
-        dsid = get_dataset_id(input_datastream_name)
+        dsid = get_datastream_id(input_datastream_name)
         dsproc.set_retriever_time_offsets(dsid, begin_offset, end_offset)
 
     @staticmethod
@@ -964,7 +1267,7 @@ class Process:
             hours (int): Number of hours to shift
 
         -----------------------------------------------------------------------"""
-        dsid = get_dataset_id(output_datastream_name)
+        dsid = get_datastream_id(output_datastream_name)
         dsproc.set_datastream_split_tz_offset(dsid, hours)
 
     def _internal_init_process_hook(self):

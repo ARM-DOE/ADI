@@ -64,6 +64,16 @@ cdef extern from "dsproc3.h" nogil:
     char *dsproc_datastream_class_level(int ds_id)
     char *dsproc_datastream_path(int ds_id)
 
+    int  dsproc_getopt(
+               const char *option, 
+               const char **value) 
+      
+    int  dsproc_setopt(
+               const char short_opt, 
+               const char *long_opt, 
+               const char *arg_name, 
+               const char *opt_desc) 
+
     void dsproc_use_nc_extension()
 
     void dsproc_disable_lock_file()
@@ -412,6 +422,11 @@ cdef extern from "dsproc3.h" nogil:
                 int          npatterns,
                 char **patterns,
                 int          ignore_case)
+
+    int     dsproc_set_file_name_time_patterns(
+                int          ds_id,
+                int          npatterns,
+                char **patterns)
     
     void    dsproc_set_datastream_file_extension(
                 int   ds_id,
@@ -550,6 +565,9 @@ cdef extern from "dsproc3_internal.h" nogil:
     char *dsproc_get_type()
     char *dsproc_get_version()
     int dsproc_get_force_mode()
+
+    unsigned int dsproc_get_missing_value_bit_flag(int bit_ndescs, const char **bit_descs)
+    int dsproc_get_qc_bit_descriptions(CDSVar *qc_var, const char ***bit_descs)
     
     time_t      dsproc_get_max_run_time()
     time_t      dsproc_get_start_time()
@@ -743,6 +761,14 @@ cdef extern from "dsproc3_internal.h" nogil:
             char *facility,
             char *name,
             char *level)
+
+    int     dsproc_set_coordsys_trans_param(
+                char        *coordsys_name,
+                char        *field_name,
+                char        *param_name,
+                CDSDataType type,
+                size_t      length,
+                void        *value)
 
     int dsproc_fetch_dataset(
             int       ds_id,

@@ -76,6 +76,8 @@ cdef inline int cds_type_to_dtype(CDSDataType cds_type) except -1:
         return np.NPY_SHORT
     elif cds_type == CDS_INT:
         return np.NPY_INT
+    elif cds_type == CDS_INT64:
+        return np.NPY_INT64
     elif cds_type == CDS_FLOAT:
         return np.NPY_FLOAT
     elif cds_type == CDS_DOUBLE:
@@ -95,6 +97,8 @@ cdef inline np.dtype cds_type_to_dtype_obj(CDSDataType cds_type):
         return np.dtype(np.int16)
     elif cds_type == CDS_INT:
         return np.dtype(np.int32)
+    elif cds_type == CDS_INT64:
+        return np.dtype(np.int64)
     elif cds_type == CDS_FLOAT:
         return np.dtype(np.float32)
     elif cds_type == CDS_DOUBLE:
@@ -1461,7 +1465,45 @@ cdef class Var(Object):
     def get_alloc_count(self):
         return self.c_ob.alloc_count
 
+    def get_default_fill_value(self):
+        """
+        Get the default fill value used by the NetCDF library.
+        """
+        # Initialize a character array of 16 bytes to store the value
+        cdef char fill_value_arr[16]
+        cdef CDSDataType cds_type = self.c_ob.type
+        cds_get_default_fill_value(cds_type, <void *>fill_value_arr)
+
+        fill_value = None
+
+        if cds_type == CDS_NAT:
+            raise ValueError("CDS_NAT")
+        elif cds_type == CDS_CHAR:
+            fill_value = (<char*>fill_value_arr)[0]
+        elif cds_type == CDS_BYTE:
+            fill_value = (<signed char*>fill_value_arr)[0]
+        elif cds_type == CDS_SHORT:
+            fill_value = (<short*>fill_value_arr)[0]
+        elif cds_type == CDS_INT:
+            fill_value = (<int*>fill_value_arr)[0]
+        elif cds_type == CDS_INT64:
+            fill_value = (<long long*>fill_value_arr)[0]
+        elif cds_type == CDS_FLOAT:
+            fill_value = (<float*>fill_value_arr)[0]
+        elif cds_type == CDS_DOUBLE:
+            fill_value = (<double*>fill_value_arr)[0]
+        else:
+            raise ValueError("Unknown CDSDataType %s" % cds_type)
+
+        return fill_value
+
     def get_default_fill(self):
+        """
+        I don't think this method works - it always returns NULL.  I don't think self.c_ob.default_fill
+        was ever obtained.  Use get_default_fill_value() instead.
+
+        TODO:  DELETE ME
+        """
         cdef void *fill_ptr = self.c_ob.default_fill
         cdef CDSDataType cds_type = self.c_ob.type
         if fill_ptr == NULL:
@@ -1476,6 +1518,8 @@ cdef class Var(Object):
             return (<short*>fill_ptr)[0]
         elif cds_type == CDS_INT:
             return (<int*>fill_ptr)[0]
+        elif cds_type == CDS_INT64:
+            return (<long long*>fill_ptr)[0]
         elif cds_type == CDS_FLOAT:
             return (<float*>fill_ptr)[0]
         elif cds_type == CDS_DOUBLE:
@@ -1830,6 +1874,7 @@ cdef class Var(Object):
         cdef signed char missing_signed_char
         cdef short missing_short
         cdef int missing_int
+        cdef long long missing_long
         cdef float missing_float
         cdef double missing_double
         cdef object missing_py
@@ -1843,6 +1888,8 @@ cdef class Var(Object):
             missing_ptr = &missing_short
         elif cds_type == CDS_INT:
             missing_ptr = &missing_int
+        elif cds_type == CDS_INT64:
+            missing_ptr = &missing_long
         elif cds_type == CDS_FLOAT:
             missing_ptr = &missing_float
         elif cds_type == CDS_DOUBLE:
@@ -1872,6 +1919,8 @@ cdef class Var(Object):
             missing_py = missing_short
         elif cds_type == CDS_INT:
             missing_py = missing_int
+        elif cds_type == CDS_INT64:
+            missing_py = missing_long
         elif cds_type == CDS_FLOAT:
             missing_py = missing_float
         elif cds_type == CDS_DOUBLE:
@@ -1879,6 +1928,14 @@ cdef class Var(Object):
         else:
             raise ValueError("Unknown CDSDataType")
         return array,missing_py
+
+    def attach_data(self, unsigned long datap, size_t sample_count):
+        self.c_ob.data.vp = <void*> datap
+        self.c_ob.sample_count = sample_count
+
+    def detach_data(self):
+        self.c_ob.data.vp = NULL
+        self.c_ob.sample_count = 0
 
     cpdef np.ndarray get_datap(self, size_t sample_start=0):
         """Get an ndarray for the the data in a CDS variable.
@@ -2018,6 +2075,88 @@ cdef class VarArray(Object):
     def __dealloc__(self):
         pass
 
+
+def set_front_edge_param(Group group, object dim_name, size_t length, np.ndarray data_nd):
+    """-----------------------------------------------------------------------------------------------------------------
+    Set the front_edge transform parameter.  Use this method in conjunction with a bounds variable.  Front edge
+    represents the first column in the 2-column bounds array for a coordinate variable.  This is used for bin
+    averaging.
+
+    Parameters
+    ----------
+    group : Group
+        If you are setting bounds on an input dataset, then you should pass the obs group.  If you are setting bounds
+        on the output transformed dataset, then you need to pass the coordinate system group.
+    dim_name : str
+        The name of the dimension the bounds belong to.
+    length :
+        The length of the 1-d data array
+
+    data_nd : np.ndarray
+        The data array as a numpy ndarray.  Data type MUST be double/float.
+
+    Returns
+    -------
+     -  1 if successful
+     -  0 if an error occurred
+    -----------------------------------------------------------------------------------------------------------------"""
+
+    cdef object b_dim_name = _to_byte_c_string(dim_name)  # convert to C string
+    cdef CDSGroup *cds_group = group.c_ob # Get underlying C pointer
+    cds_set_transform_param(cds_group, b_dim_name, "front_edge", CDS_DOUBLE, length, data_nd.data)
+
+
+def set_back_edge_param(Group group, object dim_name, size_t length, np.ndarray data_nd):
+    cdef object b_dim_name = _to_byte_c_string(dim_name)  # convert to C string
+    cdef CDSGroup *cds_group = group.c_ob # Get underlying C pointer
+    cds_set_transform_param(cds_group, b_dim_name, "back_edge", CDS_DOUBLE, length, data_nd.data)
+
+
+def parse_transform_params(Group group, object string):
+    """-----------------------------------------------------------------------------------------------------------------
+    Parse a text string containing transformation parameters and apply the transform parameters to the provided
+    group object.  Groups should be one of two types:
+
+    1) Coordinate System
+    2) Input Datastream
+
+    The string of parameters has to match the type of group you are using.  If you are setting coordinate system
+    parameters, the string should have this format:
+
+        "
+        range:transform = TRANS_PASSTHROUGH;
+        ceil_backscatter:time:transform = TRANS_PASSTHROUGH;
+        time:width = 300;
+        "
+
+        Coordinate system parameters are either set on a coordinate dimension (e.g., time, range) or they can be
+        overridden for a specific variable and dimension (e.g., ceil_backscatter:time)
+
+    If you are setting input datastream parameters, the string should have this format:
+        "
+        time:range = 600;
+        "
+
+    Note that some transform parameters (like range) are set on input datastreams, and others (like transform type or
+    bin width) are set on coordinate systems.  You have to make sure the right parameters get passed for each type
+    of object.
+
+    Parameters
+    ----------
+    parent : cds3.core.Group
+        Pointer to the CDSGroup you will apply the transform parameters to (either a coordinate system or input datastream)
+    string : object
+        text string containing the transformation params
+
+    Returns
+    -------
+     -  1 if successful
+     -  0 if an error occurred
+    -----------------------------------------------------------------------------------------------------------------"""
+
+    cdef object byte_string = _to_byte_c_string(string)      # Convert python string to c string
+    cdef CDSGroup *cds_group = group.c_ob                    # Get underlying C pointer
+    return cds_parse_transform_params(cds_group, byte_string, NULL)
 
 def print_all(object file_like, Group group, int flags):
     cdef FILE *fp

@@ -25,7 +25,7 @@ class ADILogger:
 
     @staticmethod
     def error(message):
-        dsproc.error(message)
+        dsproc.error(message, None)
 
     @staticmethod
     def exception(message):

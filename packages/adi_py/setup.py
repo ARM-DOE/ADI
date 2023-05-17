@@ -37,9 +37,14 @@ dsproc3_incdirs = pkgconfig("dsproc3", '--cflags-only-I')
 dsproc3_libdirs = pkgconfig("dsproc3", '--libs-only-L')
 dsproc3_libs    = pkgconfig("dsproc3", '--libs-only-l')
 
+trans_incdirs = pkgconfig("trans", '--cflags-only-I')
+trans_libdirs = pkgconfig("trans", '--libs-only-L')
+trans_libs    = pkgconfig("trans", '--libs-only-l')
+
 numpy_incdir = numpy.get_include()
 cds3_incdirs.append(numpy_incdir)
 dsproc3_incdirs.append(numpy_incdir)
+trans_incdirs.append(numpy_incdir)
 
 # Extension Modules
 
@@ -79,12 +84,21 @@ dsproc3_enums = Extension(
     runtime_library_dirs = dsproc3_libdirs
 )
 
+trans = Extension(
+    name            = 'trans.core',
+    sources         = ['trans/core.pyx'],
+    include_dirs    = trans_incdirs,
+    library_dirs    = trans_libdirs,
+    libraries       = trans_libs,
+    runtime_library_dirs = trans_libdirs
+)
+
 # Setup
 
 setup(
     name        = name,
     version     = version,
-    ext_modules = cythonize([cds3,cds3_enums,dsproc3,dsproc3_enums]),
-    packages    = ['cds3', 'dsproc3', 'adi_py']
+    ext_modules = cythonize([cds3,cds3_enums,dsproc3,dsproc3_enums, trans]),
+    packages    = ['cds3', 'dsproc3', 'trans', 'adi_py']
 )
 

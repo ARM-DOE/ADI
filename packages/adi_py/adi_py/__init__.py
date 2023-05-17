@@ -14,6 +14,8 @@ from .constants import (
 
 from .process import Process
 
+from .utils import DatastreamIdentifier
+
 from .xarray_accessors import ADIDatasetAccessor, ADIDataArrayAccessor
 
 from .exception import SkipProcessingIntervalException

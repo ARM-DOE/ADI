@@ -6,7 +6,7 @@ to be called directly by developers when implementing a specific Process subclas
 ---------------------------------------------------------------------------"""
 import itertools
 import os
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -17,6 +17,17 @@ import dsproc3 as dsproc
 from .constants import SpecialXrAttributes, ADIAtts, ADIDatasetType
 from .exception import SkipProcessingIntervalException
 from .logger import ADILogger
+
+
+class DatastreamIdentifier(NamedTuple):
+    """-----------------------------------------------------------------------
+    NamedTuple class that holds various information used to identify a specific
+    ADI dataset.
+    -----------------------------------------------------------------------"""
+    datastream_name: str
+    site: str
+    facility: str
+    dsid: int
 
 
 def is_empty_function(func: Callable) -> bool:
@@ -109,31 +120,66 @@ def adi_hook_exception_handler(hook_func: Callable,
     return wrapper_function
 
 
-def get_dataset_id(datastream_name: str) -> Optional[int]:
+def get_datastream_id(datastream_name: str, site: str = None, facility: str = None,
+                   dataset_type: ADIDatasetType = None) -> Optional[int]:
     """-----------------------------------------------------------------------
     Gets the corresponding dataset id for the given datastream (input or output)
 
     Args:
         datastream_name (str):  The name of the datastream to find
 
+        site (str):
+            Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+            Site is only required if the retrieval rules in the PCM specify two different
+            rules for the same datastream that differ by site.
+
+        facility (str):
+            Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+            Facility is only required if the retrieval rules in the PCM specify two different
+            rules for the same datastream that differ by facility.
+
+        dataset_type (ADIDatasetType):
+            The type of the dataset to convert (RETRIEVED, TRANSFORMED, OUTPUT)
+
     Returns:
         Optional[int]: The dataset id or None if not found
     -----------------------------------------------------------------------"""
 
     def find_datastream_dsid(dsids):
+
         for id in dsids:
             level = dsproc.datastream_class_level(id)
             cls = dsproc.datastream_class_name(id)
+
             if datastream_name == f"{cls}.{level}":
-                return int(id)
+                match = True
+
+                if site:
+                    datastream_site = dsproc.datastream_site(id)
+                    if datastream_site != site.lower():
+                        match = False
+
+                if facility:
+                    datastream_fac = dsproc.datastream_facility(id)
+                    if datastream_fac != facility.upper():
+                        match = False
+
+                if match:
+                    return int(id)
 
         return None
 
-    # First see if this is an input datastream
-    dsid = find_datastream_dsid(dsproc.get_input_datastream_ids())
+    if dataset_type == ADIDatasetType.RETRIEVED or dataset_type == ADIDatasetType.TRANSFORMED:
+        dsid = find_datastream_dsid(dsproc.get_input_datastream_ids())
 
-    if dsid is None:
+    elif dataset_type == ADIDatasetType.OUTPUT:
         dsid = find_datastream_dsid(dsproc.get_output_datastream_ids())
+
+    else:
+        dsid = find_datastream_dsid(dsproc.get_input_datastream_ids())
+
+        if dsid is None:
+            dsid = find_datastream_dsid(dsproc.get_output_datastream_ids())
 
     return dsid
 
@@ -191,10 +237,12 @@ def get_empty_ndarray_for_var(adi_var: cds3.Var, attrs: Dict = None) -> np.ndarr
     with the appropriate fill value.  The rules for selecting a fill value
     are as follows:
 
-        - If this is a qc variable, 0 will be used
+        - If this is a qc variable, the missing value bit flag will be used.  If no missing value bit, then the failed
+          transformation bit flag will be used.  If no transformation failed bit, then use _FillValue.  If no _FillValue,
+          then use the netcdf default fill value for integer data type.
         - Else if a missing_value attribute is available, missing_value will be used
         - Else if a _FillValue attribute is available, _FillValue will be used
-        - Else numpy.NaN will be used
+        - Else use the netcdf default fill value for the variable's data type
 
     Args:
         adi_var (cds3.Var): The ADI variable object
@@ -213,22 +261,51 @@ def get_empty_ndarray_for_var(adi_var: cds3.Var, attrs: Dict = None) -> np.ndarr
     # Create a data array for this variable with empty values.
     fill_value = None
 
+    # Look up the _FillValue attribute
+    _fill_value = attrs.get(ADIAtts.FILL_VALUE)
+
     # Figure out the fill value to use based upon the var's metadata
     missing_values = dsproc.get_var_missing_values(adi_var)
 
     if adi_var.get_name().startswith('qc_'):
-        # If this is a qc_ var, then we will use 0 for the fill value
-        fill_value = 0
+        # If this is a qc_ var, then first call dsproc_get_missing_value_bit_flag to see if there is a missing value
+        # bit set.
+        # dsproc.get_missing_value_bit_flag() will find a match if the bit description matches the value used in the
+        # current DOD ingest template as well as common permutations.
+        bit_descriptions = dsproc.get_qc_bit_descriptions(adi_var)
+        missing_flag = dsproc.get_missing_value_bit_flag(bit_descriptions)
+        if missing_flag > 0:
+            fill_value = missing_flag
+
+        else:
+            # If not, then we check to see if the bit 1 description contains missing value descriptions found in other
+            # DOD templates
+            if len(bit_descriptions) > 0 and 'Transformation could not finish' in bit_descriptions[0]:
+                # "Transformation could not finish" is found in VAP DOD template
+                fill_value = 1
+
+            elif len(bit_descriptions) > 0 and 'Data value not available' in bit_descriptions[0]:
+                # "Datat value not available" was used in old Ingest DOD template
+                fill_value = 1
+
+            elif _fill_value:
+                # If there is no missing value bit or transformation failed bit, then we will use the fill value attr
+                # if it exists.
+                fill_value = _fill_value
+
+            else:
+                # Get the default NetCDF4 fill value for this data type
+                fill_value = adi_var.get_default_fill_value()
 
     elif missing_values and len(missing_values) > 0:
         fill_value = missing_values[0]
 
+    elif _fill_value:
+        fill_value = _fill_value
+
     else:
-        _fill_value = attrs.get(ADIAtts.FILL_VALUE)
-        if _fill_value:
-            fill_value = _fill_value
-        else:
-            fill_value = np.NaN
+        # Get the default NetCDF4 fill value for this data type
+        fill_value = adi_var.get_default_fill_value()
 
     # Get the np dtype for the variable
     dtype = dsproc.cds_type_to_dtype_obj(adi_var.get_type())
@@ -275,10 +352,10 @@ def get_adi_var_as_dict(adi_var: cds3.Var) -> Dict:
         in the XArray.DataArray constructor to initialize a corresponding
         XArray variable.
     -----------------------------------------------------------------------"""
-    # Get the variable dimensions
+    # Get the variable's dimensions
     dims = [dim.get_name() for dim in adi_var.get_dims()]
 
-    # Get all the variable attributes
+    # Get the variable's attributes
     adi_atts: List[cds3.Att] = adi_var.get_atts()
     attrs = {att.get_name(): dsproc.get_att_value(adi_var, att.get_name(), att.get_type()) for att in adi_atts}
 
@@ -305,6 +382,32 @@ def get_adi_var_as_dict(adi_var: cds3.Var) -> Dict:
     }
 
 
+def get_dataset_dims(adi_dataset: cds3.Group) -> List[cds3.Dim]:
+    # Loop through parent groups to pull dims, and vars that may be associated with parent coord system group
+    adi_dims = []
+    group: cds3.Group = adi_dataset
+    while group:
+        group_dims = group.get_dims()
+        for dim in group_dims:
+            adi_dims.append(dim)
+        group = group.get_parent()
+
+    return adi_dims
+
+
+def get_dataset_vars(adi_dataset: cds3.Group) -> List[cds3.Var]:
+    # Loop through parent groups to pull dims, and vars that may be associated with parent coord system group
+    adi_vars = []
+    group: cds3.Group = adi_dataset
+    while group:
+        group_vars = group.get_vars()
+        for var in group_vars:
+            adi_vars.append(var)
+
+        group = group.get_parent()
+    return adi_vars
+
+
 def to_xarray(adi_dataset: cds3.Group) -> xr.Dataset:
     """-----------------------------------------------------------------------
     Convert the specified CDS.Group into an XArray dataset.
@@ -322,8 +425,12 @@ def to_xarray(adi_dataset: cds3.Group) -> xr.Dataset:
     adi_atts: List[cds3.Att] = adi_dataset.get_atts()
     attrs = {att.get_name(): dsproc.get_att_value(adi_dataset, att.get_name(), att.get_type()) for att in adi_atts}
 
-    # Get dims
-    adi_dims = adi_dataset.get_dims()
+    # Loop through parent groups to pull dims, coordinate variables, and bounds vars that may be
+    # associated with parent coord system group
+    adi_dims = get_dataset_dims(adi_dataset)
+    adi_vars = get_dataset_vars(adi_dataset)
+
+    # Convert adi dims to dictionary
     dims = {dim.get_name(): dim.get_length() for dim in adi_dims}
 
     # Find the coordinate variable names
@@ -336,7 +443,7 @@ def to_xarray(adi_dataset: cds3.Group) -> xr.Dataset:
     # Get coordinate & data variables
     coords = {}
     data_vars = {}
-    for adi_var in adi_dataset.get_vars():
+    for adi_var in adi_vars:
         var_name = adi_var.get_name()
         var_as_dict = get_adi_var_as_dict(adi_var)
         if var_name in coord_var_names:
@@ -470,7 +577,8 @@ def _sync_dims(xr_dims: Dict, adi_dataset: cds3.Group):
     -----------------------------------------------------------------------"""
 
     # key is dimension name, value is cds3.Dim object
-    adi_dims = {dim.get_name(): dim for dim in adi_dataset.get_dims()}
+    adi_dim_objs: List[cds3.Dim] = get_dataset_dims(adi_dataset)
+    adi_dims = {dim.get_name(): dim for dim in adi_dim_objs}
 
     # Check if dimension needs to be deleted from ADI dataset
     deleted_dims = [dim_name for dim_name in adi_dims if dim_name not in xr_dims]
@@ -565,8 +673,7 @@ def _set_time_variable_data_if_needed(xr_var: xr.DataArray, adi_var: cds3.Var):
         adi_var.delete_data()
 
         # Set the timevals in seconds in ADI
-        sample_count = xr_var.sizes[xr_var.dims[0]]
-        dsproc.set_sample_timevals(adi_var, 0, sample_count, timevals)
+        dsproc.set_sample_timevals(adi_var, 0, timevals)
 
 
 def _set_adi_variable_data(xr_var: xr.DataArray, adi_var: cds3.Var):
@@ -615,7 +722,8 @@ def _sync_vars(xr_dataset: xr.Dataset, adi_dataset: cds3.Group):
             The ADI group where changes will be applied
 
     -----------------------------------------------------------------------"""
-    adi_vars = {var.get_name() for var in adi_dataset.get_vars()}
+    adi_var_objs = get_dataset_vars(adi_dataset)
+    adi_vars = {var.get_name() for var in adi_var_objs}
     xr_vars = {var_name for var_name in xr_dataset.variables}
 
     # First remove deleted vars from the dataset
@@ -635,6 +743,13 @@ def _sync_vars(xr_dataset: xr.Dataset, adi_dataset: cds3.Group):
     for var_name in other_vars:
         xr_var: xr.DataArray = xr_dataset.get(var_name)
         adi_var: cds3.Var = dsproc.get_var(adi_dataset, var_name)
+
+        if adi_var is None:
+            # adi_var may be None only for coordinate variables of transformed datasets, since the coordinate vars
+            # are stored on the parent Group in adi.  Users should never be changing the coordinate variables on
+            # transformed datasets, so we are skipping these.
+            ADILogger.info(f'Not syncing coordinate variable {var_name} in transformed dataset {adi_dataset.get_name()} because it comes from the parent coordinate system dataset.')
+            continue
 
         # Check if dims have changed
         adi_dims: List[str] = adi_var.get_dim_names()
@@ -691,13 +806,24 @@ def sync_xarray(xr_dataset: xr.Dataset, adi_dataset: cds3.Group):
     _sync_vars(xr_dataset, adi_dataset)
 
 
-def get_xr_dataset(dataset_type: ADIDatasetType, datastream_name: str, coordsys_name: str = None) -> Union[xr.Dataset,  List[xr.Dataset]]:
+def get_xr_datasets(
+    dataset_type: ADIDatasetType,
+    dsid: Optional[int] = None,
+    datastream_name: Optional[str] = None,
+    site: Optional[str] = None,
+    facility: Optional[str] = None,
+    coordsys_name: Optional[str] = None
+) -> List[xr.Dataset]:
     """-----------------------------------------------------------------------
     Get an ADI dataset converted to an xarray.Dataset.
 
     Args:
         dataset_type (ADIDatasetType):
             The type of the dataset to convert (RETRIEVED, TRANSFORMED, OUTPUT)
+
+        dsid (int):
+            If the dsid is known, you can use it to look up the adi dataset.  If it is not known,
+            then use datastream_name, and optionally site/facility to identify the dataset.
 
         datastream_name (str):
             The name of one of the process' datastreams as specified in the PCM.
@@ -706,15 +832,25 @@ def get_xr_dataset(dataset_type: ADIDatasetType, datastream_name: str, coordsys_
             Optional parameter used only to find TRANSFORMED datasets.  Must be a coordinate
             system specified in the PCM or None if no coordinate system was specified.
 
-    Returns:
-        Union[xr.Dataset,  List[xr.Dataset]]:  Most of the time, return a single xr.Dataset.
-        If the process is using file-based processing or if there are multiple
-        files for the same datastream and a dimensionality conflict prevented the files
-        from being merged, then return a List[XArray.Dataset], one for each file.
-    -----------------------------------------------------------------------"""
-    datasets = []
+        site (str):
+            Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+            Site is only required if the retrieval rules in the PCM specify two different
+            rules for the same datastream that differ by site.
 
-    dsid = get_dataset_id(datastream_name)
+        facility (str):
+            Optional parameter used only to find some input datasets (RETRIEVED or TRANSFORMED).
+            Facility is only required if the retrieval rules in the PCM specify two different
+            rules for the same datastream that differ by facility.
+
+    Returns:
+        List[xr.Dataset]: Returns a list of xr.Datasets, one for each file. If there are
+            no files / datasets for the specified datastream / site / facility / coord system
+            then the list will be empty.
+    -----------------------------------------------------------------------"""
+    datasets: List[xr.Dataset] = []
+    if dsid is None:
+        dsid = get_datastream_id(datastream_name, site=site, facility=facility, dataset_type=dataset_type)
+
     if dsid is not None:
         for i in itertools.count(start=0):
 
@@ -732,19 +868,14 @@ def get_xr_dataset(dataset_type: ADIDatasetType, datastream_name: str, coordsys_
 
             # Add special metadata
             xr_dataset.attrs[SpecialXrAttributes.DATASET_TYPE] = dataset_type
-            xr_dataset.attrs[SpecialXrAttributes.DATASTREAM_NAME] = datastream_name
+            xr_dataset.attrs[SpecialXrAttributes.DATASTREAM_DSID] = dsid
             xr_dataset.attrs[SpecialXrAttributes.OBS_INDEX] = i
             if coordsys_name is not None:
                 xr_dataset.attrs[SpecialXrAttributes.COORDINATE_SYSTEM] = coordsys_name
 
             datasets.append(xr_dataset)
 
-    if len(datasets) == 0:
-        return None
-    elif len(datasets) == 1:
-        return datasets[0]
-    else:
-        return datasets
+    return datasets
 
 
 def sync_xr_dataset(xr_dataset: xr.Dataset):
@@ -756,11 +887,10 @@ def sync_xr_dataset(xr_dataset: xr.Dataset):
         xr_dataset (xr.Dataset):  The xr.Dataset(s) to sync.
 
     -----------------------------------------------------------------------"""
-    datastream_name = xr_dataset.attrs[SpecialXrAttributes.DATASTREAM_NAME]
     dataset_type = xr_dataset.attrs[SpecialXrAttributes.DATASET_TYPE]
     obs_index = xr_dataset.attrs[SpecialXrAttributes.OBS_INDEX]
     coordsys_name = xr_dataset.attrs.get(SpecialXrAttributes.COORDINATE_SYSTEM)
-    dsid = get_dataset_id(datastream_name)
+    dsid =  int(xr_dataset.attrs[SpecialXrAttributes.DATASTREAM_DSID])
 
     if dataset_type is ADIDatasetType.RETRIEVED:
         adi_dataset = dsproc.get_retrieved_dataset(dsid, obs_index)
@@ -772,13 +902,13 @@ def sync_xr_dataset(xr_dataset: xr.Dataset):
     sync_xarray(xr_dataset, adi_dataset)
 
 
-def get_datastream_files(datastream_name: str, begin_date: int, end_date: int) -> List[str]:
+def get_datastream_files(dsid: int, begin_date: int, end_date: int) -> List[str]:
     """-----------------------------------------------------------------------
-    Return the full path to each data file found for the given datastream name
+    Return the full path to each data file found for the given datastream
     and time range.
 
     Args:
-        datastream_name (str): the datastream name (e.g., "met.b1")
+        dsid (int): the datastream id (call get_dsid() to retrieve)
 
         begin_date (int): the begin timestamp of the current processing interval
             (seconds since 1970)
@@ -789,7 +919,6 @@ def get_datastream_files(datastream_name: str, begin_date: int, end_date: int) -
     Returns:
         List[str]: A list of file paths that match the datastream query.
     -----------------------------------------------------------------------"""
-    dsid = get_dataset_id(datastream_name)
     datastream_path = dsproc.datastream_path(dsid)
     files = dsproc.find_datastream_files(dsid, begin_date, end_date)
     file_paths = []
@@ -798,4 +927,3 @@ def get_datastream_files(datastream_name: str, begin_date: int, end_date: int) -
         file_paths.append(file_path)
 
     return file_paths
-
