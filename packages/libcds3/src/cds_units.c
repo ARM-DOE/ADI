@@ -265,6 +265,17 @@ static ut_unit *_cds_ut_parse_from_units(const char *from_units)
     ut_status  status;
     int        mi;
 
+    /* Special hack for "Dobson units". For some reason UDUNITS thinks 'units'
+     * is a valid unit so it successfully parses "Dobson units". Unfortunately,
+     * this is not the same as Dobson or DU. */
+
+    if (strcmp(from_units, "Dobson units") == 0) {
+        parsed_unit = ut_parse(_UnitSystem, "DU", UT_ASCII);
+        if (parsed_unit) {
+            return(parsed_unit);
+        }
+    }
+
     /* Parse from_units string */
 
     parsed_unit = ut_parse(_UnitSystem, from_units, UT_ASCII);
@@ -1171,9 +1182,6 @@ int cds_get_unit_converter(
 
     converter = ut_get_converter(from, to);
 
-    ut_free(from);
-    ut_free(to);
-
     if (!converter) {
 
         status = ut_get_status();
@@ -1182,10 +1190,16 @@ int cds_get_unit_converter(
             "Could not get units converter for: '%s' to '%s'\n",
             from_units, to_units);
 
+        ut_free(from);
+        ut_free(to);
+
         return(-1);
     }
 
     *unit_converter = (CDSUnitConverter)converter;
+
+    ut_free(from);
+    ut_free(to);
 
     return(1);
 }
@@ -1427,9 +1441,6 @@ time_t cds_validate_time_units(char *time_units)
 
     converter = ut_get_converter(from, to);
 
-    ut_free(from);
-    ut_free(to);
-
     if (!converter) {
 
         status = ut_get_status();
@@ -1440,12 +1451,17 @@ time_t cds_validate_time_units(char *time_units)
             "  - to:   '%s'\n",
             time_units, secs1970_string);
 
+        ut_free(from);
+        ut_free(to);
+
         return(-2);
     }
 
     secs1970 = cv_convert_double(converter, 0.0);
 
     cv_free(converter);
+    ut_free(from);
+    ut_free(to);
 
     return((time_t)secs1970);
 }

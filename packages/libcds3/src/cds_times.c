@@ -945,8 +945,8 @@ time_t cds_get_base_time(void *object)
 {
     CDSObject *obj = (CDSObject *)object;
     CDSVar    *var;
-    CDSAtt    *att;
     time_t     base_time;
+    const char *units;
 
     if (obj->obj_type == CDS_VAR) {
         var = (CDSVar *)object;
@@ -956,16 +956,12 @@ time_t cds_get_base_time(void *object)
         if (!var) return(-1);
     }
 
-    att = cds_get_att(var, "units");
-
-    if (!att || !att->length || !att->value.vp) {
-        return(-1);
-    }
-    else if (att->type != CDS_CHAR) {
+    units = cds_get_var_units(var);
+    if (!units || strlen(units) == 0) {
         return(-1);
     }
 
-    if (!cds_units_string_to_base_time(att->value.cp, &base_time)) {
+    if (!cds_units_string_to_base_time((char *)units, &base_time)) {
         return(-1);
     }
 

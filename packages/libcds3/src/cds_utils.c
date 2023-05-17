@@ -316,6 +316,7 @@ static size_t _cds_print_array_to_buffer(
                                 break_count   = count;
                                 break_linepos = linepos + 1;
                             }
+                            // fall through
                         default:
                             *bufp++ = uc;
                             linepos += 1;

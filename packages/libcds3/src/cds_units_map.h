@@ -84,6 +84,7 @@ static CDS_UNITS_MAP CDSBadUnitsMap[] = {
     { "Degrees Celcius",                            "degC" },
     { "Degrees East(-180 to 180)",                  "degree_east" },
     { "Degrees North(-90 to 90)",                   "degree_north" },
+    { "Dobson units",                               "DU" },
     { "Fraction",                                   "1" },
     { "HHMMSS",                                     "1" },
     { "HHMMSS.SS (hours, minutes, seconds)",        "1" },
