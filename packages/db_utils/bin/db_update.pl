@@ -148,7 +148,7 @@ sub get_object_group_package_version($$)
             # Not a DBCORE Database Object Group update.
 
             print_error(__LINE__,
-                "Please install the latest release of 'dbcore-dbog_dbcore'.\n");
+                "Please install the latest release of 'dsdb-dbog_dbcore'.\n");
             return(undef);
         }
     }
@@ -1367,7 +1367,7 @@ if ($opt_u) {
 
 print_debug("Connecting To Database\n");
 
-$gConnArgs{'Component'}   = 'dbcore';
+$gConnArgs{'Component'}   = 'dsdb';
 $gConnArgs{'ObjectGroup'} = 'dbcore';
 
 $gDB = DBCORE->new();
@@ -1378,7 +1378,7 @@ unless ($gDB->connect(\%gConnArgs)) {
 
 # Make sure the required dbcore object group is up-to-date
 
-unless (db_update('dbcore', 'dbcore', 'dbcore', 0, 0)) {
+unless (db_update('dsdb', 'dbcore', 'dbcore', 0, 0)) {
     exit(1);
 }
 

@@ -218,6 +218,9 @@ sub define_dod_var_props()
 
     foreach $prop (@{$gVarProps}) {
 
+        # I have no idea where this is coming from
+        next if ($prop->{'var_name'} eq 'ui_state');
+
         $retval = $gDB->sp_call('dodvar_property_values', 'define',
             $prop->{'dsc_name'},
             $prop->{'dsc_level'},
