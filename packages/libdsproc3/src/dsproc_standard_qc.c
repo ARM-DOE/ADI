@@ -1265,11 +1265,13 @@ ERROR_EXIT:
  *  If an error occurs in this function it will be appended to the log and
  *  error mail messages, and the process status will be set appropriately.
  *
- *  @param  ntimes     - number of times
- *  @param  times      - pointer to array of times
- *  @param  azimuths   - pointer to the array of solar azimuths
- *  @param  elevations - pointer to the array of solar elevations
- *  @param  qc_var     - pointer to the QC variable
+ *  @param  ntimes          - number of times
+ *  @param  times           - pointer to array of times
+ *  @param  azimuths        - pointer to the array of solar azimuths
+ *  @param  elevations      - pointer to the array of solar elevations
+ *  @param  has_time_bounds - flag indicating if time bounds were passed in
+ *  @param  latitude        - latitude
+ *  @param  qc_var          - pointer to the QC variable
  *
  *  @return
  *    - 1 if successful (or not applicable)
@@ -1280,26 +1282,28 @@ int dsproc_qc_solar_obstruction_check(
     time_t *times,
     double *azimuths,
     double *elevations,
+    int     has_time_bounds,
+    double  latitude,
     CDSVar *qc_var)
 {
     CDSGroup *dataset = (CDSGroup *)qc_var->parent;
     int       retval  = 0;
     CDSAtt   *att;
-    size_t    length;
-    int       found_az_bounds;
-    int       found_el_bounds;
-    double    azimuth_bounds[2];
-    double    elevation_bounds[2];
-    double    min_azi = 0;
-    double    max_azi = 0;
-    double    min_ele = 0;
-    double    max_ele = 0;
+    double   *az_range     = (double *)NULL;
+    double   *el_range     = (double *)NULL;
+    size_t    az_range_len = 0;
+    size_t    el_range_len = 0;
+    double    az_shaded_min, az_shaded_max;
+    double    el_shaded_min, el_shaded_max;
+    size_t    nsamples;
     size_t    sample_size;
-    double    azimuth, elevation;
+    double    az_sample, az_sample_min, az_sample_max;
+    double    el_sample, el_sample_min, el_sample_max;
     int      *qc_datap;
+    int       shaded;
     int       start_shading;
-    char      ts[32];
-    size_t    ti, si;
+    char      ts1[32], ts2[32];
+    size_t    ri, ti, si;
 
     int          bit_ndescs;
     const char **bit_descs = (const char **)NULL;
@@ -1307,102 +1311,94 @@ int dsproc_qc_solar_obstruction_check(
 
     /* Check for solar_obstruction_azimuth_range attribute */
 
-    found_az_bounds = 0;
     if ((att = dsproc_get_att(qc_var,  "solar_obstruction_azimuth_range")) ||
         (att = dsproc_get_att(dataset, "solar_obstruction_azimuth_range"))) {
 
-        found_az_bounds = 1;
+        az_range = cds_get_att_value(att, CDS_DOUBLE, &az_range_len, NULL);
 
-        if (att->length != 2) {
-            ERROR( DSPROC_LIB_NAME,
-                "Could not perform solar obstruction QC checks for: %s\n"
-                " -> solar_obstruction_azimuth_range has %d values but expected 2\n",
-                qc_var->name, att->length);
+        if (!az_range || az_range_len % 2) {
 
-            dsproc_set_status("Invalid solar_obstruction_azimuth_range length");
-            goto ERROR_EXIT;
+            if (!az_range && az_range_len != 0) {
+                ERROR( DSPROC_LIB_NAME,
+                    "Could not perform solar obstruction QC checks for: %s\n"
+                    " -> memory allocation error\n",
+                    qc_var->name);
+                dsproc_set_status(DSPROC_ENOMEM);
+            }
+            else {
+                ERROR( DSPROC_LIB_NAME,
+                    "Could not perform solar obstruction QC checks for: %s\n"
+                    " -> %s has an invalid number of values: %lu\n",
+                    qc_var->name, att->name, az_range_len);
+                dsproc_set_status("Invalid solar_obstruction_azimuth_range length");
+            }
+            goto CLEANUP_AND_EXIT;
         }
 
-        length = 2;
-        cds_get_att_value(att, CDS_DOUBLE, &length, azimuth_bounds);
+        /* Check if azimuth range values are within the range 0 to 360 */
 
-        min_azi = azimuth_bounds[0];
-        max_azi = azimuth_bounds[1];
+        for (ri = 0; ri < az_range_len; ++ri) {
 
-        /* Check if azimuth bounds are within the range 0-360, inclusive */
-
-        if ((min_azi < 0.0) || (min_azi >= 360.0) || 
-            (max_azi < 0.0) || (max_azi >= 360.0)) {
-
-            ERROR( DSPROC_LIB_NAME,
-                "Invalid solar_obstruction_azimuth_range [%f, %f] for: %s\n"
-                " -> valid range is 0.0 to 360.0\n",
-                min_azi, max_azi, qc_var->name);
-
-            dsproc_set_status("Invalid solar_obstruction_azimuth_range values");
-            goto ERROR_EXIT;
-        }
-
-        if (min_azi > max_azi) {
-            /* adjust min to be less than max */
-            min_azi -= 360;
+            if ((az_range[ri] < 0.0) || (az_range[ri] > 360.0)) {
+                ERROR( DSPROC_LIB_NAME,
+                    "Invalid %s:%s value: %f\n"
+                    " -> valid range is 0 to 360\n",
+                    qc_var->name, att->name, az_range[ri]);
+                dsproc_set_status("Invalid solar_obstruction_azimuth_range value");
+                goto CLEANUP_AND_EXIT;
+            }
         }
     }
 
     /* Check for solar_obstruction_elevation_range attribute */
 
-    found_el_bounds = 0;
     if ((att = dsproc_get_att(qc_var,  "solar_obstruction_elevation_range")) ||
         (att = dsproc_get_att(dataset, "solar_obstruction_elevation_range"))) {
 
-        found_el_bounds = 1;
+        el_range = cds_get_att_value(att, CDS_DOUBLE, &el_range_len, NULL);
 
-        if (att->length != 2) {
-            ERROR( DSPROC_LIB_NAME,
-                "Could not perform solar obstruction QC checks for: %s\n"
-                " -> solar_obstruction_elevation_range has %d values but expected 2\n",
-                qc_var->name, att->length);
+        if (!el_range || el_range_len % 2) {
 
-            dsproc_set_status("Invalid solar_obstruction_elevation_range length");
-            goto ERROR_EXIT;
+            if (!el_range && el_range_len != 0) {
+                ERROR( DSPROC_LIB_NAME,
+                    "Could not perform solar obstruction QC checks for: %s\n"
+                    " -> memory allocation error\n",
+                    qc_var->name);
+                dsproc_set_status(DSPROC_ENOMEM);
+            }
+            else {
+                ERROR( DSPROC_LIB_NAME,
+                    "Could not perform solar obstruction QC checks for: %s\n"
+                    " -> %s has an invalid number of values: %lu\n",
+                    qc_var->name, att->name, el_range_len);
+                dsproc_set_status("Invalid solar_obstruction_elevation_range length");
+            }
+            goto CLEANUP_AND_EXIT;
         }
 
-        length = 2;
-        cds_get_att_value(att, CDS_DOUBLE, &length, elevation_bounds);
+        /* Check if elevation range values are within the range -90 to 90 */
 
-        min_ele = elevation_bounds[0];
-        max_ele = elevation_bounds[1];
+        for (ri = 0; ri < el_range_len; ++ri) {
 
-        /* Check if elevation bounds are within the range -90 to 90, inclusive */
-        if( (min_ele < -90.0) || (min_ele > 90.0) || 
-            (max_ele < -90.0) || (max_ele > 90.0)   ) {
-
-            ERROR( DSPROC_LIB_NAME,
-                "Invalid solar_obstruction_elevation_range [%f, %f] for: %s\n"
-                " -> valid range is 0.0 to 360.0\n",
-                min_ele, max_ele, qc_var->name);
-
-            dsproc_set_status("Invalid solar_obstruction_elevation_range values");
-            goto ERROR_EXIT;
-        }
-
-        if (min_ele > max_ele) {
-
-            ERROR( DSPROC_LIB_NAME,
-                "Invalid solar_obstruction_elevation_range [%f, %f] for: %s\n"
-                " -> lower limit is greater than upper limit\n",
-                min_ele, max_ele, qc_var->name);
-
-            dsproc_set_status("Invalid solar_obstruction_elevation_range values");
-            goto ERROR_EXIT;
+            if ((el_range[ri] < -90.0) || (el_range[ri] > 90.0)) {
+                ERROR( DSPROC_LIB_NAME,
+                    "Invalid %s:%s value: %f\n"
+                    " -> valid range is -90 to 90\n",
+                    qc_var->name, att->name, el_range[ri]);
+                dsproc_set_status("Invalid solar_obstruction_elevation_range value");
+                goto CLEANUP_AND_EXIT;
+            }
         }
     }
 
-    if (!found_az_bounds) {
+    /* Check if we found both azimuth and elevation range attributes. */
 
-        if (!found_el_bounds) {
+    if (!az_range_len) {
+
+        if (!el_range_len) {
             /* Variable doesn't have solar obstruction check */
-            return(1);
+            retval = 1;
+            goto CLEANUP_AND_EXIT;
         }
 
         ERROR( DSPROC_LIB_NAME,
@@ -1410,22 +1406,54 @@ int dsproc_qc_solar_obstruction_check(
             qc_var->name);
 
         dsproc_set_status("Missing solar_obstruction_azimuth_range attribute");
-        goto ERROR_EXIT;
+        goto CLEANUP_AND_EXIT;
     }
-    else if (!found_el_bounds) {
+    else if (!el_range_len) {
         ERROR( DSPROC_LIB_NAME,
             "Missing solar_obstruction_elevation_range attribute for: %s\n",
             qc_var->name);
 
         dsproc_set_status("Missing solar_obstruction_elevation_range attribute");
-        goto ERROR_EXIT;
+        goto CLEANUP_AND_EXIT;
+    }
+
+    /* Make sure the azimuth and elevation range attributes
+     * have the same length. */
+
+    if (az_range_len != el_range_len) {
+        ERROR( DSPROC_LIB_NAME,
+            "Mismatched solar obstruction range attribute lengths for: %s\n"
+            " -> solar_obstruction_azimuth_range length:   %lu\n"
+            " -> solar_obstruction_elevation_range length: %lu\n",
+            qc_var->name, az_range_len, el_range_len);
+
+        dsproc_set_status("Mismatched solar obstruction range attribute lengths");
+        goto CLEANUP_AND_EXIT;
     }
 
     /* Get the list of QC bit descriptions */
 
     bit_ndescs = dsproc_get_qc_bit_descriptions(qc_var, &bit_descs);
-    if (bit_ndescs  < 0) goto ERROR_EXIT;
-    if (bit_ndescs == 0) return(1);
+    if (bit_ndescs  < 0) goto CLEANUP_AND_EXIT;
+    if (bit_ndescs == 0) {
+
+        if (!dsproc_get_att(qc_var, "solar_obstruction_azimuth_range") &&
+            !dsproc_get_att(qc_var, "solar_obstruction_elevation_range")) {
+
+            /* These are global attributes so we can assume that this
+             * variable doesn't have a solar obstruction check */
+
+            retval = 1;
+            goto CLEANUP_AND_EXIT;
+        }
+
+        ERROR( DSPROC_LIB_NAME,
+            "Could not find solar obstruction QC bit description for: %s\n",
+            qc_var->name);
+
+        dsproc_set_status(DSPROC_ENOBITDESC);
+        goto CLEANUP_AND_EXIT;
+    }
 
     /* Get the QC flag to use for the solar obstruction check */
 
@@ -1434,20 +1462,20 @@ int dsproc_qc_solar_obstruction_check(
 
         if (!dsproc_get_att(qc_var, "solar_obstruction_azimuth_range") &&
             !dsproc_get_att(qc_var, "solar_obstruction_elevation_range")) {
-            
+
             /* These are global attributes so we can assume that this
              * variable doesn't have a solar obstruction check */
 
-            free(bit_descs);
-            return(1);
+            retval = 1;
+            goto CLEANUP_AND_EXIT;
         }
 
         ERROR( DSPROC_LIB_NAME,
-            "Could not find solar obstruction check bit description for: %s\n",
+            "Could not find solar obstruction QC bit description for: %s\n",
             qc_var->name);
 
         dsproc_set_status(DSPROC_ENOBITDESC);
-        goto ERROR_EXIT;
+        goto CLEANUP_AND_EXIT;
     }
 
     /* Make sure the QC variable has integer data type */
@@ -1456,10 +1484,10 @@ int dsproc_qc_solar_obstruction_check(
         ERROR( DSPROC_LIB_NAME,
             "Could not perform solar obstruction QC check\n"
             " -> invalid data type for QC variable: %s\n",
-            cds_get_object_path(qc_var));
+            qc_var->name);
 
         dsproc_set_status(DSPROC_EQCVARTYPE);
-        goto ERROR_EXIT;
+        goto CLEANUP_AND_EXIT;
     }
 
     /* Get qc_var sample size */
@@ -1469,89 +1497,216 @@ int dsproc_qc_solar_obstruction_check(
         ERROR( DSPROC_LIB_NAME,
             "Could not perform solar obstruction QC check\n"
             " -> found zero length dimension for variable: %s\n",
-            cds_get_object_path(qc_var));
+            qc_var->name);
 
         dsproc_set_status(DSPROC_ESAMPLESIZE);
-        goto ERROR_EXIT;
+        goto CLEANUP_AND_EXIT;
     }
 
     /* Check if we need to initialize memory for the QC flags */
-    if (qc_var->sample_count < ntimes) {
+
+    if (has_time_bounds) {
+        nsamples = ntimes / 2;
+    }
+    else {
+        nsamples = ntimes;
+    }
+
+    if (qc_var->sample_count < nsamples) {
 
         if (!dsproc_init_var_data(qc_var, qc_var->sample_count,
-            (ntimes - qc_var->sample_count), 0)) {
+            (nsamples - qc_var->sample_count), 0)) {
 
-            goto ERROR_EXIT;
+            goto CLEANUP_AND_EXIT;
         }
     }
+
+    /* Do the QC checks */
 
     if (msngr_debug_level || msngr_provenance_level) {
-
         DEBUG_LV2( DSPROC_LIB_NAME,
-            " - %s\n",
-            qc_var->name);
-
-        DEBUG_LV2( DSPROC_LIB_NAME, 
-            "    - bit %d (0x%o): solar obstruction qc check\n"
-            "        - solar_obstruction_azimuth_range   = [%g, %g]\n"
-            "        - solar_obstruction_elevation_range = [%g, %g]\n",
-            (int)log2((double)solar_flag) + 1, solar_flag,
-            min_azi, max_azi,
-            min_ele, max_ele);
+            " - %s\n"
+            "    - bit %d (0x%o): solar obstruction qc check\n",
+            qc_var->name,
+            (int)log2((double)solar_flag) + 1, solar_flag);
     }
 
-    /* Do the QC check */
+    for (ri = 0; ri < az_range_len; ri += 2) {
 
-    start_shading = 0;
-    qc_datap = qc_var->data.ip;
+        az_shaded_min = az_range[ri];
+        az_shaded_max = az_range[ri+1];
+        el_shaded_min = el_range[ri];
+        el_shaded_max = el_range[ri+1];
 
-    for (ti = 0; ti < ntimes; ++ti) {
-
-        azimuth   = azimuths[ti];
-        elevation = elevations[ti];
-
-        /* Make sure azimuth is in the appropriate range */
-        if ((min_azi < 0) && (azimuth > max_azi)) {
-            azimuth -= 360;
+        if (msngr_debug_level || msngr_provenance_level) {
+            DEBUG_LV2( DSPROC_LIB_NAME, 
+                "        - solar_obstruction_azimuth_range   = [%g, %g]\n"
+                "        - solar_obstruction_elevation_range = [%g, %g]\n",
+                az_shaded_min, az_shaded_max,
+                el_shaded_min, el_shaded_max);
         }
 
-        /* Check if position is within bounds */
-        if ((min_azi <= azimuth)   && (azimuth <= max_azi)  &&  
-            (min_ele <= elevation) && (elevation <= max_ele)) {
+        if (az_shaded_min > az_shaded_max) {
+            /* Range crosses 0 degrees so adjust min to be negative degrees */
+            az_shaded_min -= 360;
+        }
 
-            if (!start_shading) {
-                DEBUG_LV2( DSPROC_LIB_NAME,
-                    "        - shading start = %s\n"
-                    "            - azimuth   = %g\n"
-                    "            - elevation = %g\n",
-                    format_secs1970(times[ti], ts),
-                    azimuth, elevation);
-                start_shading = 1;
-            }
+        if (el_shaded_min > el_shaded_max) {
+            ERROR( DSPROC_LIB_NAME,
+                "Invalid solar_obstruction_elevation_range [%f, %f] for: %s\n"
+                " -> lower limit is greater than upper limit\n",
+                el_shaded_min, el_shaded_max, qc_var->name);
 
-            for (si = 0; si < sample_size; ++si) {
-                *qc_datap++ |= solar_flag;
+            dsproc_set_status("Invalid solar_obstruction_elevation_range values");
+            goto CLEANUP_AND_EXIT;
+        }
+
+        start_shading = 0;
+        qc_datap = qc_var->data.ip;
+
+        if (has_time_bounds) {
+
+            for (ti = 0; ti < ntimes; ti += 2) {
+
+                /* Set sample azimuth and elevation min/max values */
+
+                if (latitude >= 0) {
+                    // northern hemisphere
+                    az_sample_min = azimuths[ti];
+                    az_sample_max = azimuths[ti+1];
+                }
+                else {
+                    // southern hemisphere
+                    az_sample_min = azimuths[ti+1];
+                    az_sample_max = azimuths[ti];
+                }
+
+                if (elevations[ti] < elevations[ti+1]) {
+                    // before solar noon
+                    el_sample_min = elevations[ti];
+                    el_sample_max = elevations[ti+1];
+                }
+                else {
+                    // after solar noon
+                    el_sample_min = elevations[ti+1];
+                    el_sample_max = elevations[ti];
+                }
+
+                /* Make sure sample azimuths are in the appropriate range */
+
+                if (az_sample_min > az_sample_max) {
+                    // sample azimuth crosses 0 degrees
+                    az_sample_min -= 360;
+                }
+                else if (az_shaded_min < 0) {
+                    // az_shaded_min was adjusted to be -180 to 180
+                    if (az_sample_min > az_shaded_max) {
+                        az_sample_min -= 360;
+                        az_sample_max -= 360;
+                    }
+                }
+
+                /* Check if the instrument is shaded */
+
+                shaded = 0;
+                if ((az_sample_min <= az_shaded_max && az_sample_max >= az_shaded_min) &&
+                    (el_sample_min <= el_shaded_max && el_sample_max >= el_shaded_min)) {
+
+                    shaded = 1;
+                }
+
+                if (shaded) {
+                    if (!start_shading) {
+                        DEBUG_LV2( DSPROC_LIB_NAME,
+                            "        - shading start = [%s, %s]\n"
+                            "            - azimuth   = [%g, %g]\n"
+                            "            - elevation = [%g, %g]\n",
+                            format_secs1970(times[ti], ts1),
+                            format_secs1970(times[ti+1], ts2),
+                            az_sample_min, az_sample_max, el_sample_min, el_sample_max);
+                        start_shading = 1;
+                    }
+
+                    for (si = 0; si < sample_size; ++si) {
+                        *qc_datap++ |= solar_flag;
+                    }
+                }
+                else {
+                    if (start_shading) {
+                        DEBUG_LV2( DSPROC_LIB_NAME,
+                            "        - shading end   = [%s, %s]\n"
+                            "            - azimuth   = [%g, %g]\n"
+                            "            - elevation = [%g, %g]\n",
+                            format_secs1970(times[ti], ts1),
+                            format_secs1970(times[ti+1], ts2),
+                            az_sample_min, az_sample_max, el_sample_min, el_sample_max);
+                        start_shading = 0;
+                    }
+
+                    qc_datap += sample_size;
+                }
             }
         }
-        else {
-            if (start_shading) {
-                DEBUG_LV2( DSPROC_LIB_NAME,
-                    "        - shading end   = %s\n"
-                    "            - azimuth   = %g\n"
-                    "            - elevation = %g\n",
-                    format_secs1970(times[ti], ts),
-                    azimuth, elevation);
-                start_shading = 0;
-            }
+        else { // does not have time_bounds
 
-            qc_datap += sample_size;
+            for (ti = 0; ti < ntimes; ++ti) {
+
+                az_sample = azimuths[ti];
+                el_sample = elevations[ti];
+
+                /* Make sure the sample azimuth is in the appropriate range */
+
+                if ((az_shaded_min < 0) && (az_sample > az_shaded_max)) {
+                    az_sample -= 360;
+                }
+
+                /* Check if the instrument is shaded */
+
+                shaded = 0;
+                if ((az_sample >= az_shaded_min) && (az_sample <= az_shaded_max) &&  
+                    (el_sample >= el_shaded_min) && (el_sample <= el_shaded_max)) {
+
+                    shaded = 1;
+                }
+
+                if (shaded) {
+                    if (!start_shading) {
+                        DEBUG_LV2( DSPROC_LIB_NAME,
+                            "        - shading start = %s\n"
+                            "            - azimuth   = %g\n"
+                            "            - elevation = %g\n",
+                            format_secs1970(times[ti], ts1),
+                            az_sample, el_sample);
+                        start_shading = 1;
+                    }
+
+                    for (si = 0; si < sample_size; ++si) {
+                        *qc_datap++ |= solar_flag;
+                    }
+                }
+                else {
+                    if (start_shading) {
+                        DEBUG_LV2( DSPROC_LIB_NAME,
+                            "        - shading end   = %s\n"
+                            "            - azimuth   = %g\n"
+                            "            - elevation = %g\n",
+                            format_secs1970(times[ti], ts1),
+                            az_sample, el_sample);
+                        start_shading = 0;
+                    }
+
+                    qc_datap += sample_size;
+                }
+            }
         }
     }
 
     retval = 1;
 
-ERROR_EXIT:
+CLEANUP_AND_EXIT:
 
+    if (az_range) free(az_range);
+    if (el_range) free(el_range);
     if (bit_descs) free(bit_descs);
     return(retval);
 }
@@ -1578,13 +1733,19 @@ ERROR_EXIT:
 int dsproc_qc_solar_obstruction_checks(
     CDSGroup   *dataset)
 {
-    time_t *times      = (time_t *)NULL;
-    double *azimuths   = (double *)NULL;
-    double *elevations = (double *)NULL;
-    int     retval     = 0;
+    time_t *times       = (time_t *)NULL;
+    double *azimuths    = (double *)NULL;
+    double *elevations  = (double *)NULL;
+    double *refractions = (double *)NULL;
+    int     retval      = 0;
+    size_t  nsamples;
     size_t  ntimes;
     double  lat;
     double  lon;
+
+    CDSVar *time_var;
+    CDSVar *time_bounds_var;
+    int     has_time_bounds;
 
     CDSVar *var;
     CDSVar *qc_var;
@@ -1592,6 +1753,7 @@ int dsproc_qc_solar_obstruction_checks(
     int     is_base_time;
     int     status;
     int     vi;
+    size_t  ti;
 
     DEBUG_LV1( DSPROC_LIB_NAME,
         "%s: Applying solar obstruction QC checks\n",
@@ -1604,7 +1766,7 @@ int dsproc_qc_solar_obstruction_checks(
     /* Get latitude and longitude */
 
     if (!dsproc_get_dataset_location(dataset, &lat, &lon, NULL)) {
-        goto ERROR_EXIT;
+        goto CLEANUP_AND_EXIT;
     }
 
     DEBUG_LV1( DSPROC_LIB_NAME,
@@ -1614,8 +1776,28 @@ int dsproc_qc_solar_obstruction_checks(
 
     /* Get sample times */
 
-    times = dsproc_get_sample_times(dataset, 0, &ntimes, NULL);
-    if (!times) goto ERROR_EXIT;
+    time_var = cds_find_time_var(dataset);
+    if (!time_var) {
+        ERROR( DSPROC_LIB_NAME,
+            "Could not perform solar obstruction QC check\n"
+            "   -> time variable not found in dataset: %s\n",
+            dsproc_dataset_name(dataset));
+        goto CLEANUP_AND_EXIT;
+    }
+
+    time_bounds_var = cds_get_bounds_var(time_var);
+
+    if (time_bounds_var) {
+        has_time_bounds = 1;
+        times = dsproc_get_sample_times(time_bounds_var, 0, &nsamples, NULL);
+        if (!times) goto CLEANUP_AND_EXIT;
+        ntimes = nsamples * 2;
+    }
+    else {
+        has_time_bounds = 0;
+        times = dsproc_get_sample_times(time_var, 0, &ntimes, NULL);
+        if (!times) goto CLEANUP_AND_EXIT;
+    }
 
     /* Get solar azimuths and elevations */
 
@@ -1624,13 +1806,28 @@ int dsproc_qc_solar_obstruction_checks(
         NULL,       // ap_ra,
         NULL,       // ap_dec,
         &elevations,
-        NULL,       // refraction,
+        &refractions,
         &azimuths,
         NULL);      // distance
 
     if (status <= 0) {
-        goto ERROR_EXIT;
+        ERROR( DSPROC_LIB_NAME,
+            "Solar position input parameter(s) out of range:\n"
+            "   -> start time: %ld\n"
+            "   -> end time:   %ld\n"
+            "   -> latitude:   %g\n"
+            "   -> longitude:  %g\n",
+            times[0], times[ntimes-1], lat, lon);
+
+        dsproc_set_status("Could Not Calculate Solar Position");
+        goto CLEANUP_AND_EXIT;
     }
+
+    for (ti = 0; ti < ntimes; ++ti) {
+        elevations[ti] += refractions[ti];
+    }
+
+    free(refractions);
 
     /************************************************************
     * Loop over all variables, applying the solar obstruction
@@ -1658,19 +1855,20 @@ int dsproc_qc_solar_obstruction_checks(
 
         /* Run solar obstruction QC check */
         if (!dsproc_qc_solar_obstruction_check(
-            ntimes, times, azimuths, elevations, qc_var)) {
+            ntimes, times, azimuths, elevations,
+            has_time_bounds, lat, qc_var)) {
 
-            goto ERROR_EXIT;
+            goto CLEANUP_AND_EXIT;
         }
     }
 
     retval = 1;
 
-ERROR_EXIT:
+CLEANUP_AND_EXIT:
 
-    if (times)      free(times);
-    if (azimuths)   free(azimuths);
-    if (elevations) free(elevations);
+    if (times)       free(times);
+    if (azimuths)    free(azimuths);
+    if (elevations)  free(elevations);
 
     return(retval);
 }

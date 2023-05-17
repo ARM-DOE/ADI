@@ -2328,6 +2328,24 @@ static int _dsproc_transform_variable(
 
             } /* end if !trans_coord_var */
 
+            /* Check if ret_var is a coordinate variable. */
+
+            if (trans_coord_var && (ret_var->ndims == 1) &&
+                (strcmp(ret_var->name, ret_var->dims[0]->name) == 0)) {
+
+                /* If we get here this is a coordinate variable that is not
+                 * used by any other variable in the group (see logic that
+                 * skips coordinate variables in dsproc_transform_data()).
+                 * 
+                 * In this case the variable will have already been created
+                 * by the _dsproc_create_trans_coordsys_dimension() function
+                 * above. */
+
+                *trans_var = trans_coord_var;
+                _dsproc_free_trans_dim_groups(trans_dim_groups);
+                return(1);
+            }
+
             if (ret_coord_var) {
 
                 /* Make sure the ret_coord_var has the same units as the
@@ -2937,6 +2955,7 @@ int dsproc_transform_data(
     DataStream *in_ds;
     int         status;
     int         csi, dsi, vari;
+    int         i;
 
     CDSGroup   *trans_coordsys;
     CDSGroup   *trans_ds_group;
@@ -3062,7 +3081,27 @@ ret_obs_group = ret_ds_group->groups[0];
                 if ((ret_var->ndims == 1) &&
                     (strcmp(ret_var->name, ret_var->dims[0]->name) == 0)) {
 
-                    continue;
+                    /* Check if this coordinate variable is actually used by
+                     * any variables in the group.  If it is, we can just skip
+                     * it because it will be pulled through with the first
+                     * variable that uses it. */
+                    for (i = 0; i < ret_obs_group->nvars; i++) {
+
+                        if (ret_obs_group->vars[i] != ret_var) {
+                            if (cds_var_has_dim	(
+                                ret_obs_group->vars[i], ret_var->name)) {
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if (i != ret_obs_group->nvars) {
+                        /* At least one variable in ths group uses
+                         * this coordinate variable. */
+
+                        continue;
+                    }
                 }
 
                 /* Skip boundary variables that were explicitly requested */

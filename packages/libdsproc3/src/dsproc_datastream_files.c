@@ -141,35 +141,35 @@ static void _dsproc_free_dsfile(DSFile *dsfile)
  */
 static DSFile *_dsproc_create_dsfile(DSDir *dir, const char *name)
 {
-    DSFile *file;
+    DSFile *dsfile;
     size_t  length;
 
-    file = (DSFile *)calloc(1, sizeof(DSFile));
-    if (!file) {
+    dsfile = (DSFile *)calloc(1, sizeof(DSFile));
+    if (!dsfile) {
         goto MEMORY_ERROR;
     }
 
-    file->name = strdup(name);
-    if (!file->name) {
+    dsfile->name = strdup(name);
+    if (!dsfile->name) {
         goto MEMORY_ERROR;
     }
 
     length = strlen(dir->path) + strlen(name) + 2;
 
-    file->full_path = malloc(length * sizeof(char));
-    if (!file->full_path) {
+    dsfile->full_path = malloc(length * sizeof(char));
+    if (!dsfile->full_path) {
         goto MEMORY_ERROR;
     }
 
-    sprintf(file->full_path, "%s/%s", dir->path, name);
+    sprintf(dsfile->full_path, "%s/%s", dir->path, name);
 
-    file->dir = dir;
+    dsfile->dir = dir;
 
-    return(file);
+    return(dsfile);
 
 MEMORY_ERROR:
 
-    if (file) _dsproc_free_dsfile(file);
+    if (dsfile) _dsproc_free_dsfile(dsfile);
 
     ERROR( DSPROC_LIB_NAME,
         "Could not create DSFile structure for: %s\n"
@@ -177,72 +177,6 @@ MEMORY_ERROR:
 
     dsproc_set_status(DSPROC_ENOMEM);
     return((DSFile *)NULL);
-}
-
-/**
- *  Static: Get or create a cached datastream file.
- *
- *  If an error occurs in this function it will be appended to the log and
- *  error mail messages, and the process status will be set appropriately.
- *
- *  @param  dir  - pointer to the DSDir structure.
- *  @param  name - name of the file
- *
- *  @return
- *    - pointer to the DSFile
- *    - NULL if an error occurred
- */
-static DSFile *_dsproc_get_dsfile(DSDir *dir, const char *name)
-{
-    size_t       new_size;
-    DSFile     **new_list;
-    DSFile      *file;
-    int          fi;
-
-    /* Check if this file is already in the cache */
-
-    for (fi = 0; fi < dir->ndsfiles; fi++) {
-        file = dir->dsfiles[fi];
-        if (strcmp(file->name, name) == 0) {
-            return(file);
-        }
-    }
-
-    /* Check if we need to increase the length of the dsfiles list */
-
-    if (dir->ndsfiles == dir->max_dsfiles - 1) {
-
-        new_size = dir->max_dsfiles * 2;
-        new_list = (DSFile **)realloc(
-            dir->dsfiles, new_size * sizeof(DSFile *));
-
-        if (!new_list) {
-
-            ERROR( DSPROC_LIB_NAME,
-                "Could not get DSFile structure for: %s/%s\n"
-                " -> memory allocation error\n", dir->path, name);
-
-            dsproc_set_status(DSPROC_ENOMEM);
-            return((DSFile *)NULL);
-        }
-
-        dir->max_dsfiles = new_size;
-        dir->dsfiles     = new_list;
-
-        for (fi = dir->ndsfiles; fi < dir->max_dsfiles; fi++) {
-            dir->dsfiles[fi] = (DSFile *)NULL;
-        }
-    }
-
-    file = _dsproc_create_dsfile(dir, name);
-    if (!file) {
-        return((DSFile *)NULL);
-    }
-
-    dir->dsfiles[dir->ndsfiles] = file;
-    dir->ndsfiles++;
-
-    return(file);
 }
 
 /**
@@ -948,10 +882,6 @@ int _dsproc_find_dsfiles(
             return(-1);
         }
 
-        if (!_dsproc_refresh_dsfile_info(dsfile)) {
-            return(-1);
-        }
-
         if (dsfile->ntimes == 0) {
             continue;
         }
@@ -1060,11 +990,6 @@ int _dsproc_find_next_dsfile(
             return(-1);
         }
 
-        if (!_dsproc_refresh_dsfile_info(*dsfile)) {
-            *dsfile = (DSFile  *)NULL;
-            return(-1);
-        }
-
         if ((*dsfile)->ntimes == 0) {
             *dsfile = (DSFile  *)NULL;
             continue;
@@ -1114,6 +1039,11 @@ int _dsproc_get_dsdir_files(DSDir *dir, char ***files)
     int             fi;
     int             err_count;
 
+    DataStream     *ds = dir->ds;
+    timeval_t       nfs_time = { 0, 0 };
+    timeval_t       mod_time;
+    char            full_path[PATH_MAX];
+
     int  (*file_name_compare)(const void *, const void *);
 
     /* Initialize output */
@@ -1162,6 +1092,25 @@ int _dsproc_get_dsdir_files(DSDir *dir, char ***files)
         dir->stats = dir_stats;
         *files     = dir->files;
         return(dir->nfiles);
+    }
+
+    /* Get current file system time if this is a 0-level input datastream.
+     *
+     * We are seeing an issue where some files are not found if they are
+     * received after we begin scanning for files but before we are finished.
+     * When this happens the order in which the files become visible is not
+     * in the order they are written. This can lead to files being processed
+     * out of chronological order.  The workaround for this is to skip files
+     * that have a mod time later than when we started scanning for files. */
+
+    if (ds->dsc_level[0] == '0' && ds->role == DSR_INPUT) {
+        
+        if (!dsproc_get_nfs_time(dir->path, &nfs_time)) {
+            ERROR( DSPROC_LIB_NAME,
+                "Could not get current file system time\n");
+            dsproc_set_status(DSPROC_EACCESS);
+            return(-1);
+        }
     }
 
     /* Open the directory */
@@ -1248,6 +1197,27 @@ int _dsproc_get_dsdir_files(DSDir *dir, char ***files)
 
                 closedir(dirp);
                 return(-1);
+            }
+        }
+
+        /* Check if this is a 0-level input datastream
+         * (see comment above where nfs_time is set). */
+
+        if (nfs_time.tv_sec) {
+
+            /* Skip files with mod times greater than the
+             * file system time at the start of the scan. */
+
+            snprintf(full_path, PATH_MAX, "%s/%s", dir->path, direntp->d_name);
+
+            if (!file_mod_time(full_path, &mod_time)) {
+                dsproc_set_status(DSPROC_EFILESTATS);
+                closedir(dirp);
+                return(-1);
+            }
+
+            if (TV_GTEQ(mod_time, nfs_time)) {
+                continue;
             }
         }
 
@@ -1392,6 +1362,79 @@ int _dsproc_get_dsdir_files(DSDir *dir, char ***files)
     }
 
     return(dir->nfiles);
+}
+
+/**
+ *  Private: Get or create a cached datastream file.
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  dir  - pointer to the DSDir structure.
+ *  @param  name - name of the file
+ *
+ *  @return
+ *    - pointer to the DSFile
+ *    - NULL if an error occurred
+ */
+DSFile *_dsproc_get_dsfile(DSDir *dir, const char *name)
+{
+    size_t       new_size;
+    DSFile     **new_list;
+    DSFile      *dsfile;
+    int          fi;
+
+    /* Check if this file is already in the cache */
+
+    for (fi = 0; fi < dir->ndsfiles; fi++) {
+        dsfile = dir->dsfiles[fi];
+        if (strcmp(dsfile->name, name) == 0) {
+            if (!_dsproc_refresh_dsfile_info(dsfile)) {
+                return((DSFile *)NULL);
+            }
+            return(dsfile);
+        }
+    }
+
+    /* Check if we need to increase the length of the dsfiles list */
+
+    if (dir->ndsfiles == dir->max_dsfiles - 1) {
+
+        new_size = dir->max_dsfiles * 2;
+        new_list = (DSFile **)realloc(
+            dir->dsfiles, new_size * sizeof(DSFile *));
+
+        if (!new_list) {
+
+            ERROR( DSPROC_LIB_NAME,
+                "Could not get DSFile structure for: %s/%s\n"
+                " -> memory allocation error\n", dir->path, name);
+
+            dsproc_set_status(DSPROC_ENOMEM);
+            return((DSFile *)NULL);
+        }
+
+        dir->max_dsfiles = new_size;
+        dir->dsfiles     = new_list;
+
+        for (fi = dir->ndsfiles; fi < dir->max_dsfiles; fi++) {
+            dir->dsfiles[fi] = (DSFile *)NULL;
+        }
+    }
+
+    dsfile = _dsproc_create_dsfile(dir, name);
+    if (!dsfile) {
+        return((DSFile *)NULL);
+    }
+
+    if (!_dsproc_refresh_dsfile_info(dsfile)) {
+        return((DSFile *)NULL);
+    }
+
+    dir->dsfiles[dir->ndsfiles] = dsfile;
+    dir->ndsfiles++;
+
+    return(dsfile);
 }
 
 /**
@@ -1557,6 +1600,87 @@ int _dsproc_open_dsfile(DSFile *file, int mode)
 }
 
 /**
+ *  Private: Read list of input files from a file.
+ *
+ *  @param  list_file - full path to the file containing the file list
+ *
+ *  @return
+ *    - 1 if successful
+ *    - 0 if an error occurred
+ */
+int _dsproc_read_input_file_list(const char *list_file)
+{
+    FileBuffer *fbuf;
+    int         nlines;
+    char      **lines;
+    int         li1, li2;
+
+    /* Read in the file */
+
+    fbuf = file_buffer_init();
+    if (!file_buffer_read(fbuf, list_file, NULL)) {
+        ERROR( DSPROC_LIB_NAME,
+            "Could not read file list from file: %s\n", list_file);
+        dsproc_set_status(DSPROC_EFILEREAD);
+        file_buffer_destroy(fbuf);
+        return(0);
+    }
+
+    if (fbuf->length == 0) {
+        ERROR( DSPROC_LIB_NAME,
+            "Zero length input file list: %s\n", list_file);
+        dsproc_set_status(DSPROC_EFILEREAD);
+        file_buffer_destroy(fbuf);
+        return(0);
+    }
+
+    /* Split the file on newline characters */
+
+    if (!file_buffer_split_lines(fbuf, &nlines, &lines)) {
+        ERROR( DSPROC_LIB_NAME,
+            "Could not read file list from file: %s\n"
+            " -> memory allocation error\n", list_file);
+        dsproc_set_status(DSPROC_ENOMEM);
+        file_buffer_destroy(fbuf);
+        return(0);
+    }
+
+    /* Remove blank lines and comment lines */
+
+    for (li1 = 0, li2 = 0; li2 < nlines; li2++) {
+
+        if (*lines[li2] == '\0' ||
+            *lines[li2] == '#') {
+
+            continue;
+        }
+
+        if (li1 != li2) {
+            lines[li1] = lines[li2];
+            lines[li2] = (char *)NULL;
+        }
+
+        li1 += 1;
+    }
+
+    nlines = li1;
+
+    /* Extract the data from the file buffer */
+
+    _InputFilesString = fbuf->data;
+    fbuf->data = (char *)NULL;
+
+    _InputFiles = fbuf->lines;
+    fbuf->lines = (char **)NULL;
+
+    _NumInputFiles = nlines;
+
+    file_buffer_destroy(fbuf);
+
+    return(1);
+}
+
+/**
  *  Private: Set input file list for Ingests from command line.
  *
  *  @param  cmd_line_arg - command line argument
@@ -1654,6 +1778,61 @@ void dsproc_close_untouched_files(void)
             }
         }
     }
+}
+
+/**
+ *  Get network file system time.
+ *
+ *  This function will get the current time used by the file system
+ *  by creating a file in the specified directory and then returning
+ *  its mod time.
+ *
+ *  The log directory will be used instead if NULL is specified for
+ *  dir_path or the specified directory is not writable.
+ *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
+ *
+ *  @param  dir_path - Path to the directory to create the temporary file 
+ *  @param  nfs_time - output: current file system time
+ *
+ *  @return
+ *    - 1 successful
+ *    - 0 if an error occured
+ */
+int dsproc_get_nfs_time(const char *dir_path, timeval_t *nfs_time)
+{
+    LogFile *log;
+    int      status;
+
+    /* Check if dir_path is read-only */
+
+    if (!dir_path || access(dir_path, W_OK) != 0) {
+
+        /* The specified directory is NULL or read-only,
+         * so try using the log directory */
+
+        log = msngr_get_log_file();
+        if (log && log->path) {
+            dir_path = log->path;
+        }
+        else {
+            /* This should never happen because we should always
+             * have a writable log directory or the processes
+             * would have already failed... but if it does,
+             * use the system time and hope for the best... */
+
+            dir_path = NULL;
+        }
+    }
+
+    if (!dir_path) {
+        gettimeofday(nfs_time, NULL);
+        return(1);
+    }
+
+    status = get_nfs_time(dir_path, nfs_time);
+    return(status);
 }
 
 /**
@@ -1853,10 +2032,6 @@ int dsproc_find_datastream_files(
 
         dsfile = _dsproc_get_dsfile(ds->dir, files[fi]);
         if (!dsfile) {
-            return(-1);
-        }
-
-        if (!_dsproc_refresh_dsfile_info(dsfile)) {
             return(-1);
         }
 

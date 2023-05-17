@@ -32,6 +32,260 @@ extern DSProc *_DSProc; /**< Internal DSProc structure */
  */
 
 /**
+ *  Private: Compare two overlapping observations.
+ *
+ *  This function will generate an error message with information about the
+ *  two overlapping observations if the FILTER_INPUT_OBS overlap filtering
+ *  mode has *not* been set.
+ *
+ *  If the FILTER_INPUT_OBS overlap filtering mode has been set, this function
+ *  will filter out the overlapping observation by keeping the one with the
+ *  most recent creation time if the number of samples is 75% or more of the
+ *  previous one, otherwise, it will keep the previous observation.
+ *
+ *  @param  g1  - pointer to the CDSGroup for obs1
+ *  @param  nt1 - number of times in obs1
+ *  @param  st1 - start time of obs1
+ *  @param  et1 - end time of obs1
+ *  @param  g2  - pointer to the CDSGroup for obs2
+ *  @param  nt2 - number of times in obs2
+ *  @param  st2 - start time of obs2
+ *  @param  et2 - end time of obs2
+ *
+ *  @return
+ *    -  1 one of the overlapping observations was removed.
+ *    -  0 an error message was generated and the process should fail.
+ */
+int _dsproc_compare_overlapping_obs(
+    CDSGroup  *g1,
+    size_t     nt1,
+    timeval_t  st1,
+    timeval_t  et1,
+    CDSGroup  *g2,
+    size_t     nt2,
+    timeval_t  st2,
+    timeval_t  et2)
+{
+    int        filter_mode = dsproc_get_overlap_filtering_mode();
+    CDSAtt    *att;
+    char      *dod1, *dod2;
+    char      *history1, *history2;
+    time_t     created1, created2;
+    char       ts11[32], ts12[32], ts21[32], ts22[32];
+    int        keep_obs;
+    int        retval = 1;
+
+    /* Get DOD versions to include in warning or error message. */
+
+    dod1 = dod2 = NULL;
+
+    att = cds_get_att(g1, "dod_version");
+    if (att) dod1 = att->value.cp;
+
+    att = cds_get_att(g2, "dod_version");
+    if (att) dod2 = att->value.cp;
+
+    if (!dod1) dod1 = "Missing dod_version attribute.";
+    if (!dod2) dod2 = "Missing dod_version attribute.";
+
+    /* Get history attribute and creation times */
+
+    created1 = created2 = 0;
+    history1 = history2 = (char *)NULL;
+    dsproc_get_dataset_creation_info(g1, &history1, &created1, NULL, NULL, NULL);
+    dsproc_get_dataset_creation_info(g2, &history2, &created2, NULL, NULL, NULL);
+
+    // need to use strdup here because we free the history strings later...
+    if (!history1) history1 = strdup("Missing history attribute or invalid format.");
+    if (!history2) history2 = strdup("Missing history attribute or invalid format.");
+
+    /* Check if FILTER_INPUT_OBS overlapping filtering mode has been set.
+     * If not, we can just bail out here. */
+
+    if (!(filter_mode & FILTER_INPUT_OBS)) {
+
+        DSPROC_ERROR( DSPROC_EINDSOVERLAP,
+            "Overlapping input data found for: %s\n"
+            "  - %s\n"
+            "      - time range:  %s -> %s, ntimes = %lu\n"
+            "      - DOD version: %s\n"
+            "      - history:     %s\n"
+            "  - %s\n"
+            "      - time range:  %s -> %s, ntimes = %lu\n"
+            "      - DOD version: %s\n"
+            "      - history:     %s\n",
+            g1->parent->name,
+            g1->name,
+            format_timeval(&st1, ts11), format_timeval(&et1, ts12), nt1,
+            dod1,
+            history1,
+            g2->name,
+            format_timeval(&st2, ts21), format_timeval(&et2, ts22), nt2,
+            dod2,
+            history2);
+
+        retval = 0;
+        goto CLEANUP_AND_EXIT;
+    }
+
+    /* The FILTER_INPUT_OBS overlapping filtering mode has been set
+     * so we need to filter out one of the overlapping observations. */
+
+    /* After talking to Krista we decided that the logic that will
+     * be more correct most of the time is to keep the obs with the
+     * most recent creation time if the number of samples is 75% or
+     * more of the previous one... */
+
+    if (created1 == 0 || created2 == 0) {
+
+        if (created1 != 0) {
+            /* The second obs is missing the history attribute or it
+             * has an invalid format, so keep the first one. */ 
+            keep_obs = 1;
+        }
+        else if (created2 != 0) {
+            /* The first obs is missing the history attribute or it
+             * has an invalid format, so keep the second one. */ 
+            keep_obs = 2;
+        }
+        else {
+            /* Both obs are missing the history attribute or they
+             * have invalid formats, so keep the one with the most
+             * samples. */ 
+            keep_obs = (nt1 > nt2) ? 1 : 2;
+        }
+    }
+    else if (created1 > created2 && nt1 >= 0.75 * nt2) {
+        // Keep the first obs (see comment above)
+        keep_obs = 1;
+    }
+    else {
+        // created1 < created2 || nt1 < 0.75 * nt2
+        keep_obs = 2;
+    }
+
+    if (keep_obs == 1) {
+        DSPROC_WARNING(
+            "Filtering overlapping input data for: %s\n"
+            "  - Keeping:  %s\n"
+            "      - time range:  %s -> %s, ntimes = %lu\n"
+            "      - DOD version: %s\n"
+            "      - history:     %s\n"
+            "  - Skipping: %s\n"
+            "      - time range:  %s -> %s, ntimes = %lu\n"
+            "      - DOD version: %s\n"
+            "      - history:     %s\n",
+            g1->parent->name,
+            g1->name,
+            format_timeval(&st1, ts11), format_timeval(&et1, ts12), nt1,
+            dod1,
+            history1,
+            g2->name,
+            format_timeval(&st2, ts21), format_timeval(&et2, ts22), nt2,
+            dod2,
+            history2);
+
+        cds_delete_group(g2);
+    }
+    else {
+        DSPROC_WARNING(
+            "Filtering overlapping input data for: %s\n"
+            "  - Keeping:  %s\n"
+            "      - time range:  %s -> %s, ntimes = %lu\n"
+            "      - DOD version: %s\n"
+            "      - history:     %s\n"
+            "  - Skipping: %s\n"
+            "      - time range:  %s -> %s, ntimes = %lu\n"
+            "      - DOD version: %s\n"
+            "      - history:     %s\n",
+            g2->parent->name,
+            g2->name,
+            format_timeval(&st2, ts21), format_timeval(&et2, ts22), nt2,
+            dod2,
+            history2,
+            g1->name,
+            format_timeval(&st1, ts11), format_timeval(&et1, ts12), nt1,
+            dod1,
+            history1);
+
+        cds_delete_group(g1);
+    }
+
+CLEANUP_AND_EXIT:
+
+    if (history1) free(history1);
+    if (history2) free(history2);
+
+    return(retval);
+}
+
+/**
+ *  Private: Check for overlapping observations in the specified CDSGroup.
+ *
+ *  If overlapping observation are found, this function will call
+ *  _dsproc_compare_overlapping_obs() to determine how to handle them.
+ *
+ *  @param  parent  - pointer to the parent CDSGroup
+ *
+ *  @return
+ *    -  1 no overlapping observations or all overlaps were filtered out.
+ *    -  0 found overlaping observations and they were *not* filtered out.
+ */
+int _dsproc_check_for_overlapping_obs(CDSGroup *parent)
+{
+    int        o1,  o2;  // obs index
+    CDSGroup  *g1, *g2;
+    size_t     nt1, nt2; // num times
+    timeval_t  st1, st2; // start times
+    timeval_t  et1, et2; // end times
+    int        status;
+
+    DEBUG_LV1( DSPROC_LIB_NAME,
+        "Checking for overlapping observations in input data for: %s\n",
+        cds_get_object_path(parent));
+
+    if (parent->ngroups < 2) {
+        return(parent->ngroups);
+    }
+
+    o1 = 0;
+    o2 = 1;
+
+    while (o2 < parent->ngroups) {
+
+        g1 = parent->groups[o1];
+        g2 = parent->groups[o2];
+
+        nt1 = cds_get_time_range(g1, &st1, &et1);
+        nt2 = cds_get_time_range(g2, &st2, &et2);
+
+        if (TV_GT(st2, et1)) {
+            /* The start time of obs2 is greater that the end time of obs1. */
+            o1 += 1;
+            o2 += 1;
+        }
+        else {
+            /* Found overlap */
+
+            status = _dsproc_compare_overlapping_obs(
+                g1, nt1, st1, et1,
+                g2, nt2, st2, et2);
+            
+            if (status == 0) {
+                // Overlaps were found and *not* filtered out.
+                return(0);
+            }
+
+            /* If we get here all overlaps were filtered out.
+             * In this case the obs indexes are still correct
+             * for the next pass through the loop. */
+        }
+    }
+
+    return(1);
+}
+
+/**
  *  Private: Merge all the observations in the specified CDSGroup.
  *
  *  If an error occurs in this function it will be appended to the log and
@@ -41,7 +295,6 @@ extern DSProc *_DSProc; /**< Internal DSProc structure */
  *
  *  @return
  *    -  number of observations after merge
- *    -  0 if there were less then 2 observations found in the group
  *    - -1 if an error occurred
  */
 int _dsproc_merge_obs(CDSGroup *parent)
@@ -68,6 +321,12 @@ int _dsproc_merge_obs(CDSGroup *parent)
     DEBUG_LV1( DSPROC_LIB_NAME,
         "Merging observations for %s\n",
         cds_get_object_path(parent));
+
+    /* Check for overlapping observations. */
+
+    if (!_dsproc_check_for_overlapping_obs(parent)) {
+        return(-1);
+    }
 
     /* Merge observations */
 

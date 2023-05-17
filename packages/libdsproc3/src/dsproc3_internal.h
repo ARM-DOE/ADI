@@ -315,6 +315,8 @@ int     dsproc_validate_datastream_data_time(
 
 void    dsproc_close_untouched_files(void);
 
+int     dsproc_get_nfs_time(const char *dir_path, timeval_t *nfs_time);
+
 void    dsproc_set_max_open_files(int ds_id, int max_open);
 
 /*@}*/
@@ -445,14 +447,17 @@ int dsproc_filter_var_nans(CDSVar *var);
 int dsproc_filter_dataset_nans(CDSGroup *dataset, int warn);
 
 /** Flag to resest overlap filtering back to duplicate records only */
-#define FILTER_DUPS_ONLY   0x00
+#define FILTER_DUP_RECS    0x00
 /** Flag to filter records that are not in chronological order */
 #define FILTER_TIME_SHIFTS 0x01
 /** Flag to filter records that have the same times but different data values */
-#define FILTER_OVERLAPS    0x02
-/** Same as FILTER_TIME_SHIFTS | FILTER_OVERLAPS */
-#define FILTER_ALL         FILTER_TIME_SHIFTS | FILTER_OVERLAPS
+#define FILTER_DUP_TIMES   0x02
+/** Flag to filter overlaping observations in the input data */
+#define FILTER_INPUT_OBS   0x04
+/** Same as FILTER_TIME_SHIFTS | FILTER_DUP_TIMES | FILTER_INPUT_OBS */
+#define FILTER_OVERLAPS    FILTER_TIME_SHIFTS | FILTER_DUP_TIMES | FILTER_INPUT_OBS
 
+int  dsproc_get_overlap_filtering_mode(void);
 void dsproc_set_overlap_filtering_mode(int mode);
 
 /*@}*/
@@ -486,6 +491,8 @@ int dsproc_qc_solar_obstruction_check(
         time_t *times,
         double *azimuths,
         double *elevations,
+        int     has_time_bounds,
+        double  latitude,
         CDSVar *qc_var);
 
 int dsproc_qc_solar_obstruction_checks(
@@ -757,6 +764,12 @@ int dsproc_set_coordsys_trans_param(
  *  @defgroup DSPROC_DEPRECATED Deprecated
  */
 /*@{*/
+
+/** Deprecated: New code should use FILTER_DUP_RECS */
+#define FILTER_DUPS_ONLY   0x00
+
+/** Deprecated: New code should use FILTER_OVERLAPS */
+#define FILTER_ALL  FILTER_TIME_SHIFTS | FILTER_DUP_TIMES
 
 /*
 void    dsproc_ingest_main(

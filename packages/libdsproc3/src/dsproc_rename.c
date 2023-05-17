@@ -139,6 +139,7 @@ static int _dsproc_rename(
     int         dot_count;
     char        rename_error[2*PATH_MAX];
     int         rename_file;
+    int         force_rename = 0;
 
     memset(&time_stamp_tm, 0, sizeof(struct tm));
 
@@ -276,6 +277,11 @@ static int _dsproc_rename(
 
     if (access(done_dir, F_OK) == 0) {
         dest_path = done_dir;
+
+        /* When moving files to the .done directory we can force the rename
+         * if the destination file with a different MD5 exists. */
+
+        force_rename = 1;
     }
     else if (errno != ENOENT) {
 
@@ -349,7 +355,6 @@ static int _dsproc_rename(
     if (access(dest_file, F_OK) == 0) {
 
         sprintf(rename_error,
-            "\n"
             "Found existing destination file while renaming source file:\n"
             " -> from: %s\n"
             " -> to:   %s\n",
@@ -405,7 +410,7 @@ static int _dsproc_rename(
 
             /* The MD5s do not match */
 
-            if (!force_mode) {
+            if (!force_mode && !force_rename) {
                 ERROR( DSPROC_LIB_NAME,
                     "%s"
                     " -> source and destination files have different MD5s\n",
@@ -419,7 +424,7 @@ static int _dsproc_rename(
                 WARNING( DSPROC_LIB_NAME,
                     "%s"
                     " -> source and destination files have different MD5s\n"
-                    " -> force option enabled: determining unique file name\n",
+                    " -> determining unique file name\n",
                     rename_error);
 
                 if (!_dsproc_get_unique_file_name(src_file, dest_file)) {

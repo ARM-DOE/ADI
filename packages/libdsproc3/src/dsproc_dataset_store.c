@@ -614,6 +614,7 @@ int dsproc_store_dataset(
     char       *time_desc   = (char *)NULL;
 
     char        timestamp[32];
+    char       *file_name;
     char        full_path[PATH_MAX];
     int         ncid;
 
@@ -804,14 +805,16 @@ int dsproc_store_dataset(
     *  of previously stored data, and verify that the remaining
     *  samples do not overlap any previously stored data.
     *
-    *  This is skipped when running in asynchronous mode because the
-    *  output files may not be created in chronological order, and
-    *  may still be in the process of being created.
+    *  This is skipped when running in asynchronous mode because it
+    *  requires accessing existing files. In asynchronous mode files
+    *  may not be created in chronological and may still be in the
+    *  process of being created.  Attempting to access these files
+    *  too soon can result in an "Unknown file format" error.
     *
     *  We also skip this if reprocessing mode is enabled and the
-    *  split mode is SPLIT_ON_STORE. I don't really like doing this,
-    *  but it was a requirement to maintain the behavior the VAP
-    *  developers were used to when using the older libraries.
+    *  split mode is SPLIT_ON_STORE. This was a requirement to
+    *  maintain the behavior the VAP developers were used to when
+    *  using the older libraries.
     *
     *************************************************************/
 
@@ -904,23 +907,26 @@ int dsproc_store_dataset(
 
     dsfile = (DSFile *)NULL;
 
-    if (!async_mode && !newfile &&
-        ds->split_mode != SPLIT_ON_STORE) {
+    if (!newfile && ds->split_mode != SPLIT_ON_STORE) {
 
         /************************************************************
         * Check for an existing file we should append this dataset to
         *************************************************************/
 
-        status = _dsproc_find_dsfiles(ds->dir, NULL, &out_begin, &dsfiles);
-
-        if (status < 0) {
-            goto ERROR_EXIT;
+        if (async_mode) {
+            status = _dsproc_get_last_updated_dsfile(ds, &dsfile);
+            if (status < 0) goto ERROR_EXIT;
+        }
+        else {
+            status = _dsproc_find_dsfiles(ds->dir, NULL, &out_begin, &dsfiles);
+            if (status < 0) goto ERROR_EXIT;
+            if (status > 0) {
+                dsfile = dsfiles[0];
+                free(dsfiles);
+            }
         }
 
         if (status > 0) {
-
-            dsfile = dsfiles[0];
-            free(dsfiles);
 
             /************************************************************
             * Make sure the begin time of the output dataset is after
@@ -1052,8 +1058,9 @@ int dsproc_store_dataset(
                 goto ERROR_EXIT;
             }
 
-            ncid     = dsfile->ncid;
-            nc_start = dsfile->ntimes;
+            file_name = dsfile->name;
+            ncid      = dsfile->ncid;
+            nc_start  = dsfile->ntimes;
 
             if (!_dsproc_update_stored_metadata(out_dataset, ncid)) {
                 goto ERROR_EXIT;
@@ -1083,6 +1090,8 @@ int dsproc_store_dataset(
 
             snprintf(full_path, PATH_MAX, "%s/%s.%s.%s",
                 ds_path, ds->name, timestamp, ds->extension);
+
+            file_name = strrchr(full_path, '/') + 1;
 
             /* Create the file */
 
@@ -1194,6 +1203,15 @@ int dsproc_store_dataset(
              * if this directory is accessed again */
 
             ds->dir->stats.st_mtime = 0;
+        }
+
+        /************************************************************
+        *  Keep track of the files that the current process has
+        *  created or updated.
+        *************************************************************/
+
+        if (!_dsproc_add_updated_dsfile_name(ds, file_name)) {
+            goto ERROR_EXIT;
         }
 
     } /* end loop over split intervals */

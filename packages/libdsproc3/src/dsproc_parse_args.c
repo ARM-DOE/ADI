@@ -32,6 +32,8 @@ extern DSProc *_DSProc; /**< Internal DSProc structure */
 */
 static char _CommandLine[8192];
 
+static char *_DefaultProcName = (char *)NULL;
+
 /**
 *  List of all internally defined command line options
 */
@@ -59,6 +61,7 @@ struct {
     { '\0', "disable-email"      },
     { '\0', "dynamic-dods"       },
     { '\0', "files"              },
+    { '\0', "filter-overlaps"    },
     { '\0', "log-dir"            },
     { '\0', "log-file"           },
     { '\0', "log-id"             },
@@ -653,7 +656,6 @@ static void _dsproc_print_advanced_options(FILE *output_stream, int type)
 "                        - disable the process lock file\n"
 "                        - disable checks for chronological data processing\n"
 "                        - disable overlap checks with previously processed data\n"
-"                        - force new file to be created for every output dataset\n"
 "\n"
 "  --disable-db-updates  Disabling database updates will prevent the process\n"
 "                        from storing runtime status information in the\n"
@@ -670,7 +672,25 @@ static void _dsproc_print_advanced_options(FILE *output_stream, int type)
     if (type == 1) { // ingest
         fprintf(output_stream,
 "\n"
+"  --file-list    file   Full path to the file containing the list of files to\n"
+"                        process. This file must have one file name per line.\n"
+"\n"
 "  --files        files  Comma separated list of files to process.\n"
+"\n"
+"  --filter-overlaps     Filter overlapping records in the output datasets.\n"
+"                        This includes overlapping records within the current\n"
+"                        dataset and records that overlap with previously\n"
+"                        processed data.\n"
+        );
+    }
+    else if (type == 2) { // vap
+        fprintf(output_stream,
+"\n"
+"  --filter-overlaps     Filter overlapping observations in the input datasets.\n"
+"                        When filtering overlapping observations, the one with\n"
+"                        the most recent creation time will be used if the\n"
+"                        number of samples is 75%% or more of the previous one,\n"
+"                        otherwise, the previous observation will be used.\n"
         );
     }
 
@@ -867,9 +887,14 @@ static void _dsproc_ingest_exit_usage(
 
     fflush(stderr);
     fflush(stdout);
-    
+
     if (nproc_names != 1) {
-        proc_name_arg  = " -n proc_name";
+        if (_DefaultProcName) {
+            proc_name_arg  = " [-n proc_name]";
+        }
+        else {
+            proc_name_arg  = " -n proc_name";
+        }
         proc_name_desc =
         "\n"
         "  -n, --name      name  Process name as defined in the PCM database.\n";
@@ -935,8 +960,17 @@ program_name, proc_name_arg, proc_name_desc);
             "VALID PROCESS NAMES\n\n");
 
         for (i = 0; i < nproc_names; i++) {
-            fprintf(output_stream,
-                "    %s\n", proc_names[i]);
+
+            if (_DefaultProcName &&
+                strcmp(proc_names[i], _DefaultProcName) == 0) {
+                
+                fprintf(output_stream,
+                    "    %s (default)\n", proc_names[i]);
+            }
+            else {
+                fprintf(output_stream,
+                    "    %s\n", proc_names[i]);
+            }
         }
 
         fprintf(output_stream, "\n");
@@ -976,7 +1010,12 @@ static void _dsproc_vap_exit_usage(
     fflush(stdout);
     
     if (nproc_names != 1) {
-        proc_name_arg  = " -n proc_name";
+        if (_DefaultProcName) {
+            proc_name_arg  = " [-n proc_name]";
+        }
+        else {
+            proc_name_arg  = " -n proc_name";
+        }
         proc_name_desc =
         "\n"
         "  -n, --name      name  Process name as defined in the PCM database.\n";
@@ -1059,8 +1098,17 @@ date_args_desc, date_opts_desc);
             "VALID PROCESS NAMES\n\n");
 
         for (i = 0; i < nproc_names; i++) {
-            fprintf(output_stream,
-                "    %s\n", proc_names[i]);
+
+            if (_DefaultProcName &&
+                strcmp(proc_names[i], _DefaultProcName) == 0) {
+                
+                fprintf(output_stream,
+                    "    %s (default)\n", proc_names[i]);
+            }
+            else {
+                fprintf(output_stream,
+                    "    %s\n", proc_names[i]);
+            }
         }
 
         fprintf(output_stream, "\n");
@@ -1136,7 +1184,17 @@ void _dsproc_ingest_parse_args(
 
             found = 1;
 
-            if (strcmp(opt, "--files") == 0) {
+            if (strcmp(opt, "--file-list") == 0) {
+
+                if (--argc <= 0) goto MISSING_ARG;
+                arg = *++argv;
+                if (*arg == '-') goto MISSING_ARG;
+
+                if (!_dsproc_read_input_file_list(arg)) {
+                    found = -1;
+                }
+            }
+            else if (strcmp(opt, "--files") == 0) {
 
                 if (--argc <= 0) goto MISSING_ARG;
                 arg = *++argv;
@@ -1149,6 +1207,9 @@ void _dsproc_ingest_parse_args(
             else if (strcmp(opt, "--help") == 0) {
                 _dsproc_ingest_exit_usage(
                     program_name, nproc_names, proc_names, 1, 0);
+            }
+            else if (strcmp(opt, "--filter-overlaps") == 0) {
+                dsproc_set_overlap_filtering_mode(FILTER_TIME_SHIFTS | FILTER_DUP_TIMES);
             }
             else if (strcmp(opt, "--force") == 0) {
                 dsproc_set_force_mode(1);
@@ -1228,6 +1289,10 @@ void _dsproc_ingest_parse_args(
     /************************************************************
     *  Check for required fields
     *************************************************************/
+
+    if (!_DSProc->name && _DefaultProcName) {
+        _DSProc->name = strdup(_DefaultProcName);
+    }
 
     if (!_DSProc->site     ||
         !_DSProc->facility ||
@@ -1376,6 +1441,9 @@ void _dsproc_vap_parse_args(
                 
                 _DSProc->cmd_line_end = secs1970;
             }
+            else if (strcmp(opt, "--filter-overlaps") == 0) {
+                dsproc_set_overlap_filtering_mode(FILTER_INPUT_OBS);
+            }
             else if (strcmp(opt, "--help") == 0) {
                 _dsproc_vap_exit_usage(
                     program_name, nproc_names, proc_names, 1, 0);
@@ -1508,6 +1576,10 @@ void _dsproc_vap_parse_args(
     *************************************************************/
 
     rt_mode = dsproc_get_real_time_mode();
+
+    if (!_DSProc->name && _DefaultProcName) {
+        _DSProc->name = strdup(_DefaultProcName);
+    }
 
     if (!_DSProc->site     ||
         !_DSProc->facility ||
@@ -1893,4 +1965,18 @@ MEM_ALLOC_ERROR:
         "Memory allocation error setting user pption\n");
 
     return(0);
+}
+
+/**
+ * Set the default process name.
+ * 
+ * This can be used for Ingests and VAPs that can be run for multiple
+ * process names. If a default process name is specified, it will be
+ * used if the executable is run without the -n option.
+ * 
+ *  @param  proc_name  Default process name
+ */
+void dsproc_set_default_proc_name(char *proc_name)
+{
+    _DefaultProcName = proc_name;
 }

@@ -434,7 +434,7 @@ static MapData *_dsproc_init_data_map(
                 }
 
                 if (!cds_define_var(out->dataset,
-                        "base_time", CDS_DOUBLE, 0, NULL) ||
+                        "base_time", CDS_INT, 0, NULL) ||
                     !cds_define_var(out->dataset,
                         "time_offset", CDS_DOUBLE, 1, dim_names)) {
 

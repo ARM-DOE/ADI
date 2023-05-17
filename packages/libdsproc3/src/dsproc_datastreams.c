@@ -104,6 +104,94 @@ static DataStream *_dsproc_create_datastream(
  */
 
 /**
+ *  Private: Add file that has been created or updated by the current process.
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  ds   - pointer to the DataStream structure
+ *  @param  file - name of the file that was created or updated
+ *
+ *  @return
+ *    - 1 if successful
+ *    - 0 if a memory allocation error occurred
+ */
+int _dsproc_add_updated_dsfile_name(DataStream *ds, char *file)
+{
+    int    nfiles;
+    int    fi;
+    char **new_list;
+
+    /* Check if the file has already been added to the list,
+     * and get the length of the list. */
+
+    nfiles = 0;
+    if (ds->updated_files) {
+        for (fi = 0; ds->updated_files[fi]; ++fi) {
+            nfiles += 1;
+            if (strcmp(ds->updated_files[fi], file) == 0) {
+                /* File already exists in the list */
+                return(1);
+            }
+        }
+    }
+
+    /* If we get here we need to add the file to the list. */
+
+    new_list = (char **)realloc(ds->updated_files, (nfiles+2)*sizeof(char *));
+    if (!new_list) goto MEMORY_ERROR;
+
+    ds->updated_files = new_list;
+
+    ds->updated_files[nfiles] = strdup(file);
+    if (!ds->updated_files[nfiles]) goto MEMORY_ERROR;
+
+    ds->updated_files[nfiles+1] = (char *)NULL;
+
+    return(1);
+
+MEMORY_ERROR:
+
+    ERROR( DSPROC_LIB_NAME,
+        "Memory allocation error adding file to updated datastream files list.\n");
+    dsproc_set_status(DSPROC_ENOMEM);
+    return(0);
+}
+
+/**
+ *  Private: Get the last file that was created or updated by the current process.
+ *
+ *  @param  ds     - pointer to the DataStream structure
+ *  @param  dsfile - output: pointer to the DSFile structure for the last file
+ *                   that was created or updated by the current process
+ *
+ *  @return
+ *    -  1  success
+ *    -  0  no files have been created or updated
+ *    - -1  if an error occured
+ */
+int _dsproc_get_last_updated_dsfile(DataStream *ds, DSFile **dsfile)
+{
+    int fi;
+
+    if (ds->updated_files) {
+
+        for (fi = 0; ds->updated_files[fi]; ++fi);
+
+       *dsfile = _dsproc_get_dsfile(ds->dir, ds->updated_files[fi-1]);
+        if (!*dsfile) return(-1);
+
+        if ((*dsfile)->ntimes == 0) {
+            return(0);
+        }
+
+        return(1);
+    }
+
+    return(0);
+}
+
+/**
  *  Private: Free the fetched dataset in a DataStream structure.
  *
  *  @param  ds - pointer to the DataStream structure
@@ -162,6 +250,8 @@ void _dsproc_free_datastream_metadata(DataStream *ds)
  */
 void _dsproc_free_datastream(DataStream *ds)
 {
+    int fi;
+
     if (ds) {
 
         if (ds->name)        free((void *)ds->name);
@@ -177,6 +267,13 @@ void _dsproc_free_datastream(DataStream *ds)
 
         if (ds->ret_cache)   _dsproc_free_ret_ds_cache(ds->ret_cache);
         if (ds->dsvar_dqrs)  _dsproc_free_dsvar_dqrs(ds->dsvar_dqrs);
+
+        if (ds->updated_files) {
+            for (fi = 0; ds->updated_files[fi]; ++fi) {
+                free(ds->updated_files[fi]);
+            }
+            free(ds->updated_files);
+        }
 
         free(ds);
     }

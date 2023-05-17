@@ -107,6 +107,8 @@ int dsproc_setopt(
         const char  *arg_name,
         const char  *opt_desc);
 
+void dsproc_set_default_proc_name(char *proc_name);
+
 void dsproc_use_nc_extension(void);
 
 int dsproc_main(
@@ -496,6 +498,14 @@ int     dsproc_set_file_name_time_patterns(
 /*@{*/
 
 const char *dsproc_dataset_name(CDSGroup *dataset);
+
+int         dsproc_get_dataset_creation_info(
+                CDSGroup  *dataset,
+                char     **history,
+                time_t    *time,
+                char     **host,
+                char     **user,
+                char     **process);
 
 int         dsproc_get_dataset_location(
                 CDSGroup *dataset,
@@ -1110,6 +1120,9 @@ void      dsproc_print_dataset_object(
 /** No Output Data Found */
 #define DSPROC_ENOOUTDATA    "No Output Data Created"
 
+/** "Missing Required Variable(s) in Input Datastream(s) */
+#define DSPROC_EMISSINGREQVARS "Missing Required Variable(s) in Input Datastream(s)"
+
 /** Could Not Initialize Signal Handlers */
 #define DSPROC_EINITSIGS     "Could Not Initialize Signal Handlers"
 
@@ -1184,6 +1197,9 @@ void      dsproc_print_dataset_object(
 
 /** Found Overlapping Data Times */
 #define DSPROC_ETIMEOVERLAP  "Found Overlapping Data Times"
+
+/** Found Overlapping Input Datasets */
+#define DSPROC_EINDSOVERLAP  "Found Overlapping Input Datasets"
 
 /** Invalid Base Time */
 #define DSPROC_EBASETIME     "Could Not Get Base Time For Time Variable"

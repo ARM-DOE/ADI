@@ -345,12 +345,15 @@ int     _dsproc_find_next_dsfile(
 
 int     _dsproc_get_dsdir_files(DSDir *dir, char ***files);
 
+DSFile *_dsproc_get_dsfile(DSDir *dir, const char *name);
+
 time_t  _dsproc_get_file_name_time(
             DSDir      *dir,
             const char *file_name);
 
 int     _dsproc_open_dsfile(DSFile *file, int mode);
 
+int     _dsproc_read_input_file_list(const char *list_file);
 int     _dsproc_set_input_file_list(const char *cmd_line_arg);
 void    _dsproc_free_input_file_list(void);
 
@@ -496,7 +499,13 @@ struct DataStream {
     int         total_records;  /**< total number of records processed        */
     timeval_t   begin_time;     /**< time of the first record processed       */
     timeval_t   end_time;       /**< time of the last record processed        */
+
+    /** Files created or updated by current processing run */
+    char    **updated_files;
 };
+
+int  _dsproc_add_updated_dsfile_name(DataStream *ds, char *file);
+int  _dsproc_get_last_updated_dsfile(DataStream *ds, DSFile **dsfile);
 
 void _dsproc_free_datastream_fetched_cds(DataStream *ds);
 void _dsproc_free_datastream_out_cds(DataStream *ds);

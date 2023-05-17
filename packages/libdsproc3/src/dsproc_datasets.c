@@ -360,6 +360,76 @@ const char *dsproc_dataset_name(CDSGroup *dataset)
 }
 
 /**
+ *  Get file creation information from the history attribute.
+ *
+ *  This function will parse the first line of the history attribute
+ *  and return the time the file was created, the host that the file
+ *  was created on, the user that ran the process that created
+ *  the file, and the name of the process that created the file.
+ *
+ *  Memory will be allocated for the returned history, host, user,
+ *  and process strings, and must be freed by the calling process.
+ *
+ *  Output arguments can be NULL if they are not needed.
+ *
+ *  \param   dataset  pointer to the dataset
+ *  \param   history  output: copy of the history attribute value
+ *  \param   time     output: creation time of the file the dataset came from
+ *  \param   host     output: host the file was created on
+ *  \param   user     output: name of the user that created the file
+ *  \param   process  output: name of the process that created the file
+ *
+ *  \retval   1  if successful
+ *  \retval   0  history attribute does not exist or has invalid format
+ */
+int dsproc_get_dataset_creation_info(
+    CDSGroup  *dataset,
+    char     **history,
+    time_t    *time,
+    char     **host,
+    char     **user,
+    char     **process)
+{
+    CDSAtt *att; 
+    int     count;
+    int     YYYY, MM, DD, hh, mm, ss;
+    char    _host[256];
+    char    _user[256];
+    char    _proc[256];
+    char   *chrp;
+
+    att = cds_get_att(dataset, "history");
+    if (!att || !att->value.cp || att->length <= 0) {
+        return(0);
+    }
+
+    if (history) {
+        *history = strdup(att->value.cp);
+        // trim trailing newline character
+        chrp = *history + strlen(*history) - 1;
+        while (chrp >= *history && isspace(*chrp)) --chrp;
+        chrp++;
+        if (*chrp == '\n') *chrp = '\0';
+    }
+
+    _host[0] = _user[0] = _proc[0] = '\0';
+    YYYY = MM = DD = hh = mm = ss = 0;
+
+    count = sscanf(att->value.cp,
+        "created by user %s on machine %s at %d-%d-%d %d:%d:%d, using %s",
+        _user, _host, &YYYY, &MM, &DD, &hh, &mm, &ss, _proc);
+
+    if (count < 5) return(0);
+
+    if (time)    *time    = get_secs1970(YYYY, MM, DD, hh, mm, ss);
+    if (host)    *host    = strdup(_host);
+    if (user)    *user    = strdup(_user);
+    if (process) *process = strdup(_proc);
+
+    return(1);
+}
+
+/**
  *  Get the values of the lat, lon, and alt variables in a dataset.
  *
  *  All output arguments can be NULL if the values are not needed.

@@ -475,9 +475,6 @@ static int solarposition(
 *  alt == -1 to zero at alt == -2.  This eliminates the discontinuity at alt
 *  == -1, and might even be kinda scientifically justified.
 *
-*  If an error occurs in this function it will be appended to the log and
-*  error mail messages, and the process status will be set appropriately.
-*
 *  @param  secs1970   - Seconds since 1970 UTC
 *  @param  latitude   - Observation site geographic latitude. 
 *                       [degrees.fraction, North positive]
@@ -567,15 +564,6 @@ int dsproc_solar_position(
 
     /* return 1 for success, 0 for bad input */
     if (status != 0) {
-
-        ERROR( DSPROC_LIB_NAME,
-            "Solar position input parameter(s) out of range:\n"
-            "   -> time (UTC): %ld\n"
-            "   -> latitude:   %g\n"
-            "   -> longitude:  %g\n",
-            secs1970, latitude, longitude);
-
-        dsproc_set_status("Could Not Calculate Solar Position");
         return(0);
     }
 

@@ -363,7 +363,7 @@ int _dsproc_filter_duplicate_samples(
 
             if (!_dsproc_compare_samples(dataset, tj, dataset, ti, ndups)) {
 
-                if (gFilterOverlaps & FILTER_OVERLAPS || force_mode) {
+                if (gFilterOverlaps & FILTER_DUP_TIMES || force_mode) {
                     noverlaps    = ndups;
                     overlap_type = 2; // times match but data values do not
                     ndups        = 0;
@@ -614,7 +614,7 @@ int _dsproc_filter_stored_samples(
         return(0);
     }
 
-    if (gFilterOverlaps & FILTER_OVERLAPS || force_mode) {
+    if (gFilterOverlaps & FILTER_DUP_TIMES || force_mode) {
 
         obs_ntimes = 1;
         if (!_dsproc_fetch_timevals(ds,
@@ -771,7 +771,7 @@ int _dsproc_filter_stored_samples(
                 /* Check if these are duplicate or overlapping records */
 
                 if (!_dsproc_compare_samples(dataset, ti, obs, tj, ndups)) {
-                    if (gFilterOverlaps & FILTER_OVERLAPS || force_mode) {
+                    if (gFilterOverlaps & FILTER_DUP_TIMES || force_mode) {
                         noverlaps    = ndups;
                         ndups        = 0;
                         overlap_type = 2; // times match but data values do not
@@ -1231,32 +1231,56 @@ int dsproc_filter_dataset_nans(CDSGroup *dataset, int warn)
 /**
  *  Filter overlapping data records.
  *
- *  This switch can be used to configure the filtering logic to remove
+ *  This function can be used to configure the filtering logic to remove
  *  data records from a dataset that overlap with records in either the
- *  current dataset or previously stored data.
+ *  current dataset or previously stored data.  It can also be used to
+ *  remove overlapping observations in the input data for processes that
+ *  use the VAP or Hybrid Ingest processing models.
  *
  *  The available modes are:
  *
- *    - FILTER_DUPS_ONLY:   This is the default setting and can be used to
- *                          reset the filtering mode back to duplicate
- *                          records only.
+ *    - FILTER_DUP_RECS:    This is the default setting and can be used to
+ *                          reset the filtering mode back to only filtering
+ *                          records in the output datasets with duplicate
+ *                          times and data values.
  *
- *    - FILTER_TIME_SHIFTS: Filter records that are not in chronological order.
- *                          This filters data records with times that fall
- *                          in-between two records in the either the current
- *                          dataset or previously stored data.
+ *    - FILTER_TIME_SHIFTS: Filter overlapping records in the output datasets
+ *                          that are not in chronological order. This filters
+ *                          data records with times that fall in-between two
+ *                          records in either the current dataset or previously
+ *                          stored data.
  *
- *    - FILTER_OVERLAPS:    Filter records with the same times but different
- *                          data values as records in the either the current
- *                          dataset or previously stored data.
+ *    - FILTER_DUP_TIMES:   Filter overlapping records in the output datasets
+ *                          that have the same times but different data values
+ *                          as records in either the current dataset or
+ *                          previously stored data.
  *
- *    - FILTER_ALL:         Same as FILTER_TIME_SHIFTS | FILTER_OVERLAPS.
+ *    - FILTER_INPUT_OBS:   Filter overlapping observations in the input
+ *                          datasets. This mode is only relevant for VAPS and
+ *                          Hybrid Ingests. When filtering overlapping
+ *                          observations, the one with the most recent creation
+ *                          time will be used if the number of samples is 75%
+ *                          or more of the previous one, otherwise, the previous
+ *                          observation will be used.
+ *
+ *    - FILTER_OVERLAPS:    Same as FILTER_TIME_SHIFTS | FILTER_DUP_TIMES | FILTER_INPUT_OBS.
  *
  *  @param  mode  - filtering mode
  */
 void dsproc_set_overlap_filtering_mode(int mode)
 {
     gFilterOverlaps = mode;
+}
+
+/**
+ *  Get current overlap filtering mode.
+ *
+ *  @return
+ *    - mode  current overlap filtering mode
+ */
+int dsproc_get_overlap_filtering_mode(void)
+{
+    return(gFilterOverlaps);
 }
 
 /*******************************************************************************

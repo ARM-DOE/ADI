@@ -296,7 +296,7 @@ static int _dsproc_init_ret_dsfile(
     timeval_t    file_end_time;
 
     RetDsFile   *ret_file;
-    char        *last_dot;
+    // char        *last_dot;
     CDSGroup    *obs_group;
 
     CDSVar      *time_var;
@@ -441,12 +441,26 @@ static int _dsproc_init_ret_dsfile(
 
     /* Create the CDS "observation" group for this file */
 
-    last_dot = strrchr(dsfile->name, '.');
-    if (last_dot) *last_dot = '\0';
+    /* It's possible to have two files that only differ by file extension
+     * (.cdf vs .nc) when the previous files were not propely removed from
+     * the Archive. Stripping the extension here causes a collision with
+     * the obs_group names and results in a somewhat cryptic error...
+     *
+     * Therefore, the logic to strip the file extension from the obs_group
+     * name needs to be removed. There wasn't really a technical reason for
+     * stripping the extension it so this "shouldn't" cause any issues...
+     *
+     * The process will still fail later due to overlapping input observations,
+     * but at least it will have a meaningful error message.  Unless of course
+     * the --filter-overlaps option is specified on the command line, in which
+     * case the process will filter the overlap and continue successfully. */
+
+    // last_dot = strrchr(dsfile->name, '.');
+    // if (last_dot) *last_dot = '\0';
 
     obs_group = cds_define_group(cache->ds_group, dsfile->name);
 
-    if (last_dot) *last_dot = '.';
+    // if (last_dot) *last_dot = '.';
 
     if (!obs_group) {
 
@@ -1714,14 +1728,15 @@ static int _dsproc_retrieve_group(
     RetDataStream *ret_ds;
     RetDsCache    *cache;
     int           *found_var_flags;
-    int            found_files;
     int            in_dsid;
     DataStream    *in_ds;
     int            status;
     int            rdsi, rvi;
 
-    Mail          *warning_mail  = msngr_get_mail(MSNGR_WARNING);
-    int            warning_count = 0;
+    int            found_files   = 0;
+    int            found_gap     = 0;
+    int            missing_req_count = 0;
+
     DataStream    *last_ds       = (DataStream *)NULL;
     int            ds_count      = 0;
     int            scan_mode     = 0;
@@ -1731,13 +1746,11 @@ static int _dsproc_retrieve_group(
 
     timeval_t      search_begin    = { 0, 0 };
     timeval_t      fetched_timeval = { 0, 0 };
-    int            wait_for_data   = 0;
     size_t         len;
 
     /* Allocate memory for a flags array to indicate if a variable was found */
 
     found_var_flags = (int *)calloc(ret_group->nvars, sizeof(int));
-    found_files     = 0;
 
     if (!found_var_flags) {
 
@@ -1815,26 +1828,26 @@ static int _dsproc_retrieve_group(
 
         if (status == 0) {
 
-            /* No data files were found for this processing interval
-             * so we need to check if this is a gap in the input data
-             * or if we need to wait for the input data to be created. */
+            /* No data was found within the current processing interval
+             * so we need to check if this is a gap in the input data. */
 
             search_begin.tv_sec = end_time;
             len = 1;
 
-            if (!dsproc_fetch_timevals(in_dsid,
+            if (dsproc_fetch_timevals(in_dsid,
                 &search_begin, NULL,
                 &len, &fetched_timeval)) {
 
-                wait_for_data = 1;
+                /* Found data after the current processing interval. */
+                found_gap = 1;
             }
         }
         else { // status > 0
 
-            found_files = 1;
+            found_files += 1;
 
             /* Check if all variables have been found
-            * before moving on to the next datastream */
+             * before moving on to the next datastream */
 
             if (rdsi < ret_subgroup->ndatastreams - 1) {
 
@@ -1863,27 +1876,23 @@ static int _dsproc_retrieve_group(
 
             if (found_files) {
 
-                if (warning_count == 0) {
+                if (missing_req_count == 0) {
 
-                    if (warning_mail) {
-                        mail_unset_flags(warning_mail, MAIL_ADD_NEWLINE);
-                    }
-
-                    WARNING( DSPROC_LIB_NAME,
-                        "%s -> %s: Could not find data for required variables:\n",
+                    LOG( DSPROC_LIB_NAME,
+                        "Could not find data for required variable(s):\n",
                         format_secs1970(begin_time, ts1),
                         format_secs1970(end_time,   ts2));
                 }
 
-                warning_count++;
+                missing_req_count++;
 
                 if (ds_count == 1) {
-                    WARNING( DSPROC_LIB_NAME,
+                    LOG( DSPROC_LIB_NAME,
                         " - %s->%s\n",
                         last_ds->name, ret_group->vars[rvi]->name);
                 }
                 else {
-                    WARNING( DSPROC_LIB_NAME,
+                    LOG( DSPROC_LIB_NAME,
                         " - %s->%s\n",
                         ret_group->name, ret_group->vars[rvi]->name);
                 }
@@ -1893,38 +1902,111 @@ static int _dsproc_retrieve_group(
         }
     }
 
-    if (warning_count && warning_mail) {
-        WARNING( DSPROC_LIB_NAME, "\n");
-        mail_set_flags(warning_mail, MAIL_ADD_NEWLINE);
-    }
+    if (status == 0) {
 
-    if (status == 0 && wait_for_data) {
+        /* Not all required variables were found. */
 
-        // We need to wait for more input data to be created.
+        if (found_gap) {
+            /* Found gap in one or more input datastreams.
+             * Skip this processing interval. */
 
-        if (ds_count == 1) {
+            if (ds_count == 1) {
 
-            LOG( DSPROC_LIB_NAME,
-                "No data found for required datastream %s after %s\n"
-                " -> waiting for input data before continuing",
-                last_ds->name,
-                format_secs1970(begin_time, ts1));
+                if (scan_mode) {
+                    LOG( DSPROC_LIB_NAME,
+                        "Skipping:   Gap in required data for: %s\n",
+                        last_ds->name);
+                }
+                else {
+                    WARNING( DSPROC_LIB_NAME,
+                        "%s -> %s: Gap in required data for: %s\n"
+                        " -> skipping current processing interval\n",
+                        format_secs1970(begin_time, ts1),
+                        format_secs1970(end_time,   ts2),
+                        last_ds->name);
+                }
+            }
+            else {
+                if (scan_mode) {
+                    LOG( DSPROC_LIB_NAME,
+                        "Skipping:   Gap in required data for datastream group: %s\n",
+                        ret_group->name);
+                }
+                else {
+                    WARNING( DSPROC_LIB_NAME,
+                        "%s -> %s: Gap in required data for datastream group: %s\n"
+                        " -> skipping current processing interval\n",
+                        format_secs1970(begin_time, ts1),
+                        format_secs1970(end_time,   ts2),
+                        ret_group->name);
+                }
+            }
         }
-        else {
-            LOG( DSPROC_LIB_NAME,
-                "No data found for required datastream group %s after %s\n"
-                " -> waiting for input data before continuing",
-                ret_group->name,
-                format_secs1970(begin_time, ts1));
+        else { // status == 0 && found_gap == 0
+
+            if (found_files == 0) {
+
+                /* No files found for any of the input datastreams
+                 * after the start of the current processing interval. */
+
+                if (ds_count == 1) {
+
+                    LOG( DSPROC_LIB_NAME,
+                        "No data found for required datastream %s after %s\n"
+                        " -> waiting for input data before continuing",
+                        last_ds->name,
+                        format_secs1970(begin_time, ts1));
+                }
+                else {
+                    LOG( DSPROC_LIB_NAME,
+                        "No data found for required datastream group %s after %s\n"
+                        " -> waiting for input data before continuing",
+                        ret_group->name,
+                        format_secs1970(begin_time, ts1));
+                }
+
+                dsproc_set_status(DSPROC_ENODATA);
+            }
+            else if (found_files < ds_count) {
+
+                /* Not all required variables were found, but we are also
+                 * missing files for at least one of the input datastreams
+                 * after the start of the current processing interval. */
+
+                LOG( DSPROC_LIB_NAME,
+                    "Missing data for one or more required variables in datastream group %s after %s\n"
+                    " -> waiting for input data before continuing",
+                    ret_group->name,
+                    format_secs1970(begin_time, ts1));
+
+                dsproc_set_status(DSPROC_ENODATA);
+            }
+            else { // found_files == ds_count
+
+                /* We found files for all input datastreams,
+                 * but are still missing one or more required variables. */
+
+                if (ds_count == 1) {
+                    ERROR( DSPROC_LIB_NAME,
+                        "Missing required variable(s) in datastream: %s\n",
+                        last_ds->name);
+                }
+                else {
+                    ERROR( DSPROC_LIB_NAME,
+                        "Missing required variable(s) in input datastreams for group: %s\n",
+                        ret_group->name);
+                }
+
+                dsproc_set_status(DSPROC_EMISSINGREQVARS);
+            }
+
+            status = -1;
         }
-
-        dsproc_set_status(DSPROC_ENODATA);
-        status = -1;
     }
-    else if (found_files == 0) {
+    else { // status == 1
 
-        if (status == 1) {
-            // no files found for optional data
+        if (found_files == 0) {
+            // No files found for optional data.
             if (ds_count == 1) {
                 LOG( DSPROC_LIB_NAME,
                     "Missing:    %s (optional)\n",
@@ -1934,38 +2016,6 @@ static int _dsproc_retrieve_group(
                 LOG( DSPROC_LIB_NAME,
                     "Missing:    %s (optional datastreams group)\n",
                     ret_group->name);
-            }
-        }
-        else {
-            // no files found for required datastream
-            if (ds_count == 1) {
-
-                if (scan_mode) {
-                    LOG( DSPROC_LIB_NAME,
-                        "Skipping:   No data found within processing interval for: %s\n",
-                        last_ds->name);
-                }
-                else {
-                    WARNING( DSPROC_LIB_NAME,
-                        "%s -> %s: Could not find required data for: %s\n",
-                        format_secs1970(begin_time, ts1),
-                        format_secs1970(end_time,   ts2),
-                        last_ds->name);
-                }
-            }
-            else {
-                if (scan_mode) {
-                    LOG( DSPROC_LIB_NAME,
-                        "Skipping:   No data found within processing interval for datastreams group: %s\n",
-                        ret_group->name);
-                }
-                else {
-                    WARNING( DSPROC_LIB_NAME,
-                        "%s -> %s: Could not find required data for datastream group: %s\n",
-                        format_secs1970(begin_time, ts1),
-                        format_secs1970(end_time,   ts2),
-                        ret_group->name);
-                }
             }
         }
     }
