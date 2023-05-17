@@ -460,6 +460,14 @@ int mail_send(Mail *mail)
 
     iovcnt = 0;
 
+/*
+    if (mail->from) {
+        iov[iovcnt++].iov_base = "From: ";
+        iov[iovcnt++].iov_base = mail->from;
+        iov[iovcnt++].iov_base = "\n";
+    }
+*/
+
     iov[iovcnt++].iov_base = "To: ";
     iov[iovcnt++].iov_base = mail->to;
     iov[iovcnt++].iov_base = "\n";
@@ -482,6 +490,11 @@ int mail_send(Mail *mail)
     for (i = 0; i < iovcnt; i++) {
         iov[i].iov_len = strlen(iov[i].iov_base);
     }
+
+//printf("%s -F '%s' -t '%s'\n", gSendMailPath, mail->from, mail->to);
+//for (i = 0; i < iovcnt; i++) {
+//  printf("%s", iov[i].iov_base);
+//}
 
     /* Create the pipe */
 
@@ -523,7 +536,7 @@ int mail_send(Mail *mail)
 
         if (mail->from) {
             execl(gSendMailPath, gSendMailPath,
-                "-f", mail->from, "-t", mail->to, NULL);
+                "-F", mail->from, "-t", mail->to, NULL);
         }
         else {
             execl(gSendMailPath, gSendMailPath,

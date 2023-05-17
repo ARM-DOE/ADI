@@ -10,7 +10,7 @@ libmsngr_la_SOURCES = \
 	msngr_utils.c \
 	msngr_version.c
 
-libmsngr_la_CFLAGS  = -Wall -Wextra
+libmsngr_la_CFLAGS  = -Wall -Wextra -Wno-unused-parameter
 libmsngr_la_LDFLAGS = -avoid-version -no-undefined
 
 pkgconfigdir = $(libdir)/pkgconfig

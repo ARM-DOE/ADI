@@ -147,10 +147,9 @@ int lockfile_create(
     char  *lockfile_host;
     pid_t  lockfile_pid;
     time_t lockfile_time;
+    time_t current_time;
 
     int    retval = 1;
-
-    flags = 0; /* prevent compiler warning */
 
     snprintf(lockfile, PATH_MAX, "%s/%s", path, name);
 
@@ -255,21 +254,46 @@ int lockfile_create(
 
         lockfile_time = (time_t)atol(++chrp);
 
-        /* Check if this process is still running. */
+        /* Check if this process was started on the same host. */
 
-        pid_time = msngr_get_process_start_time(lockfile_pid);
+        if (strcmp(lockfile_host, hostname) == 0) {
 
-        if ((strcmp(lockfile_host, hostname) == 0) &&
-            (lockfile_time == pid_time) ) {
+            /* Check if this process is still running. */
 
-            snprintf(errstr, errlen,
-                "Lockfile exists:\n"
-                " -> %s\n"
-                " -> %s\n",
-                lockfile, lockfile_string);
+            pid_time = msngr_get_process_start_time(lockfile_pid);
 
-            free(lockfile_host);
-            return(0);
+            if (lockfile_time == pid_time) {
+
+                snprintf(errstr, errlen,
+                    "Lockfile exists:\n"
+                    " -> %s\n"
+                    " -> %s\n",
+                    lockfile, lockfile_string);
+
+                free(lockfile_host);
+                return(0);
+            }
+        }
+        else {
+
+            /* Process was started on a different host. */
+
+            current_time = time(NULL);
+            if (current_time - lockfile_time < 86400) {
+
+                snprintf(errstr, errlen,
+                    "Lockfile exists:\n"
+                    " -> %s\n"
+                    " -> %s\n",
+                    lockfile, lockfile_string);
+
+                free(lockfile_host);
+                return(0);
+            }
+            else {
+                /* Process was started over 1 day ago on a differnt host,
+                 * so assume it is a stale lockfile */
+            }
         }
 
         free(lockfile_host);
