@@ -550,3 +550,85 @@ int file_munmap(void *map_addr, size_t map_size)
 
     return(1);
 }
+
+/**
+ *  Get the mod time of a file as a timeval with usec precision.
+ *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
+ *
+ *  @param  full_path - full path to the file
+ *  @param  mod_time  - output: mod time of the file
+ *
+ *  @return
+ *    - 1 successful
+ *    - 0 if an error occured
+ */
+int file_mod_time(const char *full_path, timeval_t *mod_time)
+{
+    struct stat file_stats;
+
+    if (stat(full_path, &file_stats) != 0 ) {
+
+        ERROR( ARMUTILS_LIB_NAME,
+            "Could not stat file: %s\n"
+            " -> %s\n", full_path, strerror(errno));
+
+        return(0);
+    }
+    else {
+#ifdef __APPLE__
+        mod_time->tv_sec  = file_stats.st_mtimespec.tv_sec;
+        mod_time->tv_usec = file_stats.st_mtimespec.tv_nsec / 1000;
+#else
+        mod_time->tv_sec  = file_stats.st_mtim.tv_sec;
+        mod_time->tv_usec = file_stats.st_mtim.tv_nsec / 1000;
+#endif
+    }
+
+    return(1);
+}
+
+/**
+ *  Get network file system time.
+ *
+ *  This function will get the current time used by the file system
+ *  by creating a file in the specified directory and then returning
+ *  its mod time.
+ *
+ *  Error messages from this function are sent to the message handler
+ *  (see msngr_init_log() and msngr_init_mail()).
+ *
+ *  @param  dir_path - Path to the directory to create the temporary file 
+ *  @param  nfs_time - output: current file system time
+ *
+ *  @return
+ *    - 1 successful
+ *    - 0 if an error occured
+ */
+int get_nfs_time(const char *dir_path, timeval_t *nfs_time)
+{
+    char  tmp_file[PATH_MAX];
+    FILE *tmp_fp;
+    int   status;
+
+    snprintf(tmp_file, PATH_MAX, "%s/.get_nfs_time", dir_path);
+
+    unlink(tmp_file);
+    tmp_fp = fopen(tmp_file, "w");
+    if (!tmp_fp) {
+
+        ERROR( ARMUTILS_LIB_NAME,
+            "Could not open temporary file: %s\n"
+            " -> %s\n", tmp_file, strerror(errno));
+
+        return(0);
+    }
+
+    status = file_mod_time(tmp_file, nfs_time);
+
+    fclose(tmp_fp);
+    unlink(tmp_file);
+
+    return(status);
+}

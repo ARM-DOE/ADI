@@ -29,6 +29,8 @@
 #ifndef _FILEUTILS_H
 #define _FILEUTILS_H
 
+#include "armutils/time_utils.h"
+
 /**
  *  @defgroup ARMUTILS_FILE_UTILS File Utils
  */
@@ -52,6 +54,9 @@ int file_move(
 
 void *file_mmap(const char *file, size_t *map_size);
 int   file_munmap(void *map_addr, size_t map_size);
+
+int   file_mod_time(const char *full_path, timeval_t *mod_time);
+int   get_nfs_time(const char *dir_path, timeval_t *nfs_time);
 
 /*@}*/
 
