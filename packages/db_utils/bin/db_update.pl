@@ -378,7 +378,9 @@ sub revert_json_file($)
             return(0);
         }
 
-        $retval = $gDB->query_scalar($query, $args);
+        ($query, $args) = DBCORE::process_query_placeholders($query, $args);
+
+        $retval = $gDB->do($query, $args);
         unless (defined($retval)) {
             print_error(__LINE__, $gDB->error());
             return(0);
@@ -688,7 +690,7 @@ sub load_json_file($)
     my ($file) = @_;
     my $retval;
     my $dsdb;
-    
+
     $dsdb = DSDB->new();
     $dsdb->{'DBCORE'} = $gDB;
     $dsdb->disable_autocommit();

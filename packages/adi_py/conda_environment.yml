@@ -8,6 +8,4 @@ dependencies:
   - python=3.9
   - adi_py
   - act-atmos
-  - pip=22.3.1
-  - pip:
-    - numpy==1.23.1
+

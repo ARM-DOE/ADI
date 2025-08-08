@@ -20,7 +20,7 @@ from typing import Any, Callable, List, Union, Optional
 from .constants import ADIDatasetType, ADIAtts, SpecialXrAttributes, SplitMode, TransformAttributes
 from .logger import ADILogger
 from .utils import get_datastream_id, get_xr_datasets, sync_xr_dataset, get_datastream_files, adi_hook_exception_handler, \
-    DatastreamIdentifier
+    DatastreamIdentifier, correct_zero_length_dims
 
 try:
     import dsproc3 as dsproc
@@ -417,6 +417,16 @@ class Process:
                             f' datasets (one for each file).')
         return datasets[0]
 
+    @staticmethod
+    def get_output_dataset_by_dsid(dsid: int) -> Optional[xr.Dataset]:
+        datasets = Process.get_output_datasets_by_dsid(dsid)
+        if not datasets:
+            return None
+        if len(datasets) > 1:
+            raise Exception(f'Datastream "{dsid}" contains more than one observation (i.e., file) of data.  '
+                            f'Please use the get_output_datasets_by_dsid() method to get the full list of Xarray'
+                            f' datasets (one for each file).')
+        return datasets[0]
    
     @staticmethod
     def get_output_datasets(output_datastream_name: str) -> List[xr.Dataset]: 
@@ -432,21 +442,18 @@ class Process:
                 exist for the specified datastream / site / facility / coord system
                 then the list will be empty.
         -----------------------------------------------------------------------"""
+        # Before we serialize the ADI dataset to XArray, we have to correct 0-length dimensions
+        # This could happen if a dimension length is set at runtime, but there were no
+        # input variables available with that dimension.
+        correct_zero_length_dims(datastream_name=output_datastream_name)
         return get_xr_datasets(ADIDatasetType.OUTPUT, datastream_name=output_datastream_name)
 
     @staticmethod
-    def get_output_dataset_by_dsid(dsid: int) -> Optional[xr.Dataset]:
-        datasets = get_xr_datasets(ADIDatasetType.OUTPUT,  dsid=dsid)
-        if not datasets:
-            return None
-        if len(datasets) > 1:
-            raise Exception(f'Datastream "{dsid}" contains more than one observation (i.e., file) of data.  '
-                            f'Please use the get_output_datasets_by_dsid() method to get the full list of Xarray'
-                            f' datasets (one for each file).')
-        return datasets[0]
-    
-    @staticmethod
     def get_output_datasets_by_dsid(dsid: int) -> List[xr.Dataset]:
+        # Before we serialize the ADI dataset to XArray, we have to correct 0-length dimensions
+        # This could happen if a dimension length is set at runtime, but there were no
+        # input variables available with that dimension.
+        correct_zero_length_dims(dsid=dsid)
         return get_xr_datasets(ADIDatasetType.OUTPUT,  dsid=dsid)
 
     @staticmethod

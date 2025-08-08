@@ -381,6 +381,24 @@ static int validate_time_units_tests(void)
     fprintf(gLogFP, " - time_t: %ld\n", time1);
     fprintf(gLogFP, " - fixed:  %s\n", time_units);
     
+    /***************************/
+
+    sprintf(time_units, "seconds since 2024-10-01 00:00:00 0:00 UTC");
+    fprintf(gLogFP, "\n%s:\n", time_units);
+
+    time1 = cds_validate_time_units(time_units);
+    fprintf(gLogFP, " - time_t: %ld\n", time1);
+    fprintf(gLogFP, " - fixed:  %s\n", time_units);
+    
+    /***************************/
+
+    sprintf(time_units, "seconds since 2004-12-30 00:00:16 0:00 ");
+    fprintf(gLogFP, "\n'%s':\n", time_units);
+
+    time1 = cds_validate_time_units(time_units);
+    fprintf(gLogFP, " - time_t: %ld\n", time1);
+    fprintf(gLogFP, " - fixed:  '%s'\n", time_units);
+    
     free(time_units);
     return(1);
 }

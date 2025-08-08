@@ -16,7 +16,7 @@ libarmutils_la_SOURCES = \
 	string_utils.c \
 	time_utils.c
 
-libarmutils_la_CFLAGS  = -Wall -Wextra $(MSNGR_CFLAGS) $(OPENSSL_INCLUDES)
+libarmutils_la_CFLAGS  = -Wall -Wextra -Wno-unused-parameter $(MSNGR_CFLAGS) $(OPENSSL_INCLUDES)
 libarmutils_la_LDFLAGS = -avoid-version -no-undefined
 libarmutils_la_LIBADD  = $(MSNGR_LIBS) $(OPENSSL_LDFLAGS) $(OPENSSL_LIBS)
 

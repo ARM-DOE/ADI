@@ -18,7 +18,7 @@ from .utils import DatastreamIdentifier
 
 from .xarray_accessors import ADIDatasetAccessor, ADIDataArrayAccessor
 
-from .exception import SkipProcessingIntervalException
+from .exception import SkipProcessingIntervalException, DatasetConversionException, LogLevel
 
 from .logger import ADILogger
 

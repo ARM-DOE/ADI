@@ -15,8 +15,8 @@ import xarray as xr
 import cds3
 import dsproc3 as dsproc
 from .constants import SpecialXrAttributes, ADIAtts, ADIDatasetType
-from .exception import SkipProcessingIntervalException
-from .logger import ADILogger
+from .exception import SkipProcessingIntervalException, DatasetConversionException
+from .logger import ADILogger, LogLevel
 
 
 class DatastreamIdentifier(NamedTuple):
@@ -93,7 +93,14 @@ def adi_hook_exception_handler(hook_func: Callable,
                 if post_hook_func is not None:
                     post_hook_func()
 
-            except SkipProcessingIntervalException:
+            except SkipProcessingIntervalException as spe:
+                if spe.log_level == LogLevel.ERROR:
+                    ADILogger.error(spe.msg)
+                elif spe.log_level == LogLevel.WARNING:
+                    ADILogger.warning(spe.msg)
+                else:
+                    ADILogger.info(spe.msg)
+
                 ret_val = 0
 
             except Exception as e:
@@ -109,7 +116,7 @@ def adi_hook_exception_handler(hook_func: Callable,
                 # If we are in debug mode, then raise the exception back so that it can be better
                 # utilized by debuggers.
                 mode = os.environ.get('ADI_PY_MODE', 'production').lower()
-                if mode is 'development':
+                if mode == 'development':
                     raise e
 
             finally:
@@ -334,6 +341,12 @@ def get_time_data_as_datetime64(time_var: cds3.Var) -> np.ndarray:
         values converted to the np.datetime64 data type with microsecond
         precision.
     -----------------------------------------------------------------------"""
+    # If this dataset has no time data, then throw a readable exception and let developer
+    # deal with it (since each process may want to handle it differently).
+    if time_var.sample_count == 0:
+        raise DatasetConversionException(
+            'XArray dataset could not be created because the ADI dataset has no time data!')
+
     microsecond_times = np.asarray(dsproc.get_sample_timevals(time_var, 0)) * 1000000
     datetime64_times =  np.array(pd.to_datetime(microsecond_times, unit='us'), np.datetime64)
     return datetime64_times
@@ -804,6 +817,66 @@ def sync_xarray(xr_dataset: xr.Dataset, adi_dataset: cds3.Group):
 
     # Sync variables
     _sync_vars(xr_dataset, adi_dataset)
+
+
+def correct_zero_length_dims(dsid: Optional[int] = None, datastream_name: Optional[str] = None):
+    """------------------------------------------------------------------------------------------
+    Using dsproc APIs, inspect the given output dataset.  If there are dimensions with 0 length,
+    correct them to be of length 1.  For corresponding coordinate variables, create a data
+    array of length 1 and set the value to -9999.
+
+    Apparently you only have to add values for the coordinate variable - Krista says ADI will
+    automatically fill out missing values for the second dimension for data variables.
+
+    Args:
+        dsid (Optional[int]): The dsproc dsid of the dataset (used to find the dataset)
+
+        datastream_name (Optional[str]): Or alternatively, the datastream name of the output dataset
+
+    ------------------------------------------------------------------------------------------"""
+    if dsid is None:
+        dsid = get_datastream_id(datastream_name, dataset_type=ADIDatasetType.OUTPUT)
+
+    if dsid is not None:
+        # Loop through all the files in the dataset
+        for i in itertools.count(start=0):
+            adi_dataset: cds3.Group = dsproc.get_output_dataset(dsid, i)
+            if not adi_dataset:
+                break
+
+            # Get all the dimensions associated with this dataset 
+            adi_dims: List[cds3.Dim] = get_dataset_dims(adi_dataset)
+
+            # Loop over dimensions
+            for dim in adi_dims:
+                dimension_name: str = dim.get_name()
+                if dimension_name == "time" or dimension_name == "bound": 
+                    continue
+
+                # Check to see if any dimensions have zero length and if so set their 
+                # length to 1 and any dependent variable values to missing.
+                if dim.get_length() == 0:
+                    new_dim_length: int = 1
+
+                    # Change the dimension length to 1 in dsproc
+                    ADILogger.info(f'No length set for {dimension_name}, setting length to 1')
+                    status = dsproc.set_dim_length(adi_dataset, dimension_name, new_dim_length)
+                    if status == 0:
+                        raise Exception(
+                            f'Could not set dimension {dimension_name} length = {new_dim_length}')
+
+                    # If there is a coordinate variable for this dimension, then
+                    # use dsproc to set value to -9999
+                    adi_var = dsproc.get_output_var(dsid, dimension_name, obs_index=i)
+                    if adi_var is None:
+                        ADILogger.info(f'No coordinate variable exists for dimension {dimension_name}.')
+                    else:
+                        coordvar_data = dsproc.alloc_var_data_index(adi_var, 0, new_dim_length)
+                        if coordvar_data is None:
+                            raise Exception(
+                                f'Could not allocate data for {dimension_name} coordinate variable.')
+                        
+                        coordvar_data[0] = -9999   
 
 
 def get_xr_datasets(

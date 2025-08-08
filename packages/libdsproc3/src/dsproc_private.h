@@ -254,12 +254,14 @@ void _dsproc_free_var_dqrs(VarDQR **var_dqrs);
 /*@{*/
 
 typedef struct DSDir DSDir; /**< Datastream Directory Structure */
+typedef struct DSFile DSFile; /**< Datastream File Structure */
 
 /**
  *  Datastream File Structure.
  */
-typedef struct {
+struct DSFile {
 
+    DSFile      *next;       /**< next file in the linked list                */
     DSDir       *dir;        /**< pointer to the parent datastream directory  */
     char        *name;       /**< name of the file                            */
     char        *full_path;  /**< the full path to the file                   */
@@ -276,8 +278,7 @@ typedef struct {
     timeval_t   *timevals;   /**< array of time values                        */
 
     CDSGroup    *dod;        /**< CDSGroup containing the DOD for this file   */
-
-} DSFile;
+};
 
 /**
  *  Datastream Directory Structure.
@@ -294,9 +295,7 @@ struct DSDir {
     char      **files;       /**< list of files in the directory       */
     int         max_files;   /**< allocated length of the files list   */
 
-    int         ndsfiles;    /**< number of cached dsfiles             */
-    DSFile    **dsfiles;     /**< cached dsfiles                       */
-    int         max_dsfiles; /**< allocated length of the dsfiles list */
+    DSFile     *dsf_list;    /**< linked list of cached dsfiles        */
 
     int         nopen;       /**< number of open files                 */
     int         max_open;    /**< maximum number of open files         */

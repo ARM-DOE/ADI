@@ -10,3 +10,6 @@ cdef class PyProcLoc:
     cdef cdsproc3.ProcLoc *cobj
     cdef set_procloc(self, cdsproc3.ProcLoc *obj)
 
+cdef class PyVarDQR:
+    cdef cdsproc3.VarDQR *cobj
+    cdef set_vardqr(self, cdsproc3.VarDQR *obj)

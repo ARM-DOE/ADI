@@ -470,6 +470,8 @@ int     dsproc_get_datastream_files(int ds_id, char ***file_list);
 
 time_t  dsproc_get_file_name_time(int ds_id, const char *file_name);
 
+int     dsproc_get_output_files(int ds_id, char ***file_list);
+
 void    dsproc_set_datastream_file_extension(
             int         ds_id,
             const char *extension);

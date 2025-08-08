@@ -348,7 +348,7 @@ static int _null_row_bug(PGconn *pgconn, PGresult *pgres)
 DBStatus pgsql_connect(DBConn *dbconn)
 {
     PGconn *pgconn;
-    char    conninfo[512];
+    char    conninfo[1024];
     char    host[256];
     char   *port;
 
@@ -364,11 +364,11 @@ DBStatus pgsql_connect(DBConn *dbconn)
 
     if ( (port = strchr(host, ':')) ) {
         *port++ = '\0';
-        sprintf(conninfo, "host='%s' port='%s' dbname='%s' user='%s' password='%s' ",
+        snprintf(conninfo, 1024, "host='%s' port='%s' dbname='%s' user='%s' password='%s' ",
             host, port, dbconn->db_name, dbconn->db_user, dbconn->db_pass);
     }
     else {
-        sprintf(conninfo, "host='%s' dbname='%s' user='%s' password='%s' ",
+        snprintf(conninfo, 1024, "host='%s' dbname='%s' user='%s' password='%s' ",
             dbconn->db_host, dbconn->db_name, dbconn->db_user, dbconn->db_pass);
     }
 

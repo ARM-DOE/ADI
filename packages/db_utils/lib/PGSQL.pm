@@ -336,9 +336,9 @@ sub rollback(\%)
     }
 }
 
-sub do(\%$)
+sub do
 {
-    my ($self, $sql_string) = @_;
+    my ($self, $sql_string, $args) = @_;
     my $retval;
     my $errstr;
 
@@ -347,7 +347,12 @@ sub do(\%$)
     eval {
         my $oldaction = $self->_enable_timeout_alarm($self->{'Timeout'}, undef);
 
-        $retval = $self->{'DBH'}->do($sql_string);
+        if (defined($args)) {
+            $retval = $self->{'DBH'}->do($sql_string, undef, @{$args});
+        }
+        else {
+            $retval = $self->{'DBH'}->do($sql_string);
+        }
 
         $self->_disable_timeout_alarm($oldaction);
 

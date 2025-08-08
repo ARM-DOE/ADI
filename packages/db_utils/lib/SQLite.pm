@@ -503,9 +503,9 @@ sub _execute_query(\%$$)
     return($sth);
 }
 
-sub do(\%$)
+sub do
 {
-    my ($self, $sql_string) = @_;
+    my ($self, $sql_string, $args) = @_;
     my $retval;
 
     $retval = $self->_get_stored_procedure($sql_string);
@@ -515,7 +515,13 @@ sub do(\%$)
         $sql_string = $retval;
     }
 
-    $retval = $self->{'DBH'}->do($sql_string);
+    if (defined($args)) {
+        $retval = $self->{'DBH'}->do($sql_string, undef, @{$args});
+    }
+    else {
+        $retval = $self->{'DBH'}->do($sql_string);
+    }
+
     unless (defined($retval)) {
         $self->_set_db_error("Could not execute SQL string:\n'$sql_string'\n");
         return(undef);

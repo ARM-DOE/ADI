@@ -116,9 +116,18 @@ sub main {
 	    handle_error(__LINE__, "Failed to get process: $proc_name:$proc_type");
 	    return 0;
 	}
-	
+
+    if (exists($proc->{'props'}{'primary_developer'})) {
+        delete($proc->{'props'}{'primary_developer'});
+    }
+
+    if (exists($proc->{'props'}{'has_armflow_config'})) {
+        delete($proc->{'props'}{'has_armflow_config'});
+    }
+
 	$Data::Dumper::Terse = 1;
 	$Data::Dumper::Indent = 1;
+	$Data::Dumper::Sortkeys = 1;
 	print Dumper($proc);
 
     return 1;

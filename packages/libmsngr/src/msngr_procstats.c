@@ -34,7 +34,7 @@
 
 #include "msngr.h"
 
-#if SOLARIS
+#if defined(SOLARIS)
 #include <procfs.h>
 #endif
 
@@ -50,7 +50,7 @@
 
 static ProcStats gProcStats;
 
-#if SOLARIS
+#if defined(SOLARIS)
 
 /**
  *  PRIVATE: Get stats from the /proc/pid/usage file.
@@ -190,8 +190,7 @@ static int _get_psinfo(pid_t pid)
     return(1);
 }
 
-#else
-#if LINUX
+#elif defined(LINUX)
 
 /**
  *  PRIVATE: Get stats from the /proc/pid/status file.
@@ -257,8 +256,7 @@ static int _get_process_status(pid_t pid)
     return(1);
 }
 
-#endif /* LINUX   */
-#endif /* SOLARIS */
+#endif
 
 /*******************************************************************************
  *  Public Functions
@@ -298,13 +296,11 @@ ProcStats *procstats_get(void)
 
     /* Get stats */
 
-#if SOLARIS
+#if defined(SOLARIS)
     _get_prusage(pid);
     _get_psinfo(pid);
-#else
-#if LINUX
+#elif defined(LINUX)
     _get_process_status(pid);
-#endif
 #endif
 
     return(&gProcStats);

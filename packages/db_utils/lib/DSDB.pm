@@ -292,7 +292,9 @@ sub process_json_file($$)
             return(0);
         }
 
-        $retval = $self->{'DBCORE'}->query_scalar($query, $args);
+        ($query, $args) = DBCORE::process_query_placeholders($query, $args);
+
+        $retval = $self->{'DBCORE'}->do($query, $args);
         unless (defined($retval)) {
             return(0);
         }
@@ -360,6 +362,18 @@ sub get_process_config_values(\%$)
     my $retval;
 
     $retval = $self->{'DBCORE'}->sp_call('process_config_values', 'get',
+                $self->{'proc_type'}, $self->{'proc_name'},
+                $self->{'site'}, $self->{'facility'}, $key);
+
+    return($retval);
+}
+
+sub inquire_process_config_values(\%$)
+{
+    my ($self,$key) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call('process_config_values', 'inquire',
                 $self->{'proc_type'}, $self->{'proc_name'},
                 $self->{'site'}, $self->{'facility'}, $key);
 
@@ -459,6 +473,109 @@ sub inquire_local_family_process_stats(\%$$)
                 $category, $class,
                 $self->{'site'}, $self->{'facility'},
                 $self->{'proc_type'}, $self->{'proc_name'});
+
+    return($retval);
+}
+
+# Process Procedures
+
+sub define_process(\%$)
+{
+    my ($self, $desc) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call('processes', 'define',
+                $self->{'proc_type'}, $self->{'proc_name'}, $desc);
+
+    return($retval);
+}
+
+sub inquire_processes(\%)
+{
+    my ($self) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call('processes', 'inquire',
+                $self->{'proc_type'}, $self->{'proc_name'});
+
+    return($retval);
+}
+
+sub inquire_process_input_ds_classes(\%$$)
+{
+    my ($self, $dsc_name, $dsc_level) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call('process_input_ds_classes', 'inquire',
+                $self->{'proc_type'}, $self->{'proc_name'},
+                $dsc_name, $dsc_level);
+
+    return($retval);
+}
+
+sub inquire_process_output_ds_classes(\%$$)
+{
+    my ($self, $dsc_name, $dsc_level) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call('process_output_ds_classes', 'inquire',
+                $self->{'proc_type'}, $self->{'proc_name'},
+                $dsc_name, $dsc_level);
+
+    return($retval);
+}
+
+# Process Family Procedures
+
+sub define_process_family(\%$$$$$)
+{
+    my ($self, $category, $class, $lat, $lon, $alt) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call('process_families', 'define',
+                $category, $class,
+                $self->{'site'}, $self->{'facility'},
+                $lat, $lon, $alt);
+
+    return($retval);
+}
+
+sub inquire_process_families(\%$$)
+{
+    my ($self, $category, $class) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call('process_families', 'inquire',
+                $category, $class,
+                $self->{'site'}, $self->{'facility'});
+
+    return($retval);
+}
+
+sub get_process_family_output_ds_classes(\%$$)
+{
+    my ($self, $category, $class) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call(
+                'process_family_output_ds_classes', 'get',
+                $category, $class,
+                $self->{'site'}, $self->{'facility'});
+
+    return($retval);
+}
+
+sub inquire_process_family_output_ds_classes(\%$$$$)
+{
+    my ($self, $category, $class, $dsc_name, $dsc_level) = @_;
+    my $retval;
+
+    $retval = $self->{'DBCORE'}->sp_call(
+                'process_family_output_ds_classes', 'inquire',
+                $category, $class,
+                $self->{'site'}, $self->{'facility'},
+                $self->{'proc_type'}, $self->{'proc_name'},
+                $dsc_name, $dsc_level);
 
     return($retval);
 }
@@ -634,60 +751,6 @@ sub inquire_family_processes(\%$$)
                 $category, $class,
                 $self->{'site'}, $self->{'facility'},
                 $self->{'proc_type'}, $self->{'proc_name'});
-
-    return($retval);
-}
-
-# Datastream Class Procedures
-
-sub inquire_process_input_ds_classes(\%$$)
-{
-    my ($self, $dsc_name, $dsc_level) = @_;
-    my $retval;
-
-    $retval = $self->{'DBCORE'}->sp_call('process_input_ds_classes', 'inquire',
-                $self->{'proc_type'}, $self->{'proc_name'},
-                $dsc_name, $dsc_level);
-
-    return($retval);
-}
-
-sub inquire_process_output_ds_classes(\%$$)
-{
-    my ($self, $dsc_name, $dsc_level) = @_;
-    my $retval;
-
-    $retval = $self->{'DBCORE'}->sp_call('process_output_ds_classes', 'inquire',
-                $self->{'proc_type'}, $self->{'proc_name'},
-                $dsc_name, $dsc_level);
-
-    return($retval);
-}
-
-sub get_process_family_output_ds_classes(\%$$)
-{
-    my ($self, $category, $class) = @_;
-    my $retval;
-
-    $retval = $self->{'DBCORE'}->sp_call(
-                'process_family_output_ds_classes', 'get',
-                $category, $class,
-                $self->{'site'}, $self->{'facility'});
-
-    return($retval);
-}
-
-sub inquire_process_family_output_ds_classes(\%$$$$)
-{
-    my ($self, $category, $class, $dsc_name, $dsc_level) = @_;
-    my $retval;
-
-    $retval = $self->{'DBCORE'}->sp_call(
-                'process_family_output_ds_classes', 'inquire',
-                $category, $class,
-                $self->{'site'}, $self->{'facility'},
-                $self->{'proc_type'}, $self->{'proc_name'},
-                $dsc_name, $dsc_level);
 
     return($retval);
 }

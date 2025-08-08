@@ -754,7 +754,7 @@ static void _dsproc_print_user_options(FILE *output_stream)
 
     int   length;
     int   indent;
-    char  opt_arg_format[32];
+    char  opt_arg_format[64];
     char  opt_format[32];
     char  desc_format1[32];
     char  desc_format2[32];

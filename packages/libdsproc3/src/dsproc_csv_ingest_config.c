@@ -255,7 +255,7 @@ static int _csv_find_conf_file(CSVConf *conf, time_t data_time, int flags, char 
     int          search_npaths;
     const char **search_paths;
 
-    char         full_path[PATH_MAX];
+    char         full_path[PATH_MAX*2];
     char         pattern[PATH_MAX];
     const char  *patternp;
     int          found_file;
@@ -282,7 +282,7 @@ static int _csv_find_conf_file(CSVConf *conf, time_t data_time, int flags, char 
 
         for (pi = 0; pi < search_npaths; ++pi) {
 
-            strncpy(path, search_paths[pi], PATH_MAX);
+            snprintf(path, PATH_MAX, "%s", search_paths[pi]);
 
             DSPROC_DEBUG_LV1(
                 "Checking for main csv_conf file in: %s\n", path);
@@ -329,7 +329,7 @@ static int _csv_find_conf_file(CSVConf *conf, time_t data_time, int flags, char 
 
                 DSPROC_DEBUG_LV1(" - checking for file: %s\n", name);
 
-                snprintf(full_path, PATH_MAX, "%s/%s", path, name);
+                snprintf(full_path, PATH_MAX*2, "%s/%s", path, name);
 
                 if (access(full_path, F_OK) == 0) {
                     DSPROC_DEBUG_LV1(" - found\n");
@@ -378,7 +378,7 @@ static int _csv_find_conf_file(CSVConf *conf, time_t data_time, int flags, char 
                 return(-1);
             }
 
-            strncpy(path, dirlist->path, PATH_MAX);
+            snprintf(path, PATH_MAX, "%s", dirlist->path);
         }
         else {
 
@@ -399,7 +399,7 @@ static int _csv_find_conf_file(CSVConf *conf, time_t data_time, int flags, char 
 
             for (pi = 0; pi < search_npaths; ++pi) {
 
-                strncpy(path, search_paths[pi], PATH_MAX);
+                snprintf(path, PATH_MAX, "%s", search_paths[pi]);
 
                 DSPROC_DEBUG_LV1(
                     "Checking for time varying csv_conf files in: %s\n", path);
@@ -485,7 +485,7 @@ static int _csv_find_conf_file(CSVConf *conf, time_t data_time, int flags, char 
             }
             else {
                 found_file = 1;
-                strncpy(name, file_list[fi], PATH_MAX);
+                snprintf(name, PATH_MAX, "%s", file_list[fi]);
                 DSPROC_DEBUG_LV1(" - found: %s\n", name);
             }
         }
@@ -639,7 +639,7 @@ static int _csv_load_conf_file(
     const char *name,
     int         flags)
 {
-    char        full_path[PATH_MAX];
+    char        full_path[PATH_MAX*2];
     struct stat file_stats;
     size_t      nbytes;
     size_t      nread;
@@ -667,7 +667,7 @@ static int _csv_load_conf_file(
 
     /* Set the full path to the conf file */
 
-    snprintf(full_path, PATH_MAX, "%s/%s", path, name);
+    snprintf(full_path, PATH_MAX*2, "%s/%s", path, name);
 
     /* Get the file status */
 
@@ -809,6 +809,31 @@ static int _csv_load_conf_file(
                 /* skip whitespace, colons, and = signs */
 
                 while (isspace(*linep) || *linep == ':' || *linep == '=') ++linep;
+
+                /* Check if we need to clear the conf key value
+                 * read in from the previous file. */
+
+                if (strcmp(key, "HEADER_LINE") == 0) {
+                    if (conf->header_line) {
+                        free((void *)conf->header_line);
+                        conf->header_line = (char *)NULL;
+                    }
+                }
+                else if (strcmp(key, "HEADER_LINE_TAG") == 0) {
+                    if (conf->header_tag) {
+                        free((void *)conf->header_tag);
+                        conf->header_tag = (char *)NULL;
+                    }
+                }
+                else if (strcmp(key, "HEADER_LINE_NUMBER") == 0) {
+                    conf->header_linenum = 0;
+                }
+                else if (strcmp(key, "NUMBER_OF_HEADER_LINES") == 0) {
+                    conf->header_nlines = 0;
+                }
+                else if (strcmp(key, "NUMBER_OF_COLUMNS") == 0) {
+                    conf->exp_ncols = 0;
+                }
             }
             else {
 

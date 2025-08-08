@@ -3,11 +3,18 @@
 This module contains the **ADILogger** class which provides a python-like
 logging API facade around the dsproc logging methods.
 -----------------------------------------------------------------------"""
+from enum import Enum
 import io
 import sys
 import traceback
 
 import dsproc3 as dsproc
+
+class LogLevel(Enum):
+    DEBUG = 'debug'
+    INFO = 'info'
+    WARNING = 'warning'
+    ERROR = 'error'
 
 
 class ADILogger:

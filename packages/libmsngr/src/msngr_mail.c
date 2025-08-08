@@ -72,6 +72,9 @@ static char gSendMailPath[64];
  *  If errlen is 0 then no error message is written to errstr
  *  and errstr can be NULL.
  *
+ *  If the sendmail program can not be found the error message
+ *  will start with, "Could not find sendmail".
+ *
  *  @param  from    - who the message is from
  *  @param  to      - comma delimited list of recipients
  *  @param  cc      - comma delimited carbon copy list
@@ -106,17 +109,16 @@ Mail *mail_create(
 
     if (gSendMailPath[0] == '\0') {
 
-        if (access("/usr/lib/sendmail", X_OK) == 0) {
-            strcpy(gSendMailPath, "/usr/lib/sendmail");
-        }
-        else if (access("/usr/sbin/sendmail", X_OK) == 0) {
+        if (access("/usr/sbin/sendmail", X_OK) == 0) {
             strcpy(gSendMailPath, "/usr/sbin/sendmail");
+        }
+        else if (access("/usr/lib/sendmail", X_OK) == 0) {
+            strcpy(gSendMailPath, "/usr/lib/sendmail");
         }
         else {
 
             snprintf(errstr, errlen,
-                "Could not create mail message: '%s'\n"
-                " -> sendmail program not found\n", subject);
+                "Could not find sendmail in /usr/sbin/sendmail\n");
 
             return((Mail *)NULL);
         }
@@ -590,8 +592,8 @@ int mail_send(Mail *mail)
 
             snprintf(mail->errstr, MAX_MAIL_ERROR,
                 "Could not execute sendmail command: '%s'\n"
-                " -> %s\n",
-                gSendMailPath, strerror(exit_value));
+                " -> Non-zero exit value: %d\n",
+                gSendMailPath, exit_value);
         }
 
         retval = 0;

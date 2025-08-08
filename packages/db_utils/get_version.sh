@@ -9,5 +9,5 @@ if [ "$kernel" == "Linux" ]; then
     fi
 fi
 
-printf "db_utils-v2.7-0.$rel"
+printf "db_utils-v2.11-1.$rel"
 exit 0

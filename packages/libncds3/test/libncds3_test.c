@@ -430,6 +430,9 @@ int unit_conversion_test(int test_num)
             out_file = "out.unit_conversion_test_3.nc";
             grp_name = "unit_conversion_test_3";
             break;
+        default:
+            fprintf(stderr, "Invalid unit_conversion_test number!\n");
+            return(0);
     }
 
     /* Open the input file */
@@ -978,6 +981,10 @@ int main(int argc, char **argv)
         status = nc_subset(
             in_file, out_file, out_format,
             start_sample, sample_count, nvars, var_list);
+    }
+    else {
+        fprintf(stderr, "Unknown command: %s\n", command);
+        status = 0;
     }
 
     return( (status) ? 0 : 1 );

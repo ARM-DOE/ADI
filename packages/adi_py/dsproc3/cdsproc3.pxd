@@ -354,17 +354,17 @@ cdef extern from "dsproc3.h" nogil:
     void    dsproc_unset_var_flags(CDSVar *var, int flags)
 
     ctypedef struct VarDQR:
-        char  *id          # DQR ID
-        char  *desc        # description
-        char  *ds_name     # datastream name
-        char  *var_name    # variable name
-        int          code        # code number
-        char  *color       # code color
-        char  *code_desc   # code description
-        time_t       start_time  # start time in seconds since 1970
-        time_t       end_time    # end time in seconds since 1970
-        size_t       start_index # start time index in dataset
-        size_t       end_index   # end time index in dataset
+        const char  *id
+        const char  *desc      
+        const char  *ds_name  
+        const char  *var_name
+        int    code   
+        const char  *color 
+        const char  *code_desc
+        time_t       start_time 
+        time_t       end_time  
+        size_t       start_index
+        size_t       end_index 
 
     int dsproc_get_var_dqrs(CDSVar *var, VarDQR ***dqrs)
     
@@ -547,6 +547,7 @@ cdef extern from "dsproc3_internal.h" nogil:
     void dsproc_disable_db_updates()
     void dsproc_disable_lock_file()
     void dsproc_disable_mail_messages()
+    void dsproc_disable_nan_filter_warnings()
 
     void dsproc_set_processing_interval(
                 time_t begin_time, 

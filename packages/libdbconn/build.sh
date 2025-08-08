@@ -4,6 +4,10 @@
 
 script_name=$0
 
+if [ -d "/usr/pgsql-13/bin" ]; then
+    export PATH="/usr/pgsql-13/bin:${PATH}"
+fi
+
 usage()
 {
     cat <<EOM

@@ -128,8 +128,8 @@ static int _dsproc_rename(
     char        src_md5[64];
     char        done_dir[PATH_MAX];
     char       *dest_path;
-    char        dest_name[256];
-    char        dest_file[PATH_MAX];
+    char        dest_name[PATH_MAX];
+    char        dest_file[PATH_MAX*2];
     char        dest_md5[64];
     struct tm   time_stamp_tm;
     char        time_stamp[32];
@@ -137,7 +137,7 @@ static int _dsproc_rename(
     char        time_string2[32];
     const char *preserve;
     int         dot_count;
-    char        rename_error[2*PATH_MAX];
+    char        rename_error[PATH_MAX*4];
     int         rename_file;
     int         force_rename = 0;
 
@@ -336,15 +336,15 @@ static int _dsproc_rename(
     }
 
     if (preserve) {
-        snprintf(dest_name, 256, "%s.%s.%s.%s",
+        snprintf(dest_name, PATH_MAX, "%s.%s.%s.%s",
             ds->name, time_stamp, extension, preserve);
     }
     else {
-        snprintf(dest_name, 256, "%s.%s.%s",
+        snprintf(dest_name, PATH_MAX, "%s.%s.%s",
             ds->name, time_stamp, extension);
     }
 
-    snprintf(dest_file, PATH_MAX, "%s/%s", dest_path, dest_name);
+    snprintf(dest_file, PATH_MAX*2, "%s/%s", dest_path, dest_name);
 
     /************************************************************
     *  Check if the output file already exists

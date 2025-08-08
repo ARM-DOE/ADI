@@ -101,6 +101,7 @@ if [ -d lib ]; then
             echo "uninstalled: $libdir/$f"
         done
     else
+        export PERLLIB=".:$PERLLIB"
         mkdir -p $libdir
         for f in *pm; do
             run "perl -c $f"

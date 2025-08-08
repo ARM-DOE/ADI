@@ -254,6 +254,8 @@ int subsample (core_s cs) {
 
   double range = cs.range;
 
+  int smallest_d_last_good_value, first_iteration_of_while_loop;
+
   // Just to keep things clear; rmet is the pointer to the 2D metrics
   // structure, and I prefer to work with that.
   metrics=*rmet;
@@ -283,6 +285,7 @@ int subsample (core_s cs) {
 
   // again, i indexes our input field, j indexes the target field
   iold=0;
+  smallest_d_last_good_value = 0;
   for (j=0; j<nt; j++) {
     qc_output[j]=0;
 
@@ -337,12 +340,22 @@ int subsample (core_s cs) {
     // Now scan up i's until we find the one that's closest, absolutely, to
     // our target index
     //while (index[i] <= target[j]+range && i < ni) {
+    first_iteration_of_while_loop = 1; 
     while (i < ni && (d=fabs(index[i]-target[j])) <= range) {
 
       // keep track of smallest absolute distance, regardless of whether
       // that point is decent or not...
       if (d < smallest_d) { 
 	smallest_d=d;
+      }
+
+      //KLG new logic to possible address range issue.
+      //    if index[i] > target[j] from the start of this while loop then we want to reset
+      //    smallest_d to the smallest_d used when we set the last good value. 
+      if ( (j != 0) && first_iteration_of_while_loop == 1) {
+          if (index[i] > target[j]) {
+              smallest_d = smallest_d_last_good_value;
+          }
       }
 
       // ...but we only want to set this as our target distance if it
@@ -357,6 +370,7 @@ int subsample (core_s cs) {
       // then we can break out of this loop.
       if (d > dist && it > 0) break;
 
+      first_iteration_of_while_loop = 0; 
       i++;
     }
 
@@ -407,10 +421,13 @@ int subsample (core_s cs) {
       // Otherwise, if the data is full of missings, we end up O(n^2).
       iold=i;
       continue;
-    }
+    } // end logic if no good points within range
 
     // Otherwise, use our stored it
     output[j]=array[it];
+
+    //KLG new logic saving smallest_d of last good value
+    smallest_d_last_good_value = smallest_d;
 
     // target[j+1] can be closest to no value of i < it, so save it as the
     // start part.

@@ -100,7 +100,8 @@ int _dsproc_compare_samples(
         /* Skip the time variables */
 
         if ((strcmp(var1->name, "time") == 0) ||
-            (strcmp(var1->name, "time_offset") == 0)) {
+            (strcmp(var1->name, "time_offset") == 0) ||
+            (strcmp(var1->name, "time_bounds") == 0)) {
 
             continue;
         }

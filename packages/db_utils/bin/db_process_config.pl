@@ -153,11 +153,11 @@ elsif ($opt_delval) {
 }
 elsif ($opt_list) {
 
-    my $retval = $gDSDB->get_process_config_values($ARGV[0]);
+    my $retval = $gDSDB->inquire_process_config_values($ARGV[0]);
 
     if ($retval) {
         my @hash_keys =
-            $gDSDB->get_sp_return_hash('process_config_values', 'get');
+            $gDSDB->get_sp_return_hash('process_config_values', 'inquire');
 
         my $table = $gDSDB->hasharray_to_table(\@hash_keys, $retval);
 

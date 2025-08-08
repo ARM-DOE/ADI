@@ -549,7 +549,11 @@ sub main {
                 delete($proc_def->{'props'}->{'max_run_time'});
             }
         }
-        
+
+        if (defined($proc_def->{'props'}) && defined($proc_def->{'props'}->{'has_armflow_config'})) {
+            delete($proc_def->{'props'}->{'has_armflow_config'});
+        }
+
         my $noclean = (defined($proc_clean)) ? 0 : 1;
     
         unless (PCMDB::save_process($DB, $rep_type, $rep_name, $proc_def, undef, $proc_full, $noclean)) {

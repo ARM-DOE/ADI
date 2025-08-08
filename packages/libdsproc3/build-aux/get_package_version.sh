@@ -9,5 +9,5 @@ if [ "$kernel" == "Linux" ]; then
     fi
 fi
 
-printf "2.68-0.$rel"
+printf "2.71-1.$rel"
 exit 0

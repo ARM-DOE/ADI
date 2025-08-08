@@ -58,6 +58,8 @@ typedef struct DateTimeCode {
 
 static DateTimeCode _DateTimeCodes[] = {
 
+    // 3 character month abreviation
+    { 'b', "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)" },
     { 'C', "([[:digit:]]{2})"    }, // century number (year/100) as a 2-digit integer
     { 'd', "([[:digit:]]{1,2})"  }, // day number in the month (1-31).
     { 'e', "([[:digit:]]{1,2})"  }, // day number in the month (1-31).
@@ -412,6 +414,11 @@ int retime_execute(RETime *retime, const char *string, RETimeRes *res)
     double      frac;
     double      iptr;
 
+    int         i;
+    const char *month_abbr[] = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
     /* Clear previous result */
 
     res->year           = -1;
@@ -466,6 +473,18 @@ int retime_execute(RETime *retime, const char *string, RETimeRes *res)
 
             case 'C': // century number (year/100) as a 2-digit integer
                 res->century = atoi(substr);
+                break;
+            case 'b': // 3 character month abreviation (Jan, Feb, Mar, etc. ).
+                for (i = 0; i < 12; ++i) {
+                    if (strcmp(substr, month_abbr[i]) == 0) {
+                        res->month = i+1;
+                        break;
+                    }
+                }
+                if (i == 12) {
+                    // Not a 3 character month abbreviation
+                    return(0);
+                }
                 break;
             case 'd': // day number in the month (1-31).
             case 'e': // day number in the month (1-31).

@@ -100,8 +100,6 @@ static void _dsproc_close_dsfile(DSFile *file)
         file->ncid  = 0;
         dir->nopen -= 1;
     }
-
-    file->touched = 0;
 }
 
 /**
@@ -142,6 +140,7 @@ static void _dsproc_free_dsfile(DSFile *dsfile)
 static DSFile *_dsproc_create_dsfile(DSDir *dir, const char *name)
 {
     DSFile *dsfile;
+    DSFile *dsf_node;
     size_t  length;
 
     dsfile = (DSFile *)calloc(1, sizeof(DSFile));
@@ -165,6 +164,20 @@ static DSFile *_dsproc_create_dsfile(DSDir *dir, const char *name)
 
     dsfile->dir = dir;
 
+    /* Insert it at the end of the linked list */
+
+    if (!dir->dsf_list) {
+        dir->dsf_list = dsfile;
+    }
+    else {
+        dsf_node = dir->dsf_list;
+        while (dsf_node->next) {
+            dsf_node = dsf_node->next;
+        }
+
+        dsf_node->next = dsfile;
+    }
+
     return(dsfile);
 
 MEMORY_ERROR:
@@ -177,6 +190,30 @@ MEMORY_ERROR:
 
     dsproc_set_status(DSPROC_ENOMEM);
     return((DSFile *)NULL);
+}
+
+/**
+ *  Static: Remove a datastream file structure from the linked list.
+ *
+ *  @param  prev_dsfile - pointer to the previous DSFile in the linked list.
+ *  @param  dsfile      - pointer to the DSFile structure.
+ */
+static void _dsproc_delete_dsfile(DSFile *prev_dsfile, DSFile *dsfile)
+{
+    DSDir *dir = dsfile->dir;
+
+    /* Remove the dsfile from the linked list */
+
+    if (prev_dsfile) {
+        prev_dsfile->next = dsfile->next;
+    }
+    else {
+        dir->dsf_list = dsfile->next;
+    }
+
+    /* Free the memory */
+
+    _dsproc_free_dsfile(dsfile);
 }
 
 /**
@@ -346,9 +383,11 @@ static int _dsproc_refresh_dsfile_info(DSFile *dsfile)
         return(0);
     }
 
-    /* Check if the file has been updated */
+    /* Check if the file has been updated,
+     * or needs to be opened. */
 
-    if (dsfile->stats.st_mtime        != file_stats.st_mtime       ||
+    if (!dsfile->ncid || !dsfile->stats.st_mtime ||
+        dsfile->stats.st_mtime != file_stats.st_mtime ||
 #ifdef __APPLE__
         dsfile->stats.st_mtimespec.tv_sec  != file_stats.st_mtimespec.tv_sec ||
         dsfile->stats.st_mtimespec.tv_nsec != file_stats.st_mtimespec.tv_nsec) {
@@ -418,6 +457,7 @@ static int _dsproc_refresh_dsfile_info(DSFile *dsfile)
     }
 
     dsfile->stats = file_stats;
+    dsfile->touched = 1;
 
     return(1);
 }
@@ -651,16 +691,6 @@ DSDir *_dsproc_create_dsdir(const char *path)
     dir->nopen    = 0;
     dir->max_open = 64;
 
-    /* Initialize the dsfiles list */
-
-    dir->max_dsfiles = 128;
-    dir->ndsfiles    = 0;
-
-    dir->dsfiles = (DSFile **)calloc(dir->max_dsfiles, sizeof(DSFile *));
-    if (!dir->dsfiles) {
-        goto MEMORY_ERROR;
-    }
-
     return(dir);
 
 MEMORY_ERROR:
@@ -686,13 +716,8 @@ void _dsproc_free_dsdir(DSDir *dir)
 
     if (dir) {
 
-        if (dir->dsfiles) {
-
-            for (fi = 0; fi < dir->ndsfiles; fi++) {
-                if (dir->dsfiles[fi]) _dsproc_free_dsfile(dir->dsfiles[fi]);
-            }
-
-            free(dir->dsfiles);
+        while (dir->dsf_list) {
+            _dsproc_delete_dsfile(NULL, dir->dsf_list);
         }
 
         if (dir->files) {
@@ -1379,15 +1404,11 @@ int _dsproc_get_dsdir_files(DSDir *dir, char ***files)
  */
 DSFile *_dsproc_get_dsfile(DSDir *dir, const char *name)
 {
-    size_t       new_size;
-    DSFile     **new_list;
-    DSFile      *dsfile;
-    int          fi;
+    DSFile *dsfile;
 
     /* Check if this file is already in the cache */
 
-    for (fi = 0; fi < dir->ndsfiles; fi++) {
-        dsfile = dir->dsfiles[fi];
+    for (dsfile = dir->dsf_list; dsfile; dsfile = dsfile->next) {
         if (strcmp(dsfile->name, name) == 0) {
             if (!_dsproc_refresh_dsfile_info(dsfile)) {
                 return((DSFile *)NULL);
@@ -1396,31 +1417,7 @@ DSFile *_dsproc_get_dsfile(DSDir *dir, const char *name)
         }
     }
 
-    /* Check if we need to increase the length of the dsfiles list */
-
-    if (dir->ndsfiles == dir->max_dsfiles - 1) {
-
-        new_size = dir->max_dsfiles * 2;
-        new_list = (DSFile **)realloc(
-            dir->dsfiles, new_size * sizeof(DSFile *));
-
-        if (!new_list) {
-
-            ERROR( DSPROC_LIB_NAME,
-                "Could not get DSFile structure for: %s/%s\n"
-                " -> memory allocation error\n", dir->path, name);
-
-            dsproc_set_status(DSPROC_ENOMEM);
-            return((DSFile *)NULL);
-        }
-
-        dir->max_dsfiles = new_size;
-        dir->dsfiles     = new_list;
-
-        for (fi = dir->ndsfiles; fi < dir->max_dsfiles; fi++) {
-            dir->dsfiles[fi] = (DSFile *)NULL;
-        }
-    }
+    /* Create a new dsfile entry */
 
     dsfile = _dsproc_create_dsfile(dir, name);
     if (!dsfile) {
@@ -1430,9 +1427,6 @@ DSFile *_dsproc_get_dsfile(DSDir *dir, const char *name)
     if (!_dsproc_refresh_dsfile_info(dsfile)) {
         return((DSFile *)NULL);
     }
-
-    dir->dsfiles[dir->ndsfiles] = dsfile;
-    dir->ndsfiles++;
 
     return(dsfile);
 }
@@ -1545,8 +1539,7 @@ ERROR_EXIT:
 int _dsproc_open_dsfile(DSFile *file, int mode)
 {
     DSDir  *dir = file->dir;
-    DSFile *prev_file;
-    int     fi;
+    DSFile *dsf_node;
 
     /* Check if the file is already open. */
 
@@ -1563,19 +1556,16 @@ int _dsproc_open_dsfile(DSFile *file, int mode)
 
     if (!file->ncid) {
 
-        /* Check if this will exceed the maximum number of open files */
+        /* Start closing cached files if too many are open */
 
-        fi = 0;
+        dsf_node = dir->dsf_list;
+        while (dsf_node && (dir->nopen >= dir->max_open)) {
 
-        while ((dir->nopen >= dir->max_open) && (fi < dir->ndsfiles)) {
-
-            prev_file = dir->dsfiles[fi];
-
-            if (prev_file->ncid) {
-                _dsproc_close_dsfile(prev_file);
+            if (dsf_node->ncid) {
+                _dsproc_close_dsfile(dsf_node);
             }
 
-            ++fi;
+            dsf_node = dsf_node->next;
         }
 
         /* Open the file */
@@ -1755,8 +1745,9 @@ void dsproc_close_untouched_files(void)
     int         ds_id;
     DataStream *ds;
     DSDir      *dir;
-    DSFile     *file;
-    int         fi;
+    DSFile     *dsf_node;
+    DSFile     *prev;
+    DSFile     *next;
 
     for (ds_id = 0; ds_id < _DSProc->ndatastreams; ds_id++) {
 
@@ -1766,15 +1757,21 @@ void dsproc_close_untouched_files(void)
 
             dir = ds->dir;
 
-            for (fi = 0; fi < dir->ndsfiles; fi++) {
+            prev = (DSFile *)NULL;
+            dsf_node = dir->dsf_list;
+            while (dsf_node) {
 
-                file = dir->dsfiles[fi];
+                next = dsf_node->next;
 
-                if (file->ncid && !file->touched) {
-                    _dsproc_close_dsfile(file);
+                if (!dsf_node->touched) {
+                    _dsproc_delete_dsfile(prev, dsf_node);
+                }
+                else {
+                    prev = dsf_node;
+                    dsf_node->touched = 0;
                 }
 
-                file->touched = 0;
+                dsf_node = next;
             }
         }
     }
@@ -1931,6 +1928,12 @@ int dsproc_add_datastream_file_patterns(
  *  If the end_time is not specified, the file containing data for the
  *  time just after the begin_time will be returned.
  *
+ *  Caveat when running in asynchronous mode: If this function is being used
+ *  for an output datastream while running in asynchronous mode, the search
+ *  will be limited to the files created by the current process. The exception
+ *  to this would be if the process is also running in quicklook-only mode.
+ *  In this case the file search will behave normally.
+ *
  *  The memory used by the returned file list is dynamically allocated and
  *  and must be freed using the dsproc_free_file_list() function.
  *
@@ -2009,19 +2012,34 @@ int dsproc_find_datastream_files(
         return(-1);
     }
 
-    /* Get the list of files that bracket and contain
-     * data for the requested time range. */
+    /* Check if we need to limit the search to only files
+     * created by the current process. */
 
-    nfiles = _dsproc_find_dsdir_files(
-        ds->dir, begin_time, end_time, &files);
+    if (ds->role == DSR_OUTPUT &&
+        dsproc_get_asynchrounous_mode() == 1 &&
+        dsproc_get_quicklook_mode() != QUICKLOOK_ONLY) {
 
-    if (nfiles <= 0) {
+        DEBUG_LV1( DSPROC_LIB_NAME,
+            " - limiting search to files created by the current process\n");
 
-        if (nfiles == 0) {
-            goto RETURN_NOT_FOUND;
+        for (nfiles = 0; ds->updated_files[nfiles]; ++nfiles);
+        files = ds->updated_files;
+    }
+    else {
+        /* Get the list of files that bracket and contain
+         * data for the requested time range. */
+
+        nfiles = _dsproc_find_dsdir_files(
+            ds->dir, begin_time, end_time, &files);
+
+        if (nfiles <= 0) {
+
+            if (nfiles == 0) {
+                goto RETURN_NOT_FOUND;
+            }
+
+            return(-1);
         }
-
-        return(-1);
     }
 
     /* Loop over all files and return the ones in the requested range */
@@ -2247,6 +2265,51 @@ time_t dsproc_get_file_name_time(int ds_id, const char *file_name)
 {
     DataStream *ds = _DSProc->datastreams[ds_id];
     return(_dsproc_get_file_name_time(ds->dir, file_name));
+}
+
+/**
+ *  Get the list of files that were created or updated for an output datastream.
+ *
+ *  The memory used by the returned file list is dynamically allocated and
+ *  and must be freed using the dsproc_free_file_list() function.
+ *
+ *  If an error occurs in this function it will be appended to the log and
+ *  error mail messages, and the process status will be set appropriately.
+ *
+ *  @param  ds_id     - output datastream ID
+ *  @param  file_list - output: pointer to the NULL terminated list of file names
+ *
+ *  @return
+ *    -  number of files
+ *    - -1 if an error occurred
+ */
+int dsproc_get_output_files(int ds_id, char ***file_list)
+{
+    DataStream *ds = _DSProc->datastreams[ds_id];
+    int         nfiles;
+
+    if (ds->updated_files) {
+
+        for (nfiles = 0; ds->updated_files[nfiles]; ++nfiles);
+
+        *file_list = _dsproc_clone_file_list(nfiles, ds->updated_files);
+        if (!*file_list) {
+
+            ERROR( DSPROC_LIB_NAME,
+                "Could not create list of output files for: %s\n"
+                " -> memory allocation error\n",
+                dsproc_datastream_name(ds_id));
+
+            dsproc_set_status(DSPROC_ENOMEM);
+            return(-1);
+        }
+    }
+    else {
+        *file_list = (char **)NULL;
+        nfiles    = 0;
+    }
+
+    return(nfiles);
 }
 
 /**

@@ -233,7 +233,7 @@ sub connect
     $self->{'DBType'} = $dbtype;
 
     if ($dbtype eq 'SQLite') {
-    
+
         if (!$dbname || $dbname eq 'prompt') {
             print("\n" .
             "Please specify the path to the SQLite database file: ");
@@ -614,14 +614,14 @@ sub load_defs(\%$$)
 # Database Query Subroutines
 #
 
-sub do(\%$)
+sub do
 {
-    my ($self, $sql_string) = @_;
+    my ($self, $sql_string, $args) = @_;
     my $retval;
 
     return(undef) unless($self->_init_db_method());
 
-    $retval = $self->{'DBH'}->do($sql_string);
+    $retval = $self->{'DBH'}->do($sql_string, $args);
 
     return($retval);
 }
@@ -1270,6 +1270,29 @@ sub read_json_file($$)
     close FH;
 
     return decode_json($json);
+}
+
+sub process_query_placeholders($$)
+{
+    my ($query, $args) = @_;
+
+    if (ref($args) ne 'HASH') {
+        return ($query, $args);
+    }
+
+    my %index = ();
+    for my $key (keys(%{$args})) {
+        my $placeholder = ":$key";
+        while ((my $pos = index($query, $placeholder)) != -1) {
+            $index{$pos} = $key;
+            $query =~ s/\Q$placeholder/?/;
+        }
+    }
+
+    my @indices = sort { int($a) <=> int($b) } keys(%index);
+    my @newargs = map { $args->{$index{$_}} } @indices;
+
+    return ($query, \@newargs);
 }
 
 1;

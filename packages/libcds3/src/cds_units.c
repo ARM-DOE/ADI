@@ -23,6 +23,7 @@
 #include <errno.h>
 #include UDUNITS_INCLUDE
 #include <math.h>
+#include <ctype.h>
 
 /*******************************************************************************
  *  Private Data and Functions
@@ -1356,8 +1357,11 @@ time_t cds_validate_time_units(char *time_units)
     double        secs1970;
     ut_status     status;
     struct tm     gmt;
+    char         *strp;
     char         *cp1;
     char         *cp2;
+    int           length;
+    int           found_space;
 
     /* Load the default units system if one has not already been loaded */
 
@@ -1391,9 +1395,31 @@ time_t cds_validate_time_units(char *time_units)
 
         if (from) ut_free(from);
 
+        /* First check for white space at the end of the string */
+
+        length = strlen(time_units);
+        if (length == 0) {
+            ut_free(to);
+            return(-1);
+        }
+
+        found_space = 0;
+        cp1 = &time_units[length-1];
+        if (isspace(*cp1)) {
+            found_space = 1;
+            while (isspace(*cp1) && cp1 != time_units) *cp1-- = '\0';
+        }
+
         /* Check for known formats that can be fixed */
 
-        if (sscanf(time_units,
+        if ( (strp = strstr(time_units, "0:00 UTC")) ) {
+
+            /* remove the redundant UTC at the end */
+
+            strp += 4;
+            *strp = '\0';
+        }
+        else if (sscanf(time_units,
             "seconds since %d-%d-%d, %d:%d:%d",
             &gmt.tm_year, &gmt.tm_mon, &gmt.tm_mday,
             &gmt.tm_hour, &gmt.tm_min, &gmt.tm_sec) == 6) {
@@ -1425,7 +1451,7 @@ time_t cds_validate_time_units(char *time_units)
             cp1 = time_units;
             while ( (cp1 = strchr(cp1, '/')) ) *cp1++ = '-';
         }
-        else {
+        else if (!found_space) {
             ut_free(to);
             return(-1);
         }

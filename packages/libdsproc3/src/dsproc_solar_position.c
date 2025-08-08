@@ -9,7 +9,7 @@
  *  Functions to calculate position of the sun
  */
 
-
+#include <math.h>
 #include "dsproc3.h"
 #include "dsproc3_internal.h"
 
@@ -19,17 +19,6 @@
 #define TWOPI   6.2831853071795864
 #define DEG_RAD 0.017453292519943295
 #define RAD_DEG 57.295779513082323
-
-double acos(),
-       asin(),
-       atan2(),
-       cos(),
-       fabs(),
-       modf(),
-       sin(),
-       tan();
-
-
 
 /** @privatesection */
 /*******************************************************************************

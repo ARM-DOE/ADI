@@ -54,7 +54,7 @@ static int   _LogDataTime  = 0;        /**< use data time for log time       */
 
 static char  _InputDir[PATH_MAX];      /**< input dir from ingest file loop  */
 static char  _InputFile[PATH_MAX];     /**< input file from ingest file loop */
-static char  _InputSource[PATH_MAX];   /**< full path to input file          */
+static char  _InputSource[PATH_MAX*2]; /**< full path to input file          */
 
 static int   _RealTimeMode = 0;        /**< real time mode flag              */
 
@@ -554,12 +554,22 @@ static int _init_mail(
 
         if (status == 0) {
 
-            ERROR( DSPROC_LIB_NAME,
-                "Could not initialize mail message for: %s\n"
-                " -> %s\n", config_key, errstr);
+            if (strstr(errstr, "Could not find sendmail")) {
 
-            dsproc_set_status(DSPROC_EMAILINIT);
-            return(0);
+                LOG( DSPROC_LIB_NAME,
+                    "Disabling mail messages: %s",
+                    errstr);
+
+                _DisableMail = 1;
+            }
+            else {
+                ERROR( DSPROC_LIB_NAME,
+                    "Could not initialize mail message for: %s\n"
+                    " -> %s\n", config_key, errstr);
+
+                dsproc_set_status(DSPROC_EMAILINIT);
+                return(0);
+            }
         }
     }
     else if (status < 0) {
@@ -1258,6 +1268,7 @@ int _set_next_obs_loop_interval(time_t search_start)
     timeval_t   search_begin = { search_start, 0 };
     timeval_t   begin        = { 0, 0 };
     timeval_t   end          = { 0, 0 };
+    int         ti;
 
     int         status;
 
@@ -1291,6 +1302,27 @@ int _set_next_obs_loop_interval(time_t search_start)
 
         file_begin = dsfile->timevals[0];
         file_end   = dsfile->timevals[dsfile->ntimes - 1];
+
+        /* Hack to get past files with corrupted time values that
+         * resut in the end time being less that the begin time.
+         * Without this hack we can get into an infinite loop. */
+
+        if (TV_LTEQ(file_end, file_begin)) {
+
+            /* Find the largest time value */
+            file_end = file_begin;
+            for (ti = 1; ti < dsfile->ntimes; ++ti) {
+                if (TV_GT(dsfile->timevals[ti], file_end)) {
+                    file_end = dsfile->timevals[ti];
+                }
+            }
+
+            if (TV_EQ(file_end, file_begin)) {
+                /* begin and end times are the same,
+                 * so just add a minute. */
+                file_end.tv_sec += 60;
+            }
+        }
 
         if (!begin.tv_sec || TV_LT(file_begin, begin)) {
             begin    = file_begin;
@@ -2474,7 +2506,7 @@ void dsproc_set_input_dir(const char *input_dir)
     DEBUG_LV1( DSPROC_LIB_NAME,
         "Setting input directory: %s\n", input_dir);
 
-    strncpy(_InputDir, input_dir, PATH_MAX);
+    snprintf(_InputDir, PATH_MAX, "%s", input_dir);
 }
 
 /**
@@ -2492,8 +2524,8 @@ void dsproc_set_input_source(const char *input_file)
     DEBUG_LV1( DSPROC_LIB_NAME,
         "Setting input source:    %s/%s\n", _InputDir, input_file);
 
-    strncpy(_InputFile, input_file, PATH_MAX);
-    snprintf(_InputSource, PATH_MAX, "%s/%s", _InputDir, input_file);
+    snprintf(_InputFile, PATH_MAX, "%s", input_file);
+    snprintf(_InputSource, PATH_MAX*2, "%s/%s", _InputDir, input_file);
 }
 
 /**
@@ -3422,7 +3454,7 @@ int dsproc_finish(void)
     char        finish_time_string[32];
     int         mail_error_status;
     DataStream *ds;
-    int         dsi;
+    int         dsi, fi, loop;
     char       *hostname;
     char        time_string1[32];
     char        time_string2[32];
@@ -3467,46 +3499,72 @@ int dsproc_finish(void)
 
             continue;
         }
+    }
 
-        if (ds->role == DSR_OUTPUT &&
-            ds->begin_time.tv_sec) {
+    for (loop = 0; loop < 2; ++loop) {
 
-            format_timeval(&(ds->begin_time), time_string1);
+        for (dsi = 0; dsi < _DSProc->ndatastreams; dsi++) {
 
-            if (ds->end_time.tv_sec) {
-                format_timeval(&(ds->end_time), time_string2);
+            ds = _DSProc->datastreams[dsi];
+
+            if (loop == 0 && ds->dsc_level[0] != '0') {
+                continue;
             }
-            else {
-                strcpy(time_string2, "none");
+            else if (loop == 1 && ds->dsc_level[0] == '0') {
+                continue;
             }
 
-            LOG( DSPROC_LIB_NAME,
-                "\n"
-                "Datastream Stats: %s\n"
-                " - begin time:    %s\n"
-                " - end time:      %s\n",
-                ds->name, time_string1, time_string2);
+            if (ds->role == DSR_OUTPUT &&
+                ds->begin_time.tv_sec) {
 
-            if (ds->total_files) {
+                format_timeval(&(ds->begin_time), time_string1);
+
+                if (ds->end_time.tv_sec) {
+                    format_timeval(&(ds->end_time), time_string2);
+                }
+                else {
+                    strcpy(time_string2, "none");
+                }
 
                 LOG( DSPROC_LIB_NAME,
-                    " - total files:   %d\n"
-                    " - total bytes:   %lu\n",
-                    ds->total_files, (unsigned long)ds->total_bytes);
+                    "\n"
+                    "Datastream Stats: %s\n"
+                    " - begin time:    %s\n"
+                    " - end time:      %s\n",
+                    ds->name, time_string1, time_string2);
 
-                total_files += ds->total_files;
+                if (ds->total_files) {
+
+                    LOG( DSPROC_LIB_NAME,
+                        " - total files:   %d\n"
+                        " - total bytes:   %lu\n",
+                        ds->total_files, (unsigned long)ds->total_bytes);
+
+                    total_files += ds->total_files;
+                }
+
+                if (ds->total_records) {
+
+                    LOG( DSPROC_LIB_NAME,
+                        " - total records: %d\n",
+                        ds->total_records);
+
+                    total_records += ds->total_records;
+                }
+
+                if (ds->updated_files) {
+
+                    LOG( DSPROC_LIB_NAME,
+                        " - output files:\n");
+
+                    for (fi = 0; ds->updated_files[fi]; ++fi) {
+                        LOG( DSPROC_LIB_NAME,
+                            "    - %s\n", ds->updated_files[fi]);
+                    }
+                }
+
+                continue;
             }
-
-            if (ds->total_records) {
-
-                LOG( DSPROC_LIB_NAME,
-                    " - total records: %d\n",
-                    ds->total_records);
-
-                total_records += ds->total_records;
-            }
-
-            continue;
         }
     }
 

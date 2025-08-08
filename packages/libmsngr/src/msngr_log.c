@@ -411,7 +411,7 @@ LogFile *log_open(
         }
     }
 
-#if LINUX /* Update Process Stats */
+#if defined(LINUX) /* Update Process Stats */
     if (log->flags & LOG_STATS) {
         procstats_get();
     }
@@ -574,7 +574,7 @@ int log_vprintf(
             full_path, strerror(log_errno));
     }
 
-#if LINUX /* Update Process Stats */
+#if defined(LINUX) /* Update Process Stats */
     if (log->flags & LOG_STATS) {
         procstats_get();
     }

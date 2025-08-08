@@ -467,15 +467,8 @@ static int ret_delete_datastream(
                     ds, &(coord_dim->nvarmaps), coord_dim->varmaps);
 
                 if (coord_dim->nvarmaps == 0) {
-
-                    ERROR( DSDB_LIB_NAME,
-                        "All retriever datastreams were filtered for coordinate variable map: %s:%s\n",
-                        coord_system->name, coord_dim->name);
-
                     free(coord_dim->varmaps);
                     coord_dim->varmaps = (RetDsVarMap **)NULL;
-
-                    retval = 0;
                 }
             }
 

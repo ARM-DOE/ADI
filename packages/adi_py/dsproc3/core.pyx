@@ -170,6 +170,69 @@ cdef class PyProcLoc:
         def __get__(self):
             return self.cobj.alt
 
+cdef class PyVarDQR:
+    """PyVarDQR"""
+
+    def __cinit__(self):
+        """TODO"""
+        self.cobj = NULL
+
+    def __init__(self):
+        """TODO"""
+        pass
+
+    cdef set_vardqr(self, VarDQR *obj):
+        """TODO"""
+        self.cobj = obj
+
+    def __dealloc__(self):
+        """TODO"""
+        pass
+
+    property id:
+        def __get__(self):
+            return self.cobj.id
+
+    property desc:
+        def __get__(self):
+            return self.cobj.desc
+
+    property ds_name:
+        def __get__(self):
+            return self.cobj.ds_name
+
+    property var_name:
+        def __get__(self):
+            return self.cobj.var_name
+
+    property code:
+        def __get__(self):
+            return self.cobj.code
+
+    property color:
+        def __get__(self):
+            return self.cobj.color
+
+    property code_desc:
+        def __get__(self):
+            return self.cobj.code_desc
+
+    property start_time:
+        def __get__(self):
+            return self.cobj.start_time
+
+    property end_time:
+        def __get__(self):
+            return self.cobj.end_time
+
+    property start_index:
+        def __get__(self):
+            return self.cobj.start_index
+
+    property end_index:
+        def __get__(self):
+            return self.cobj.end_index
+
 #    def get_lat(self):
 #       return self.c_ob.lat
 
@@ -1731,7 +1794,7 @@ def getopt(object option):
     """
 
     cdef object b_option
-    cdef char *strval=NULL
+    cdef const char *strval=NULL
     cdef int retval
     cdef object retstr
 
@@ -4140,7 +4203,44 @@ def unset_var_flags(cds3.core.Var var, int flags):
 #    size_t       start_index # start time index in dataset
 #    size_t       end_index   # end time index in dataset
 #
-#int dsproc_get_var_dqrs(CDSVar *var, VarDQR ***dqrs)
+def get_var_dqrs(cds3.core.Var var):
+    """Get all available DQRs for the data stored in the specified variable.
+    
+    The memory used by the output array belongs to the internal variable
+    tag and must not be freed or altered by the calling process.
+
+    Parameters
+    ----------    
+    var : cds3.core.Var
+        Pointer to the variable
+    var_dqrs :  output
+        List of Pointers to the VarTarget structures.
+        The id member of VarTarget is a property of returned list items
+        The desc of VarTarget is a property of returned list items
+        The var_name of VarTarget is a property of returned list items
+        The code of VarTarget is a property of returned list items
+        The color of VarTarget is a property of returned list items
+        The code_desc of VarTarget is a property of returned list items
+        The start_time of VarTarget is a property of returned list items
+        The end_time of VarTarget is a property of returned list items
+        The start_index of VarTarget is a property of returned list items
+        The end_index of VarTarget is a property of returned list items
+     
+    Returns
+    -------
+    - A list of DQRs
+    - 0 if no DQRs have been defined/exists for this variable 
+    """
+    cdef VarDQR **dqrs
+    cdef int count
+    cdef list retval = []
+    cdef PyVarDQR vardqr
+    count = dsproc_get_var_dqrs(var.c_ob, &dqrs)
+    for i in range(count):
+        vardqr = PyVarDQR()
+        vardqr.set_vardqr(dqrs[i])
+        retval.append(vardqr)
+    return retval
 
 def dump_dataset(
         cds3.core.Group dataset,
@@ -4292,38 +4392,47 @@ def run_dq_inspector(int ds_id, time_t begin_time,
     - -1  if the process could not be executed
 
     """
-    
-    if len(input_args) != 0 and input_args[-1] != None:
-        input_args = input_args + [None]
 
     cdef int return_value
 
-    cdef const char **c_input_args = <const_char**>malloc(len(input_args) * sizeof(char*))
+    cdef int list_length 
+    if len(input_args) != 0 and input_args[len(input_args)-1] != None:
+        list_length = len(input_args) + 1
+    else:
+        list_length = len(input_args)
 
-    cdef object b = None
+    cdef const char **c_input_args = <const_char**>malloc(list_length * sizeof(char*))
+
+    cdef object b_input_args = [None] * list_length
 
     # String processing varies depending on which Python version is run
     # The PyString_AsString is different with different functionality depending on the Python version. See imports.
     if sys.version_info[0] < 3:
         # Python Major Version 2
-        for i in range(len(input_args)):
-            if i == len(input_args)-1:
+        for i in range(list_length):
+            if i == list_length-1:
                 c_input_args[i] = NULL
             else:
                 c_input_args[i] = PyString_AsString(input_args[i])
     else:
         # Python Major Version 3
-        for i in range(len(input_args)):
-            if i == len(input_args) - 1:
-                c_input_args[i] = NULL
+        for i in range(list_length):
+            if i == list_length-1:
                 break
-            b = PyUnicode_AsEncodedString(input_args[i], "UTF-8", "strict")
-            c_input_args[i] = PyString_AsString(b)
-    
-    return_value = dsproc_run_dq_inspector(ds_id, begin_time, end_time, c_input_args, flag)
+            else:
+                b_input_args[i] = PyUnicode_AsEncodedString(input_args[i], "UTF-8","strict")
+
+        for i in range(list_length):
+            if i == list_length-1:
+                c_input_args[i] = NULL
+            else:
+                c_input_args[i] = PyString_AsString(b_input_args[i])
+
+    return_value = dsproc_run_dq_inspector(ds_id, begin_time,
+       end_time, c_input_args, flag)
     free(c_input_args)
-    del b
     return return_value
+
 
 def add_datastream_file_patterns(int ds_id, object patterns, int ignore_case):
     """
@@ -5054,6 +5163,12 @@ def set_datastream_flags(int ds_id, int flags):
 
     """
     dsproc_set_datastream_flags(ds_id, flags)
+
+#void dsproc_disable_nan_filter_warnings(void)
+def disable_nan_filter_warnings():
+    """ Disable the warning messages from the NaN/Inf Filter.
+    """
+    dsproc_disable_nan_filter_warnings()
 
 #void    dsproc_set_datastream_format(int ds_id, DSFormat format)
 def set_datastream_path(int ds_id, object path):

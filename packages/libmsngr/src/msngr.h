@@ -39,13 +39,13 @@
 #define MSNGR_LIB_NAME "libmsngr"
 
 /** Define SOLARIS if this is a solaris system. */
-#ifndef SOLARIS
-#define SOLARIS (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
+#if defined(sun) && (defined(__svr4__) || defined(__SVR4))
+#define SOLARIS
 #endif
 
 /** Define LINUX if this is a linux system. */
-#ifndef LINUX
-#define LINUX (defined(linux))
+#if defined(linux) || defined(__linux__)
+#define LINUX
 #endif
 
 /** External variable containing the debug level. */
